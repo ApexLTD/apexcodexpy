@@ -4,7 +4,6 @@ import subprocess
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from itertools import chain
-from pathlib import Path
 from typing import Any
 
 from codex.tasks.result import TaskResult
@@ -41,35 +40,3 @@ class PipInstall:
             yield "--upgrade"
 
         yield from self.args
-
-
-@dataclass(frozen=True, kw_only=True)
-class RuffCheck:
-    on: Path
-
-    fix: bool = False
-    unsafe: bool = False
-
-    def __iter__(self) -> Iterator[str]:
-        yield "check"
-        yield str(self.on)
-
-        if self.fix:
-            yield "--fix"
-
-        if self.unsafe:
-            yield "--unsafe-fixes"
-
-
-@dataclass(frozen=True, kw_only=True)
-class RuffFormat:
-    on: Path
-
-    check: bool = False
-
-    def __iter__(self) -> Iterator[str]:
-        yield "format"
-        yield str(self.on)
-
-        if self.check:
-            yield "--check"
