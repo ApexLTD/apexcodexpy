@@ -42,14 +42,11 @@ class ShellProgram:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPipInstall:
+class PipInstall:
     args: Iterable[str] = ()
     upgrade: bool = True
 
     def __iter__(self) -> Iterator[str]:
-        yield "python"
-        yield "-m"
-        yield "pip"
         yield "install"
 
         if self.upgrade:
