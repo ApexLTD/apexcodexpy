@@ -29,6 +29,27 @@ class ShellTask(ABC):
 
 
 @dataclass(frozen=True)
+class RunPoetryInstallTools(ShellTask):
+    @property
+    def _command(self) -> Iterable[str]:
+        yield "python"
+        yield "-m"
+        yield "pip"
+        yield "install"
+        yield "--upgrade"
+        yield "pip"
+        yield "poetry"
+
+
+@dataclass(frozen=True)
+class RunPoetryInstallDependencies(ShellTask):
+    @property
+    def _command(self) -> Iterable[str]:
+        yield "poetry"
+        yield "install"
+
+
+@dataclass(frozen=True)
 class RunRuffCheck(ShellTask):
     on: Path
 

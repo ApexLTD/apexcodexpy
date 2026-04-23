@@ -40,6 +40,26 @@ def _(
 
 
 @cli.command(
+    name="install",
+    help="Install project tools and dependencies.",
+)
+def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+) -> None:
+    raise typer.Exit(
+        PyCodex(
+            target=Path(path),
+            reporter=DefaultReporter.using(TyperDevice()),
+        ).install()
+    )
+
+
+@cli.command(
     name="lock",
     help="Lock project dependencies.",
 )

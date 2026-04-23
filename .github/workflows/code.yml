@@ -24,7 +24,7 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        run: make install
+        run: poetry run codex install
 
       - name: Lint
         run: poetry run codex lint
@@ -41,7 +41,7 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        run: make install
+        run: poetry run codex install
 
       - name: Test
         run: poetry run pytest tests
