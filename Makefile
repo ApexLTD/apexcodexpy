@@ -14,14 +14,5 @@ lock:
 update:
 	poetry update
 
-format:
-	poetry run codex fix
-
-format-unsafe:
-	poetry run codex fix --unsafe
-
-lint:
-	poetry run codex lint
-
 test:
 	poetry run pytest tests --cov --last-failed
