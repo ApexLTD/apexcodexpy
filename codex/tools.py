@@ -9,6 +9,8 @@ from codex.tasks import (
     RunPoetryInstallDependencies,
     RunPoetryLock,
     RunPoetryUpdate,
+    RunRuffCheck,
+    RunRuffFormat,
     TaskResult,
 )
 
@@ -34,3 +36,14 @@ class Poetry:
 
     def lint(self) -> TaskResult:
         return RunPoetryCheck(on=self.on).run()
+
+
+@dataclass(frozen=True, kw_only=True)
+class Ruff:
+    on: Path
+
+    def lint(self, fix: bool, unsafe: bool) -> TaskResult:
+        return RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe).run()
+
+    def format(self, check: bool = False) -> TaskResult:
+        return RunRuffFormat(on=self.on, check=check).run()
