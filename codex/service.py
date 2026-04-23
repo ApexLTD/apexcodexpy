@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.reporters import Reporter
-from codex.tasks import RunMypy, RunRuffCheck, SyncToml
+from codex.tasks import RunGitAmend, RunMypy, RunRuffCheck, SyncToml
 from codex.tasks.shell import RunPoetryCheck, RunRuffFormat
 
 
@@ -28,4 +28,9 @@ class PyCodex:
         return self.reporter.report(
             black=RunRuffFormat(on=self.target).run(),
             ruff=RunRuffCheck(on=self.target, fix=True, unsafe=unsafe).run(),
+        )
+
+    def amend(self) -> int:
+        return self.reporter.report(
+            amend=RunGitAmend().run(),
         )

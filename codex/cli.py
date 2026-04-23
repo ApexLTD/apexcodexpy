@@ -96,6 +96,19 @@ def _(
     )
 
 
+@cli.command(
+    name="amend",
+    help="Amend the last git commit without changing the message.",
+)
+def _() -> None:
+    raise typer.Exit(
+        PyCodex(
+            target=Path("."),
+            reporter=DefaultReporter.using(TyperDevice()),
+        ).amend()
+    )
+
+
 @dataclass(frozen=True)
 class TyperDevice:
     color: str = typer.colors.RESET

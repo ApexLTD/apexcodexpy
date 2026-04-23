@@ -84,3 +84,14 @@ class RunPoetryCheck(ShellTask):
         yield "check"
         yield "--strict"
         yield f"--project={self.on}"
+
+
+@dataclass(frozen=True)
+class RunGitAmend(ShellTask):
+    @property
+    def _command(self) -> Iterable[str]:
+        yield "git"
+        yield "commit"
+        yield "--amend"
+        yield "--no-edit"
+        yield "-a"
