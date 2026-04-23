@@ -41,7 +41,7 @@ def _(
 
 @cli.command(
     name="lock",
-    help="Run poetry lock.",
+    help="Lock project dependencies.",
 )
 def _() -> None:
     raise typer.Exit(
@@ -54,7 +54,7 @@ def _() -> None:
 
 @cli.command(
     name="update",
-    help="Run poetry update.",
+    help="Update project dependencies.",
 )
 def _() -> None:
     raise typer.Exit(
