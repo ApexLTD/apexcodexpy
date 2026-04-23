@@ -1,27 +1,27 @@
 from codex.tasks.program import (
+    PoetryCheck,
+    PoetryInstall,
+    PoetryLock,
+    PoetryUpdate,
     RuffCheck,
     RuffFormat,
     RunGitAmend,
     RunMypy,
     RunPipInstall,
-    RunPoetryCheck,
-    RunPoetryInstallDependencies,
-    RunPoetryLock,
-    RunPoetryUpdate,
 )
 from codex.tasks.result import TaskResult
 from codex.tasks.update import SyncToml
 
 __all__ = [
-    "RunPoetryCheck",
+    "PoetryCheck",
     "RuffFormat",
-    "RunPoetryInstallDependencies",
+    "PoetryInstall",
     "RunPipInstall",
     "TaskResult",
     "RunGitAmend",
     "RunMypy",
-    "RunPoetryLock",
-    "RunPoetryUpdate",
+    "PoetryLock",
+    "PoetryUpdate",
     "RuffCheck",
     "SyncToml",
 ]

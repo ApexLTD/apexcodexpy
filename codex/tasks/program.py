@@ -59,10 +59,31 @@ class RunPipInstall:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPoetryInstallDependencies:
+class PoetryInstall:
     def __iter__(self) -> Iterator[str]:
-        yield "poetry"
         yield "install"
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoetryLock:
+    def __iter__(self) -> Iterator[str]:
+        yield "lock"
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoetryUpdate:
+    def __iter__(self) -> Iterator[str]:
+        yield "update"
+
+
+@dataclass(frozen=True, kw_only=True)
+class PoetryCheck:
+    on: Path
+
+    def __iter__(self) -> Iterator[str]:
+        yield "check"
+        yield "--strict"
+        yield f"--project={self.on}"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -104,31 +125,6 @@ class RunMypy:
     def __iter__(self) -> Iterator[str]:
         yield "mypy"
         yield str(self.on)
-
-
-@dataclass(frozen=True, kw_only=True)
-class RunPoetryCheck:
-    on: Path
-
-    def __iter__(self) -> Iterator[str]:
-        yield "poetry"
-        yield "check"
-        yield "--strict"
-        yield f"--project={self.on}"
-
-
-@dataclass(frozen=True, kw_only=True)
-class RunPoetryLock:
-    def __iter__(self) -> Iterator[str]:
-        yield "poetry"
-        yield "lock"
-
-
-@dataclass(frozen=True, kw_only=True)
-class RunPoetryUpdate:
-    def __iter__(self) -> Iterator[str]:
-        yield "poetry"
-        yield "update"
 
 
 @dataclass(frozen=True, kw_only=True)

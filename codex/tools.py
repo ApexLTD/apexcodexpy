@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.tasks import (
+    PoetryCheck,
+    PoetryInstall,
+    PoetryLock,
+    PoetryUpdate,
     RuffCheck,
     RuffFormat,
     RunPipInstall,
-    RunPoetryCheck,
-    RunPoetryInstallDependencies,
-    RunPoetryLock,
-    RunPoetryUpdate,
     TaskResult,
 )
 from codex.tasks.program import Program, ShellProgram
@@ -23,20 +23,22 @@ class Pip:
 
 
 @dataclass(frozen=True, kw_only=True)
-class Poetry:
+class Poetry(ShellProgram):
     on: Path
 
+    name: str = "poetry"
+
     def install(self) -> TaskResult:
-        return Program().run(RunPoetryInstallDependencies())
+        return self.run(PoetryInstall())
 
     def lock(self) -> TaskResult:
-        return Program().run(RunPoetryLock())
+        return self.run(PoetryLock())
 
     def update(self) -> TaskResult:
-        return Program().run(RunPoetryUpdate())
+        return self.run(PoetryUpdate())
 
     def lint(self) -> TaskResult:
-        return Program().run(RunPoetryCheck(on=self.on))
+        return self.run(PoetryCheck(on=self.on))
 
 
 @dataclass(frozen=True, kw_only=True)
