@@ -1,14 +1,15 @@
-# codexpy
+# ApexCodexPy
 
 The Non-Destructive Configuration Steward for Python Projects.
 
-codexpy is a CLI tool designed to enforce consistent linting and typing standards across multiple projects.
-Unlike standard runners, codexpy synchronizes your pyproject.toml with a "Gold Standard" configuration
+ApexCodexPy is a CLI tool designed to enforce consistent linting and typing standards across multiple projects.
+Unlike standard runners, ApexCodexPy synchronizes your pyproject.toml with a "Gold Standard" configuration
 without destroying existing project-specific settings or comments.
 
 ## 🚀 Purpose
 
-Modern Python development often suffers from "Config Drift"—where different projects slowly diverge in their ruff or mypy settings. codexpy solves this by:
+Modern Python development often suffers from "Config Drift"—where different projects slowly diverge in their ruff or mypy settings.
+ApexCodexPy solves this by:
 
 ### Enforcing Standards
 
@@ -16,7 +17,7 @@ Overwriting critical linting rules with a centralized set of best practices.
 
 ### Preserving Context
 
-Using tomlkit to ensure that your hand-written comments and formatting remain intact.
+Using tomlkit to ensure that your handwritten comments and formatting remain intact.
 
 ### Dry-Run Capability
 
@@ -25,7 +26,7 @@ Allowing developers to see exactly what would change before any modifications ar
 ## 📦 Installation & Integration
 From PyPI
 
-Since codexpy is available on PyPI, you can add it directly to your project using Poetry:
+Since ApexCodexPy is available on PyPI, you can add it directly to your project using Poetry:
 
 ```sh
 poetry add apexcodexpy --group dev
@@ -35,7 +36,7 @@ poetry add apexcodexpy --group dev
 
 ### 1. Synchronize Configuration
 
-Align your pyproject.toml with the codexpy standards.
+Align your pyproject.toml with the ApexCodexPy standards.
 
 ```sh
 # Preview changes (Dry Run)
@@ -71,7 +72,7 @@ codex fix --silent
 
 ## 🧩 Standards Enforced
 
-codexpy currently enforces a strict ruff.lint.select list including:
+ApexCodexPy currently enforces a strict ruff.lint.select list including:
 
 | Name                    | Code |
 |-------------------------|------|
@@ -99,8 +100,8 @@ It also enforces mypy.strict = true.
 
 Non-Destructive Merge
 
-The core logic resides in a functional deep_merge. It takes the project's current TOML and the codexpy standards,
-returns a new sorted configuration, and preserves all tomlkit item metadata (inline comments).
+The core logic resides in a functional deep_merge. It takes the project's current TOML and the ApexCodexPy standards,
+returns a new configuration, and preserves all tomlkit item metadata (inline comments).
 
 ### Architecture: Strategy Pattern
 
@@ -114,4 +115,4 @@ returns a new sorted configuration, and preserves all tomlkit item metadata (inl
 - Create a new Task implementation.
 - Add the tool's standard config to get_standards().
 - Register the task in PyCodex.
-- Add CLI command using the above mentioned PyCodex method.
+- Add CLI command using the above-mentioned PyCodex method.
