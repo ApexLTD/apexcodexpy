@@ -33,13 +33,18 @@ class ShellTask(ABC):
 
 @dataclass(frozen=True, kw_only=True)
 class RunPipInstall(ShellTask):
+    upgrade: bool = True
+
     @property
     def _command(self) -> Iterable[str]:
         yield "python"
         yield "-m"
         yield "pip"
         yield "install"
-        yield "--upgrade"
+
+        if self.upgrade:
+            yield "--upgrade"
+
         yield from self.args
 
 
