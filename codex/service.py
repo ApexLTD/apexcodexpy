@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from codexpy.reporters import Reporter
-from codexpy.tasks import RunMypy, RunRuffCheck, SyncToml
-from codexpy.tasks.shell import RunPoetryCheck, RunRuffFormat
+from codex.reporters import Reporter
+from codex.tasks import RunMypy, RunRuffCheck, SyncToml
+from codex.tasks.shell import RunPoetryCheck, RunRuffFormat
 
 
 @dataclass(frozen=True)

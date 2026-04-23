@@ -28,7 +28,7 @@ From PyPI
 Since codexpy is available on PyPI, you can add it directly to your project using Poetry:
 
 ```sh
-poetry add codexpy --group dev
+poetry add apexcodexpy --group dev
 ```
 
 ## 🛠 Usage

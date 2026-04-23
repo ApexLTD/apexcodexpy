@@ -7,7 +7,7 @@ from typing import Any
 
 import tomlkit
 
-from codexpy.tasks.result import TaskResult
+from codex.tasks.result import TaskResult
 
 
 def _mypy_config() -> dict[str, Any]:

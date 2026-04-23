@@ -5,8 +5,8 @@ from pathlib import Path
 
 import typer
 
-from codexpy.reporters import DefaultReporter
-from codexpy.service import PyCodex
+from codex.reporters import DefaultReporter
+from codex.service import PyCodex
 
 cli = typer.Typer(
     add_completion=False,

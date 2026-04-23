@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from subprocess import CompletedProcess
 
-from codexpy.tasks.result import TaskResult
+from codex.tasks.result import TaskResult
 
 
 class ShellTask(ABC):
