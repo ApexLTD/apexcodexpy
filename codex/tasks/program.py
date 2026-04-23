@@ -25,7 +25,7 @@ class ShellProgram:
         )
 
     def _command_with(self, args: Iterable[str]) -> Iterable[str]:
-        yield self.name
+        yield from self.name.split()
         yield from chain.from_iterable(str(arg).split() for arg in args)
 
 
