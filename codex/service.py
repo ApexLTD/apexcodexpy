@@ -3,11 +3,10 @@ from pathlib import Path
 
 from codex.reporters import Reporter
 from codex.tasks import (
-    RunGitAmend,
-    RunMypy,
+    GitAmend,
     SyncToml,
 )
-from codex.tasks.program import Program
+from codex.tasks.program import ShellProgram
 from codex.tools import Pip, Poetry, Ruff
 
 
@@ -42,7 +41,7 @@ class Codex:
             poetry=Poetry(on=self.target).lint(),
             black=Ruff(on=self.target).format(check=True),
             ruff=Ruff(on=self.target).lint(fix=False),
-            mypy=Program().run(RunMypy(on=self.target)),
+            mypy=ShellProgram(name="mypy").run(on=self.target),
         )
 
     def fix(self, unsafe: bool = False) -> int:
@@ -53,5 +52,5 @@ class Codex:
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=Program().run(RunGitAmend()),
+            amend=ShellProgram(name="git").run(GitAmend()),
         )

@@ -5,31 +5,19 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
+from typing import Any
 
 from codex.tasks.result import TaskResult
-
-
-@dataclass(frozen=True, kw_only=True)
-class Program:
-    def run(self, args: Iterable[str]) -> TaskResult:
-        return TaskResult.parse(
-            subprocess.run(
-                list(chain.from_iterable(arg.split() for arg in args)),
-                text=True,
-                encoding="utf-8",
-                capture_output=True,
-            )
-        )
 
 
 @dataclass(frozen=True, kw_only=True)
 class ShellProgram:
     name: str
 
-    def run(self, args: Iterable[str]) -> TaskResult:
+    def run(self, args: Iterable[Any] | None = None, **kwargs: Any) -> TaskResult:
         return TaskResult.parse(
             subprocess.run(
-                list(self._command_with(args)),
+                list(self._command_with([*(args or []), *kwargs.values()])),
                 text=True,
                 encoding="utf-8",
                 capture_output=True,
@@ -38,7 +26,7 @@ class ShellProgram:
 
     def _command_with(self, args: Iterable[str]) -> Iterable[str]:
         yield self.name
-        yield from chain.from_iterable(arg.split() for arg in args)
+        yield from chain.from_iterable(str(arg).split() for arg in args)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -116,18 +104,8 @@ class RuffFormat:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunMypy:
-    on: Path
-
+class GitAmend:
     def __iter__(self) -> Iterator[str]:
-        yield "mypy"
-        yield str(self.on)
-
-
-@dataclass(frozen=True, kw_only=True)
-class RunGitAmend:
-    def __iter__(self) -> Iterator[str]:
-        yield "git"
         yield "commit"
         yield "--amend"
         yield "--no-edit"
