@@ -5,28 +5,21 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
-from typing import Any
 
 from codex.tasks.result import TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)
-class ShellRunner:
-    args: Iterable[Any]
-
-    def run(self) -> TaskResult:
-        raw_result = subprocess.run(
-            self._command,
-            text=True,
-            encoding="utf-8",
-            capture_output=True,
+class Shell:
+    def run(self, args: Iterable[str]) -> TaskResult:
+        return TaskResult.parse(
+            subprocess.run(
+                list(chain.from_iterable(arg.split() for arg in args)),
+                text=True,
+                encoding="utf-8",
+                capture_output=True,
+            )
         )
-
-        return TaskResult.parse(raw_result)
-
-    @property
-    def _command(self) -> list[str]:
-        return list(chain.from_iterable(str(arg).split() for arg in self.args))
 
 
 @dataclass(frozen=True, kw_only=True)
