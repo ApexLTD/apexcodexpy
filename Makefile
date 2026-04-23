@@ -1,9 +1,6 @@
 help:
 	poetry run codex
 
-amend:
-	git commit --amend --no-edit -a
-
 install:
 	python -m pip install --upgrade pip poetry
 	poetry install
