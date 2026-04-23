@@ -23,6 +23,25 @@ class Program:
 
 
 @dataclass(frozen=True, kw_only=True)
+class ShellProgram:
+    name: str
+
+    def run(self, args: Iterable[str]) -> TaskResult:
+        return TaskResult.parse(
+            subprocess.run(
+                list(self._command_with(args)),
+                text=True,
+                encoding="utf-8",
+                capture_output=True,
+            )
+        )
+
+    def _command_with(self, args: Iterable[str]) -> Iterable[str]:
+        yield self.name
+        yield from chain.from_iterable(arg.split() for arg in args)
+
+
+@dataclass(frozen=True, kw_only=True)
 class RunPipInstall:
     args: Iterable[str] = ()
     upgrade: bool = True
@@ -54,7 +73,6 @@ class RunRuffCheck:
     unsafe: bool = False
 
     def __iter__(self) -> Iterator[str]:
-        yield "ruff"
         yield "check"
         yield str(self.on)
 

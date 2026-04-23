@@ -13,7 +13,7 @@ from codex.tasks import (
     RunRuffFormat,
     TaskResult,
 )
-from codex.tasks.program import Program
+from codex.tasks.program import Program, ShellProgram
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -40,11 +40,13 @@ class Poetry:
 
 
 @dataclass(frozen=True, kw_only=True)
-class Ruff:
+class Ruff(ShellProgram):
     on: Path
 
+    name: str = "ruff"
+
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
-        return Program().run(RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe))
+        return self.run(RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe))
 
     def format(self, check: bool = False) -> TaskResult:
         return Program().run(RunRuffFormat(on=self.on, check=check))
