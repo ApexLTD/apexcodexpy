@@ -1,5 +1,4 @@
 from codex.tasks.program import (
-    GitAmend,
     PipInstall,
     PoetryCheck,
     PoetryInstall,
@@ -17,7 +16,6 @@ __all__ = [
     "PoetryInstall",
     "PipInstall",
     "TaskResult",
-    "GitAmend",
     "PoetryLock",
     "PoetryUpdate",
     "RuffCheck",

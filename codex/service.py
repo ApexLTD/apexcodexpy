@@ -3,7 +3,6 @@ from pathlib import Path
 
 from codex.reporters import Reporter
 from codex.tasks import (
-    GitAmend,
     SyncToml,
 )
 from codex.tasks.program import ShellProgram
@@ -52,5 +51,10 @@ class Codex:
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=ShellProgram(name="git").run(GitAmend()),
+            amend=ShellProgram(name="git").run(
+                "commit",
+                "--amend",
+                "--no-edit",
+                "-a",
+            ),
         )

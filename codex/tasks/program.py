@@ -14,10 +14,10 @@ from codex.tasks.result import TaskResult
 class ShellProgram:
     name: str
 
-    def run(self, args: Iterable[Any] | None = None, **kwargs: Any) -> TaskResult:
+    def run(self, *args: Any, **kwargs: Any) -> TaskResult:
         return TaskResult.parse(
             subprocess.run(
-                list(self._command_with([*(args or []), *kwargs.values()])),
+                list(self._command_with([*args, *kwargs.values()])),
                 text=True,
                 encoding="utf-8",
                 capture_output=True,
@@ -101,12 +101,3 @@ class RuffFormat:
 
         if self.check:
             yield "--check"
-
-
-@dataclass(frozen=True, kw_only=True)
-class GitAmend:
-    def __iter__(self) -> Iterator[str]:
-        yield "commit"
-        yield "--amend"
-        yield "--no-edit"
-        yield "-a"

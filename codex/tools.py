@@ -21,7 +21,7 @@ class Pip(ShellProgram):
     name: str = "pip"
 
     def install(self, *packages: str) -> TaskResult:
-        return self.run(PipInstall(args=packages))
+        return self.run(*PipInstall(args=packages))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -31,16 +31,16 @@ class Poetry(ShellProgram):
     name: str = "poetry"
 
     def install(self) -> TaskResult:
-        return self.run(PoetryInstall())
+        return self.run(*PoetryInstall())
 
     def lock(self) -> TaskResult:
-        return self.run(PoetryLock())
+        return self.run(*PoetryLock())
 
     def update(self) -> TaskResult:
-        return self.run(PoetryUpdate())
+        return self.run(*PoetryUpdate())
 
     def lint(self) -> TaskResult:
-        return self.run(PoetryCheck(on=self.on))
+        return self.run(*PoetryCheck(on=self.on))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -50,7 +50,7 @@ class Ruff(ShellProgram):
     name: str = "ruff"
 
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
-        return self.run(RuffCheck(on=self.on, fix=fix, unsafe=unsafe))
+        return self.run(*RuffCheck(on=self.on, fix=fix, unsafe=unsafe))
 
     def format(self, check: bool = False) -> TaskResult:
-        return self.run(RuffFormat(on=self.on, check=check))
+        return self.run(*RuffFormat(on=self.on, check=check))
