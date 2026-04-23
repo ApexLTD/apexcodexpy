@@ -5,15 +5,12 @@ from codex.reporters import Reporter
 from codex.tasks import (
     RunGitAmend,
     RunMypy,
-    RunPoetryCheck,
-    RunPoetryInstallDependencies,
     RunPoetryInstallTools,
-    RunPoetryLock,
-    RunPoetryUpdate,
     RunRuffCheck,
     RunRuffFormat,
     SyncToml,
 )
+from codex.tools import Poetry
 
 
 @dataclass(frozen=True)
@@ -28,23 +25,23 @@ class PyCodex:
 
     def lock(self) -> int:
         return self.reporter.report(
-            lock=RunPoetryLock().run(),
+            lock=Poetry(on=self.target).lock(),
         )
 
     def update(self) -> int:
         return self.reporter.report(
-            update=RunPoetryUpdate().run(),
+            update=Poetry(on=self.target).update(),
         )
 
     def install(self) -> int:
         return self.reporter.report(
             tools=RunPoetryInstallTools().run(),
-            dependencies=RunPoetryInstallDependencies().run(),
+            dependencies=Poetry(on=self.target).install(),
         )
 
     def lint(self) -> int:
         return self.reporter.report(
-            poetry=RunPoetryCheck(on=self.target).run(),
+            poetry=Poetry(on=self.target).lint(),
             black=RunRuffFormat(on=self.target, check=True).run(),
             ruff=RunRuffCheck(on=self.target).run(),
             mypy=RunMypy(on=self.target).run(),
