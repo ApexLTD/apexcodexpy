@@ -5,10 +5,6 @@ from pathlib import Path
 
 from codex.tasks import (
     PipInstall,
-    PoetryCheck,
-    PoetryInstall,
-    PoetryLock,
-    PoetryUpdate,
     RuffCheck,
     RuffFormat,
     TaskResult,
@@ -31,16 +27,16 @@ class Poetry(ShellProgram):
     name: str = "poetry"
 
     def install(self) -> TaskResult:
-        return self.run(*PoetryInstall())
+        return self.run("install")
 
     def lock(self) -> TaskResult:
-        return self.run(*PoetryLock())
+        return self.run("lock")
 
     def update(self) -> TaskResult:
-        return self.run(*PoetryUpdate())
+        return self.run("update")
 
     def lint(self) -> TaskResult:
-        return self.run(*PoetryCheck(on=self.on))
+        return self.run(f"check --strict --project={self.on}")
 
 
 @dataclass(frozen=True, kw_only=True)

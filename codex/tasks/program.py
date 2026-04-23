@@ -44,34 +44,6 @@ class PipInstall:
 
 
 @dataclass(frozen=True, kw_only=True)
-class PoetryInstall:
-    def __iter__(self) -> Iterator[str]:
-        yield "install"
-
-
-@dataclass(frozen=True, kw_only=True)
-class PoetryLock:
-    def __iter__(self) -> Iterator[str]:
-        yield "lock"
-
-
-@dataclass(frozen=True, kw_only=True)
-class PoetryUpdate:
-    def __iter__(self) -> Iterator[str]:
-        yield "update"
-
-
-@dataclass(frozen=True, kw_only=True)
-class PoetryCheck:
-    on: Path
-
-    def __iter__(self) -> Iterator[str]:
-        yield "check"
-        yield "--strict"
-        yield f"--project={self.on}"
-
-
-@dataclass(frozen=True, kw_only=True)
 class RuffCheck:
     on: Path
 
