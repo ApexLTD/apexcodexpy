@@ -4,12 +4,19 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.tasks import (
+    RunPipInstall,
     RunPoetryCheck,
     RunPoetryInstallDependencies,
     RunPoetryLock,
     RunPoetryUpdate,
     TaskResult,
 )
+
+
+@dataclass(frozen=True, kw_only=True)
+class Pip:
+    def install(self, *packages: str) -> TaskResult:
+        return RunPipInstall(args=packages).run()
 
 
 @dataclass(frozen=True, kw_only=True)

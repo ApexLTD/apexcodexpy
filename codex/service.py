@@ -5,12 +5,11 @@ from codex.reporters import Reporter
 from codex.tasks import (
     RunGitAmend,
     RunMypy,
-    RunPoetryInstallTools,
     RunRuffCheck,
     RunRuffFormat,
     SyncToml,
 )
-from codex.tools import Poetry
+from codex.tools import Pip, Poetry
 
 
 @dataclass(frozen=True)
@@ -35,7 +34,7 @@ class PyCodex:
 
     def install(self) -> int:
         return self.reporter.report(
-            tools=RunPoetryInstallTools().run(),
+            tools=Pip().install("pip", "poetry"),
             dependencies=Poetry(on=self.target).install(),
         )
 

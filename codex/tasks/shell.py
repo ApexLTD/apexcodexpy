@@ -10,7 +10,10 @@ from subprocess import CompletedProcess
 from codex.tasks.result import TaskResult
 
 
+@dataclass(frozen=True, kw_only=True)
 class ShellTask(ABC):
+    args: Iterable[str] = ()
+
     def run(self) -> TaskResult:
         return TaskResult.parse(self._execute())
 
@@ -28,8 +31,8 @@ class ShellTask(ABC):
         pass
 
 
-@dataclass(frozen=True)
-class RunPoetryInstallTools(ShellTask):
+@dataclass(frozen=True, kw_only=True)
+class RunPipInstall(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
         yield "python"
@@ -37,11 +40,10 @@ class RunPoetryInstallTools(ShellTask):
         yield "pip"
         yield "install"
         yield "--upgrade"
-        yield "pip"
-        yield "poetry"
+        yield from self.args
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunPoetryInstallDependencies(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
@@ -49,7 +51,7 @@ class RunPoetryInstallDependencies(ShellTask):
         yield "install"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunRuffCheck(ShellTask):
     on: Path
 
@@ -69,7 +71,7 @@ class RunRuffCheck(ShellTask):
             yield "--unsafe-fixes"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunRuffFormat(ShellTask):
     on: Path
 
@@ -85,7 +87,7 @@ class RunRuffFormat(ShellTask):
             yield "--check"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunMypy(ShellTask):
     on: Path
 
@@ -95,7 +97,7 @@ class RunMypy(ShellTask):
         yield str(self.on)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunPoetryCheck(ShellTask):
     on: Path
 
@@ -107,7 +109,7 @@ class RunPoetryCheck(ShellTask):
         yield f"--project={self.on}"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunPoetryLock(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
@@ -115,7 +117,7 @@ class RunPoetryLock(ShellTask):
         yield "lock"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunPoetryUpdate(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
@@ -123,7 +125,7 @@ class RunPoetryUpdate(ShellTask):
         yield "update"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RunGitAmend(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
