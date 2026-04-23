@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.tasks import (
+    RuffCheck,
+    RuffFormat,
     RunPipInstall,
     RunPoetryCheck,
     RunPoetryInstallDependencies,
     RunPoetryLock,
     RunPoetryUpdate,
-    RunRuffCheck,
-    RunRuffFormat,
     TaskResult,
 )
 from codex.tasks.program import Program, ShellProgram
@@ -46,7 +46,7 @@ class Ruff(ShellProgram):
     name: str = "ruff"
 
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
-        return self.run(RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe))
+        return self.run(RuffCheck(on=self.on, fix=fix, unsafe=unsafe))
 
     def format(self, check: bool = False) -> TaskResult:
-        return Program().run(RunRuffFormat(on=self.on, check=check))
+        return self.run(RuffFormat(on=self.on, check=check))

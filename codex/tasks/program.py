@@ -66,7 +66,7 @@ class RunPoetryInstallDependencies:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunRuffCheck:
+class RuffCheck:
     on: Path
 
     fix: bool = False
@@ -84,13 +84,12 @@ class RunRuffCheck:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunRuffFormat:
+class RuffFormat:
     on: Path
 
     check: bool = False
 
     def __iter__(self) -> Iterator[str]:
-        yield "ruff"
         yield "format"
         yield str(self.on)
 
