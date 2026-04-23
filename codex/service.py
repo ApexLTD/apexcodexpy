@@ -5,12 +5,10 @@ from codex.reporters import Reporter
 from codex.tasks import (
     RunGitAmend,
     RunMypy,
-    RunRuffCheck,
-    RunRuffFormat,
     SyncToml,
 )
-from codex.tasks.shell import Shell
-from codex.tools import Pip, Poetry
+from codex.tasks.program import Program
+from codex.tools import Pip, Poetry, Ruff
 
 
 @dataclass(frozen=True)
@@ -42,18 +40,18 @@ class PyCodex:
     def lint(self) -> int:
         return self.reporter.report(
             poetry=Poetry(on=self.target).lint(),
-            black=Shell().run(RunRuffFormat(on=self.target, check=True)),
-            ruff=Shell().run(RunRuffCheck(on=self.target)),
-            mypy=Shell().run(RunMypy(on=self.target)),
+            black=Ruff(on=self.target).format(check=True),
+            ruff=Ruff(on=self.target).lint(fix=False),
+            mypy=Program().run(RunMypy(on=self.target)),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            black=Shell().run(RunRuffFormat(on=self.target)),
-            ruff=Shell().run(RunRuffCheck(on=self.target, fix=True, unsafe=unsafe)),
+            black=Ruff(on=self.target).format(),
+            ruff=Ruff(on=self.target).lint(fix=True, unsafe=unsafe),
         )
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=Shell().run(RunGitAmend()),
+            amend=Program().run(RunGitAmend()),
         )

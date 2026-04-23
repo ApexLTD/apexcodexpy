@@ -10,7 +10,7 @@ from codex.tasks.result import TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)
-class Shell:
+class Program:
     def run(self, args: Iterable[str]) -> TaskResult:
         return TaskResult.parse(
             subprocess.run(

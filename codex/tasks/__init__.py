@@ -1,5 +1,4 @@
-from codex.tasks.result import TaskResult
-from codex.tasks.shell import (
+from codex.tasks.program import (
     RunGitAmend,
     RunMypy,
     RunPipInstall,
@@ -10,6 +9,7 @@ from codex.tasks.shell import (
     RunRuffCheck,
     RunRuffFormat,
 )
+from codex.tasks.result import TaskResult
 from codex.tasks.update import SyncToml
 
 __all__ = [

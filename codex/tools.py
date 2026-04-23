@@ -13,13 +13,13 @@ from codex.tasks import (
     RunRuffFormat,
     TaskResult,
 )
-from codex.tasks.shell import Shell
+from codex.tasks.program import Program
 
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
     def install(self, *packages: str) -> TaskResult:
-        return Shell().run(RunPipInstall(args=packages))
+        return Program().run(RunPipInstall(args=packages))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -27,24 +27,24 @@ class Poetry:
     on: Path
 
     def install(self) -> TaskResult:
-        return Shell().run(RunPoetryInstallDependencies())
+        return Program().run(RunPoetryInstallDependencies())
 
     def lock(self) -> TaskResult:
-        return Shell().run(RunPoetryLock())
+        return Program().run(RunPoetryLock())
 
     def update(self) -> TaskResult:
-        return Shell().run(RunPoetryUpdate())
+        return Program().run(RunPoetryUpdate())
 
     def lint(self) -> TaskResult:
-        return Shell().run(RunPoetryCheck(on=self.on))
+        return Program().run(RunPoetryCheck(on=self.on))
 
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:
     on: Path
 
-    def lint(self, fix: bool, unsafe: bool) -> TaskResult:
-        return Shell().run(RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe))
+    def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
+        return Program().run(RunRuffCheck(on=self.on, fix=fix, unsafe=unsafe))
 
     def format(self, check: bool = False) -> TaskResult:
-        return Shell().run(RunRuffFormat(on=self.on, check=check))
+        return Program().run(RunRuffFormat(on=self.on, check=check))
