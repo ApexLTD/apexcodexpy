@@ -22,6 +22,12 @@ class PyCodex:
             sync=SyncToml(of=self.target, dry_run=dry_run).run()
         )
 
+    def install(self) -> int:
+        return self.reporter.report(
+            tools=Pip().install("pip", "poetry"),
+            dependencies=Poetry(on=self.target).install(),
+        )
+
     def lock(self) -> int:
         return self.reporter.report(
             lock=Poetry(on=self.target).lock(),
@@ -30,12 +36,6 @@ class PyCodex:
     def update(self) -> int:
         return self.reporter.report(
             update=Poetry(on=self.target).update(),
-        )
-
-    def install(self) -> int:
-        return self.reporter.report(
-            tools=Pip().install("pip", "poetry"),
-            dependencies=Poetry(on=self.target).install(),
         )
 
     def lint(self) -> int:
