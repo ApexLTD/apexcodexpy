@@ -2,7 +2,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.reporters import Reporter
-from codex.tasks import RunGitAmend, RunMypy, RunRuffCheck, SyncToml
+from codex.tasks import (
+    RunGitAmend,
+    RunMypy,
+    RunPoetryLock,
+    RunPoetryUpdate,
+    RunRuffCheck,
+    SyncToml,
+)
 from codex.tasks.shell import RunPoetryCheck, RunRuffFormat
 
 
@@ -14,6 +21,16 @@ class PyCodex:
     def sync(self, dry_run: bool = False) -> int:
         return self.reporter.report(
             sync=SyncToml(of=self.target, dry_run=dry_run).run()
+        )
+
+    def lock(self) -> int:
+        return self.reporter.report(
+            lock=RunPoetryLock().run(),
+        )
+
+    def update(self) -> int:
+        return self.reporter.report(
+            update=RunPoetryUpdate().run(),
         )
 
     def lint(self) -> int:

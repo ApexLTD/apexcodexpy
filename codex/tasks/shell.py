@@ -87,6 +87,22 @@ class RunPoetryCheck(ShellTask):
 
 
 @dataclass(frozen=True)
+class RunPoetryLock(ShellTask):
+    @property
+    def _command(self) -> Iterable[str]:
+        yield "poetry"
+        yield "lock"
+
+
+@dataclass(frozen=True)
+class RunPoetryUpdate(ShellTask):
+    @property
+    def _command(self) -> Iterable[str]:
+        yield "poetry"
+        yield "update"
+
+
+@dataclass(frozen=True)
 class RunGitAmend(ShellTask):
     @property
     def _command(self) -> Iterable[str]:
