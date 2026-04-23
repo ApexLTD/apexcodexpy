@@ -12,7 +12,7 @@ from codex.tools import Pip, Poetry, Ruff
 
 
 @dataclass(frozen=True)
-class PyCodex:
+class Codex:
     target: Path
     reporter: Reporter
 

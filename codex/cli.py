@@ -6,7 +6,7 @@ from pathlib import Path
 import typer
 
 from codex.reporters import DefaultReporter
-from codex.service import PyCodex
+from codex.service import Codex
 
 cli = typer.Typer(
     add_completion=False,
@@ -32,7 +32,7 @@ def _(
     ),
 ) -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path(path),
             reporter=DefaultReporter.using(TyperDevice()),
         ).sync(dry_run=dry_run)
@@ -52,7 +52,7 @@ def _(
     ),
 ) -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path(path),
             reporter=DefaultReporter.using(TyperDevice()),
         ).install()
@@ -65,7 +65,7 @@ def _(
 )
 def _() -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path("."),
             reporter=DefaultReporter.using(TyperDevice()),
         ).lock()
@@ -78,7 +78,7 @@ def _() -> None:
 )
 def _() -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path("."),
             reporter=DefaultReporter.using(TyperDevice()),
         ).update()
@@ -104,7 +104,7 @@ def _(
     ),
 ) -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path(path),
             reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
         ).lint()
@@ -135,7 +135,7 @@ def _(
     ),
 ) -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path(path),
             reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
         ).fix(unsafe=unsafe)
@@ -148,7 +148,7 @@ def _(
 )
 def _() -> None:
     raise typer.Exit(
-        PyCodex(
+        Codex(
             target=Path("."),
             reporter=DefaultReporter.using(TyperDevice()),
         ).amend()
