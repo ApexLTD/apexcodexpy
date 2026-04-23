@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import subprocess
-from abc import ABC, abstractmethod
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from itertools import chain
@@ -31,19 +30,8 @@ class ShellRunner:
 
 
 @dataclass(frozen=True, kw_only=True)
-class ShellTask(ABC):
+class RunPipInstall:
     args: Iterable[str] = ()
-
-    def run(self) -> TaskResult:
-        return ShellRunner(args=self).run()
-
-    @abstractmethod
-    def __iter__(self) -> Iterator[str]:
-        pass
-
-
-@dataclass(frozen=True, kw_only=True)
-class RunPipInstall(ShellTask):
     upgrade: bool = True
 
     def __iter__(self) -> Iterator[str]:
@@ -59,14 +47,14 @@ class RunPipInstall(ShellTask):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPoetryInstallDependencies(ShellTask):
+class RunPoetryInstallDependencies:
     def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "install"
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunRuffCheck(ShellTask):
+class RunRuffCheck:
     on: Path
 
     fix: bool = False
@@ -85,7 +73,7 @@ class RunRuffCheck(ShellTask):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunRuffFormat(ShellTask):
+class RunRuffFormat:
     on: Path
 
     check: bool = False
@@ -100,7 +88,7 @@ class RunRuffFormat(ShellTask):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunMypy(ShellTask):
+class RunMypy:
     on: Path
 
     def __iter__(self) -> Iterator[str]:
@@ -109,7 +97,7 @@ class RunMypy(ShellTask):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPoetryCheck(ShellTask):
+class RunPoetryCheck:
     on: Path
 
     def __iter__(self) -> Iterator[str]:
@@ -120,21 +108,21 @@ class RunPoetryCheck(ShellTask):
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPoetryLock(ShellTask):
+class RunPoetryLock:
     def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "lock"
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunPoetryUpdate(ShellTask):
+class RunPoetryUpdate:
     def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "update"
 
 
 @dataclass(frozen=True, kw_only=True)
-class RunGitAmend(ShellTask):
+class RunGitAmend:
     def __iter__(self) -> Iterator[str]:
         yield "git"
         yield "commit"

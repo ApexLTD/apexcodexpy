@@ -9,6 +9,7 @@ from codex.tasks import (
     RunRuffFormat,
     SyncToml,
 )
+from codex.tasks.shell import ShellRunner
 from codex.tools import Pip, Poetry
 
 
@@ -41,18 +42,20 @@ class PyCodex:
     def lint(self) -> int:
         return self.reporter.report(
             poetry=Poetry(on=self.target).lint(),
-            black=RunRuffFormat(on=self.target, check=True).run(),
-            ruff=RunRuffCheck(on=self.target).run(),
-            mypy=RunMypy(on=self.target).run(),
+            black=ShellRunner(args=RunRuffFormat(on=self.target, check=True)).run(),
+            ruff=ShellRunner(args=RunRuffCheck(on=self.target)).run(),
+            mypy=ShellRunner(args=RunMypy(on=self.target)).run(),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            black=RunRuffFormat(on=self.target).run(),
-            ruff=RunRuffCheck(on=self.target, fix=True, unsafe=unsafe).run(),
+            black=ShellRunner(args=RunRuffFormat(on=self.target)).run(),
+            ruff=ShellRunner(
+                args=RunRuffCheck(on=self.target, fix=True, unsafe=unsafe)
+            ).run(),
         )
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=RunGitAmend().run(),
+            amend=ShellRunner(args=RunGitAmend()).run(),
         )
