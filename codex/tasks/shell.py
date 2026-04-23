@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
@@ -35,11 +35,10 @@ class ShellTask(ABC):
     args: Iterable[str] = ()
 
     def run(self) -> TaskResult:
-        return ShellRunner(args=self._command).run()
+        return ShellRunner(args=self).run()
 
-    @property
     @abstractmethod
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         pass
 
 
@@ -47,8 +46,7 @@ class ShellTask(ABC):
 class RunPipInstall(ShellTask):
     upgrade: bool = True
 
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "python"
         yield "-m"
         yield "pip"
@@ -62,8 +60,7 @@ class RunPipInstall(ShellTask):
 
 @dataclass(frozen=True, kw_only=True)
 class RunPoetryInstallDependencies(ShellTask):
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "install"
 
@@ -75,8 +72,7 @@ class RunRuffCheck(ShellTask):
     fix: bool = False
     unsafe: bool = False
 
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "ruff"
         yield "check"
         yield str(self.on)
@@ -94,8 +90,7 @@ class RunRuffFormat(ShellTask):
 
     check: bool = False
 
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "ruff"
         yield "format"
         yield str(self.on)
@@ -108,8 +103,7 @@ class RunRuffFormat(ShellTask):
 class RunMypy(ShellTask):
     on: Path
 
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "mypy"
         yield str(self.on)
 
@@ -118,8 +112,7 @@ class RunMypy(ShellTask):
 class RunPoetryCheck(ShellTask):
     on: Path
 
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "check"
         yield "--strict"
@@ -128,24 +121,21 @@ class RunPoetryCheck(ShellTask):
 
 @dataclass(frozen=True, kw_only=True)
 class RunPoetryLock(ShellTask):
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "lock"
 
 
 @dataclass(frozen=True, kw_only=True)
 class RunPoetryUpdate(ShellTask):
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "poetry"
         yield "update"
 
 
 @dataclass(frozen=True, kw_only=True)
 class RunGitAmend(ShellTask):
-    @property
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield "git"
         yield "commit"
         yield "--amend"
