@@ -27,7 +27,7 @@ jobs:
         run: make install
 
       - name: Lint
-        run: codex lint
+        run: poetry run codex lint
 
   test:
     runs-on: ubuntu-latest
