@@ -38,7 +38,7 @@ class Codex:
         return self.reporter.report(
             poetry=Poetry().lint(self.target),
             black=Poetry().run(Ruff().format(self.target, check=True)),
-            ruff=Poetry().run(Ruff().lint(self.target, fix=False)),
+            ruff=Poetry().run(Ruff().lint(self.target)),
             mypy=Poetry().run(MyPy().check(self.target)),
         )
 

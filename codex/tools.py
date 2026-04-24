@@ -98,7 +98,7 @@ class Ruff:
         self,
         target: Path,
         *,
-        fix: bool = True,
+        fix: bool = False,
         unsafe: bool = False,
     ) -> Program:
         return (
