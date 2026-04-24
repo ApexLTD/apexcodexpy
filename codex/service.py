@@ -19,31 +19,31 @@ class Codex:
     def install(self) -> int:
         return self.reporter.report(
             tools=Pip().install("pip", "poetry").run(),
-            dependencies=Poetry(on=self.target).install().run(),
+            dependencies=Poetry().install().run(),
         )
 
     def lock(self) -> int:
         return self.reporter.report(
-            lock=Poetry(on=self.target).lock().run(),
+            lock=Poetry().lock().run(),
         )
 
     def update(self) -> int:
         return self.reporter.report(
-            update=Poetry(on=self.target).update().run(),
+            update=Poetry().update().run(),
         )
 
     def lint(self) -> int:
         return self.reporter.report(
-            poetry=Poetry(on=self.target).lint().run(),
-            black=Ruff(on=self.target).format(check=True).run(),
-            ruff=Ruff(on=self.target).lint(fix=False).run(),
-            mypy=MyPy(on=self.target).run().run(),
+            poetry=Poetry().lint(self.target).run(),
+            black=Ruff().format(self.target, check=True).run(),
+            ruff=Ruff().lint(self.target, fix=False).run(),
+            mypy=MyPy().check(self.target).run(),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            black=Ruff(on=self.target).format().run(),
-            ruff=Ruff(on=self.target).lint(fix=True, unsafe=unsafe).run(),
+            black=Ruff().format(self.target).run(),
+            ruff=Ruff().lint(self.target, fix=True, unsafe=unsafe).run(),
         )
 
     def amend(self) -> int:

@@ -76,8 +76,6 @@ class Pip:
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
-    on: Path
-
     def install(self) -> Program:
         return Program("poetry install")
 
@@ -87,32 +85,34 @@ class Poetry:
     def update(self) -> Program:
         return Program("poetry update")
 
-    def lint(self) -> Program:
-        return Program("poetry check").with_a(project=self.on).flag(strict=True)
+    def lint(self, target: Path) -> Program:
+        return Program("poetry check").with_a(project=target).flag(strict=True)
 
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:
-    on: Path
-
-    def lint(self, fix: bool = True, unsafe: bool = False) -> Program:
+    def lint(
+        self,
+        target: Path,
+        fix: bool = True,
+        unsafe: bool = False,
+    ) -> Program:
         return (
-            Program("ruff check")
-            .append(self.on)
-            .flag(fix=fix)
-            .flag(unsafe_fixes=unsafe)
+            Program("ruff check").append(target).flag(fix=fix).flag(unsafe_fixes=unsafe)
         )
 
-    def format(self, check: bool | None = None) -> Program:
-        return Program("ruff format").append(self.on).flag(check=check)
+    def format(
+        self,
+        target: Path,
+        check: bool | None = None,
+    ) -> Program:
+        return Program("ruff format").append(target).flag(check=check)
 
 
 @dataclass(frozen=True, kw_only=True)
 class MyPy:
-    on: Path
-
-    def run(self) -> Program:
-        return Program("mypy").append(self.on)
+    def check(self, target: Path) -> Program:
+        return Program("mypy").append(target)
 
 
 @dataclass(frozen=True, kw_only=True)
