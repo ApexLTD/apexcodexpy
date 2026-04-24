@@ -37,7 +37,7 @@ class DefaultReporter:
         self.device.with_white().echo(result.stdout)
         self.device.with_yellow().echo(result.stderr)
 
-        return result.exit_code
+        return int(result)
 
 
 class _Device(Protocol):

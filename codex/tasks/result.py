@@ -11,6 +11,9 @@ class TaskResult:
     stderr: str
     exit_code: int
 
+    def __int__(self) -> int:
+        return self.exit_code
+
     def __bool__(self) -> bool:
         return self.exit_code == 0
 
