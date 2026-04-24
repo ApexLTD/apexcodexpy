@@ -57,6 +57,16 @@ class Ruff(ShellProgram):
 
 
 @dataclass(frozen=True, kw_only=True)
+class MyPy:
+    on: Path
+
+    name: str = "mypy"
+
+    def run(self) -> TaskResult:
+        return ShellProgram(name=self.name).run(on=self.on)
+
+
+@dataclass(frozen=True, kw_only=True)
 class Git:
     name: str = "git"
 

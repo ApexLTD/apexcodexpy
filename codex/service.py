@@ -3,8 +3,7 @@ from pathlib import Path
 
 from codex.reporters import Reporter
 from codex.tasks import Toml
-from codex.tasks.program import ShellProgram
-from codex.tools import Git, Pip, Poetry, Ruff
+from codex.tools import Git, MyPy, Pip, Poetry, Ruff
 
 
 @dataclass(frozen=True)
@@ -38,7 +37,7 @@ class Codex:
             poetry=Poetry(on=self.target).lint(),
             black=Ruff(on=self.target).format(check=True),
             ruff=Ruff(on=self.target).lint(fix=False),
-            mypy=ShellProgram(name="mypy").run(on=self.target),
+            mypy=MyPy(on=self.target).run(),
         )
 
     def fix(self, unsafe: bool = False) -> int:
