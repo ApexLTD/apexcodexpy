@@ -7,7 +7,7 @@ from codex.tasks import TaskResult
 
 
 class Reporter(Protocol):
-    def report(self, **results: TaskResult) -> int:
+    def report(self, *results: TaskResult) -> int:
         pass
 
 
@@ -22,10 +22,8 @@ class DefaultReporter:
     def silenced(self) -> _Silenced:
         return _Silenced(self)
 
-    def report(self, **results: TaskResult) -> int:
-        return sum(
-            self.report_one(result.named(name)) for name, result in results.items()
-        )
+    def report(self, *results: TaskResult) -> int:
+        return sum(self.report_one(result) for result in results)
 
     def report_one(self, result: TaskResult) -> int:
         if result:

@@ -14,32 +14,36 @@ class Codex:
     reporter: Reporter
 
     def sync(self, dry_run: bool = False) -> int:
-        return self.reporter.report(sync=Toml(dry_run=dry_run).sync(self.target))
+        return self.reporter.report(
+            Toml(dry_run=dry_run).sync(self.target).named("sync")
+        )
 
     def install(self) -> int:
         return self.reporter.report(
-            tools=Pip().install("pip", "poetry").run(),
-            dependencies=Poetry().install(),
+            Pip().install("pip", "poetry").run().named("tools"),
+            Poetry().install().named("dependencies"),
         )
 
     def lock(self) -> int:
-        return self.reporter.report(lock=Poetry().lock())
+        return self.reporter.report(Poetry().lock().named("lock"))
 
     def update(self) -> int:
-        return self.reporter.report(update=Poetry().update())
+        return self.reporter.report(Poetry().update().named("update"))
 
     def lint(self) -> int:
         return self.reporter.report(
-            poetry=Poetry().lint(self.target),
-            black=Poetry().run(Ruff().format(self.target, check=True)),
-            ruff=Poetry().run(Ruff().lint(self.target)),
-            mypy=Poetry().run(MyPy().check(self.target)),
+            Poetry().lint(self.target).named("poetry"),
+            Poetry().run(Ruff().format(self.target, check=True)).named("black"),
+            Poetry().run(Ruff().lint(self.target)).named("ruff"),
+            Poetry().run(MyPy().check(self.target)).named("mypy"),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            black=Poetry().run(Ruff().format(self.target)),
-            ruff=Poetry().run(Ruff().lint(self.target, fix=True, unsafe=unsafe)),
+            Poetry().run(Ruff().format(self.target)).named("black"),
+            Poetry()
+            .run(Ruff().lint(self.target, fix=True, unsafe=unsafe))
+            .named("ruff"),
         )
 
 
@@ -49,11 +53,10 @@ class Git:
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=(
-                Program("git commit")
-                .flag(all=True)
-                .flag(amend=True)
-                .flag(edit=False)
-                .run()
-            )
+            Program("git commit")
+            .flag(all=True)
+            .flag(amend=True)
+            .flag(edit=False)
+            .run()
+            .named("amend")
         )
