@@ -3,7 +3,6 @@ from __future__ import annotations
 import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from itertools import chain
 from pathlib import Path
 from typing import Any
 
@@ -11,22 +10,22 @@ from codex.tasks import TaskResult
 
 
 @dataclass(frozen=True)
-class ShellCommand:
-    program: str
+class Program:
+    name: str
 
     _arguments: list[str] = field(init=False, default_factory=list)
 
-    def with_a(self, **kwargs: Any) -> ShellCommand:
+    def with_a(self, **kwargs: Any) -> Program:
         return self.and_a(**kwargs)
 
-    def and_a(self, **kwargs: Any) -> ShellCommand:
+    def and_a(self, **kwargs: Any) -> Program:
         assert len(kwargs) == 1, "with_a/and_a supports one argument at a time."
 
         name, value = kwargs.popitem()
 
         return self.append(f"--{name}={value}")
 
-    def flag(self, **kwargs: bool | None) -> ShellCommand:
+    def flag(self, **kwargs: bool | None) -> Program:
         for name, value in kwargs.items():
             flag = self.dashify(name)
 
@@ -38,13 +37,13 @@ class ShellCommand:
     def dashify(self, name: str) -> str:
         return name.replace("_", "-")
 
-    def extend(self, arguments: Iterable[Any]) -> ShellCommand:
+    def extend(self, arguments: Iterable[Any]) -> Program:
         for argument in arguments:
             self.append(argument)
 
         return self
 
-    def append(self, argument: Any) -> ShellCommand:
+    def append(self, argument: Any) -> Program:
         self._arguments.extend(str(argument).split())
 
         return self
@@ -63,29 +62,10 @@ class ShellCommand:
         return " ".join(self._command())
 
     def _command(self) -> Iterable[str]:
-        yield from self.program.split()
+        yield from self.name.split()
 
         for argument in self._arguments:
             yield from str(argument).split()
-
-
-@dataclass(frozen=True)
-class ShellProgram:
-    name: str
-
-    def run(self, *args: Any, **kwargs: Any) -> TaskResult:
-        return TaskResult.parse(
-            subprocess.run(
-                list(self._command_with([*args, *kwargs.values()])),
-                text=True,
-                encoding="utf-8",
-                capture_output=True,
-            )
-        )
-
-    def _command_with(self, args: Iterable[str]) -> Iterable[str]:
-        yield from self.name.split()
-        yield from chain.from_iterable(str(arg).split() for arg in args)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -94,7 +74,7 @@ class Pip:
 
     def install(self, *packages: str) -> TaskResult:
         return (
-            ShellCommand(self.name)
+            Program(self.name)
             .append("install")
             .flag(upgrade=True)
             .extend(packages)
@@ -109,17 +89,17 @@ class Poetry:
     name: str = "poetry"
 
     def install(self) -> TaskResult:
-        return ShellCommand(self.name).append("install").run()
+        return Program(self.name).append("install").run()
 
     def lock(self) -> TaskResult:
-        return ShellCommand(self.name).append("lock").run()
+        return Program(self.name).append("lock").run()
 
     def update(self) -> TaskResult:
-        return ShellCommand(self.name).append("update").run()
+        return Program(self.name).append("update").run()
 
     def lint(self) -> TaskResult:
         return (
-            ShellCommand(self.name)
+            Program(self.name)
             .append("check")
             .with_a(project=self.on)
             .flag(strict=True)
@@ -135,7 +115,7 @@ class Ruff:
 
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
         return (
-            ShellCommand(self.name)
+            Program(self.name)
             .append("check")
             .append(self.on)
             .flag(fix=fix)
@@ -145,11 +125,7 @@ class Ruff:
 
     def format(self, check: bool | None = None) -> TaskResult:
         return (
-            ShellCommand(self.name)
-            .append("format")
-            .append(self.on)
-            .flag(check=check)
-            .run()
+            Program(self.name).append("format").append(self.on).flag(check=check).run()
         )
 
 
@@ -160,7 +136,7 @@ class MyPy:
     name: str = "mypy"
 
     def run(self) -> TaskResult:
-        return ShellCommand(self.name).append(self.on).run()
+        return Program(self.name).append(self.on).run()
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -169,7 +145,7 @@ class Git:
 
     def amend(self) -> TaskResult:
         return (
-            ShellCommand(self.name)
+            Program(self.name)
             .append("commit")
             .flag(all=True)
             .flag(amend=True)
