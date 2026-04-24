@@ -21,18 +21,18 @@ class Codex:
     def install(self) -> int:
         return self.reporter.report(
             Pip().install("pip", "poetry").run().named("tools"),
-            Poetry().install().named("dependencies"),
+            Poetry().install(),
         )
 
     def lock(self) -> int:
-        return self.reporter.report(Poetry().lock().named("lock"))
+        return self.reporter.report(Poetry().lock())
 
     def update(self) -> int:
-        return self.reporter.report(Poetry().update().named("update"))
+        return self.reporter.report(Poetry().update())
 
     def lint(self) -> int:
         return self.reporter.report(
-            Poetry().lint(self.target).named("poetry"),
+            Poetry().lint(self.target),
             Poetry().run(Ruff().format(self.target, check=True)).named("black"),
             Poetry().run(Ruff().lint(self.target)).named("ruff"),
             Poetry().run(MyPy().check(self.target)).named("mypy"),
