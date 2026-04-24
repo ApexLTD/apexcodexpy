@@ -67,7 +67,7 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
-class SyncToml:
+class Toml:
     of: Path
 
     dry_run: bool = False
@@ -76,7 +76,7 @@ class SyncToml:
     def _toml(self) -> Path:
         return self.of / "pyproject.toml"
 
-    def run(self) -> TaskResult:
+    def sync(self) -> TaskResult:
         if not self._toml.exists():
             return TaskResult.fail(stderr=f"{self._toml.name} not found.")
 

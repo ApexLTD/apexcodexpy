@@ -2,9 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.reporters import Reporter
-from codex.tasks import (
-    SyncToml,
-)
+from codex.tasks import Toml
 from codex.tasks.program import ShellProgram
 from codex.tools import Git, Pip, Poetry, Ruff
 
@@ -16,7 +14,7 @@ class Codex:
 
     def sync(self, dry_run: bool = False) -> int:
         return self.reporter.report(
-            sync=SyncToml(of=self.target, dry_run=dry_run).run()
+            sync=Toml(of=self.target, dry_run=dry_run).sync(),
         )
 
     def install(self) -> int:
