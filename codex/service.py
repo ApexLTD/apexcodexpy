@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 
 from codex.reporters import Reporter
 from codex.tasks import Toml
-from codex.tools import Git, MyPy, Pip, Poetry, Ruff
+from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
 @dataclass(frozen=True)
@@ -46,7 +48,18 @@ class Codex:
             ruff=Poetry().run(Ruff().lint(self.target, fix=True, unsafe=unsafe)),
         )
 
+
+@dataclass(frozen=True)
+class Git:
+    reporter: Reporter
+
     def amend(self) -> int:
         return self.reporter.report(
-            amend=Git().amend().run(),
+            amend=(
+                Program("git commit")
+                .flag(all=True)
+                .flag(amend=True)
+                .flag(edit=False)
+                .run()
+            )
         )

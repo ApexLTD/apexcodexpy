@@ -118,9 +118,3 @@ class Ruff:
 class MyPy:
     def check(self, target: Path) -> Program:
         return Program("mypy").append(target)
-
-
-@dataclass(frozen=True, kw_only=True)
-class Git:
-    def amend(self) -> Program:
-        return Program("git commit").flag(all=True).flag(amend=True).flag(edit=False)

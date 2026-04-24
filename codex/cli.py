@@ -6,7 +6,7 @@ from pathlib import Path
 import typer
 
 from codex.reporters import DefaultReporter
-from codex.service import Codex
+from codex.service import Codex, Git
 
 cli = typer.Typer(
     add_completion=False,
@@ -147,12 +147,7 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path("."),
-            reporter=DefaultReporter.using(TyperDevice()),
-        ).amend()
-    )
+    raise typer.Exit(Git(reporter=DefaultReporter.using(TyperDevice())).amend())
 
 
 @dataclass(frozen=True)
