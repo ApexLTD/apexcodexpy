@@ -85,8 +85,11 @@ class Poetry:
     def update(self) -> Program:
         return Program("poetry update")
 
-    def lint(self, target: Path) -> Program:
-        return Program("poetry check").with_a(project=target).flag(strict=True)
+    def lint(self, target: Path) -> TaskResult:
+        return Program("poetry check").with_a(project=target).flag(strict=True).run()
+
+    def run(self, program: Program) -> TaskResult:
+        return Program(f"poetry run {program}").run()
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -94,6 +97,7 @@ class Ruff:
     def lint(
         self,
         target: Path,
+        *,
         fix: bool = True,
         unsafe: bool = False,
     ) -> Program:
@@ -104,6 +108,7 @@ class Ruff:
     def format(
         self,
         target: Path,
+        *,
         check: bool | None = None,
     ) -> Program:
         return Program("ruff format").append(target).flag(check=check)

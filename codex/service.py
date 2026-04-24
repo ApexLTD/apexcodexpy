@@ -34,16 +34,16 @@ class Codex:
 
     def lint(self) -> int:
         return self.reporter.report(
-            poetry=Poetry().lint(self.target).run(),
-            black=Ruff().format(self.target, check=True).run(),
-            ruff=Ruff().lint(self.target, fix=False).run(),
-            mypy=MyPy().check(self.target).run(),
+            poetry=Poetry().lint(self.target),
+            black=Poetry().run(Ruff().format(self.target, check=True)),
+            ruff=Poetry().run(Ruff().lint(self.target, fix=False)),
+            mypy=Poetry().run(MyPy().check(self.target)),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            black=Ruff().format(self.target).run(),
-            ruff=Ruff().lint(self.target, fix=True, unsafe=unsafe).run(),
+            black=Poetry().run(Ruff().format(self.target)),
+            ruff=Poetry().run(Ruff().lint(self.target, fix=True, unsafe=unsafe)),
         )
 
     def amend(self) -> int:
