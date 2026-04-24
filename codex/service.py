@@ -6,7 +6,7 @@ from codex.tasks import (
     SyncToml,
 )
 from codex.tasks.program import ShellProgram
-from codex.tools import Pip, Poetry, Ruff
+from codex.tools import Git, Pip, Poetry, Ruff
 
 
 @dataclass(frozen=True)
@@ -51,10 +51,5 @@ class Codex:
 
     def amend(self) -> int:
         return self.reporter.report(
-            amend=ShellProgram(name="git").run(
-                "commit",
-                "--amend",
-                "--no-edit",
-                "-a",
-            ),
+            amend=Git().amend(),
         )

@@ -54,3 +54,16 @@ class Ruff(ShellProgram):
             self.on,
             "--check" if check else "",
         )
+
+
+@dataclass(frozen=True, kw_only=True)
+class Git:
+    name: str = "git"
+
+    def amend(self) -> TaskResult:
+        return ShellProgram(name=self.name).run(
+            "commit",
+            "--amend",
+            "--no-edit",
+            "-a",
+        )
