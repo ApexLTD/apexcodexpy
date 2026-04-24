@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from codex.tasks import PipInstall, TaskResult
+from codex.tasks import TaskResult
 from codex.tasks.program import ShellProgram
 
 
@@ -12,7 +12,7 @@ class Pip(ShellProgram):
     name: str = "pip"
 
     def install(self, *packages: str) -> TaskResult:
-        return self.run(*PipInstall(args=packages))
+        return self.run("install", "--upgrade", *packages)
 
 
 @dataclass(frozen=True, kw_only=True)
