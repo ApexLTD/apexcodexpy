@@ -10,7 +10,7 @@ from typing import Any
 from codex.tasks import TaskResult
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True)
 class ShellProgram:
     name: str
 
@@ -34,7 +34,7 @@ class Pip:
     name: str = "pip"
 
     def install(self, *packages: str) -> TaskResult:
-        return ShellProgram(name=self.name).run("install", "--upgrade", *packages)
+        return ShellProgram(self.name).run("install", "--upgrade", *packages)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -44,16 +44,16 @@ class Poetry:
     name: str = "poetry"
 
     def install(self) -> TaskResult:
-        return ShellProgram(name=self.name).run("install")
+        return ShellProgram(self.name).run("install")
 
     def lock(self) -> TaskResult:
-        return ShellProgram(name=self.name).run("lock")
+        return ShellProgram(self.name).run("lock")
 
     def update(self) -> TaskResult:
-        return ShellProgram(name=self.name).run("update")
+        return ShellProgram(self.name).run("update")
 
     def lint(self) -> TaskResult:
-        return ShellProgram(name=self.name).run(f"check --strict --project={self.on}")
+        return ShellProgram(self.name).run(f"check --strict --project={self.on}")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -63,7 +63,7 @@ class Ruff:
     name: str = "ruff"
 
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
-        return ShellProgram(name=self.name).run(
+        return ShellProgram(self.name).run(
             "check",
             self.on,
             "--fix" if fix else "--no-fix",
@@ -71,7 +71,7 @@ class Ruff:
         )
 
     def format(self, check: bool = False) -> TaskResult:
-        return ShellProgram(name=self.name).run(
+        return ShellProgram(self.name).run(
             "format",
             self.on,
             "--check" if check else "",
@@ -85,7 +85,7 @@ class MyPy:
     name: str = "mypy"
 
     def run(self) -> TaskResult:
-        return ShellProgram(name=self.name).run(on=self.on)
+        return ShellProgram(self.name).run(on=self.on)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -93,7 +93,7 @@ class Git:
     name: str = "git"
 
     def amend(self) -> TaskResult:
-        return ShellProgram(name=self.name).run(
+        return ShellProgram(self.name).run(
             "commit",
             "--amend",
             "--no-edit",
