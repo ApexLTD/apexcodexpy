@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
 from typing import Any
@@ -26,17 +26,3 @@ class ShellProgram:
     def _command_with(self, args: Iterable[str]) -> Iterable[str]:
         yield from self.name.split()
         yield from chain.from_iterable(str(arg).split() for arg in args)
-
-
-@dataclass(frozen=True, kw_only=True)
-class PipInstall:
-    args: Iterable[str] = ()
-    upgrade: bool = True
-
-    def __iter__(self) -> Iterator[str]:
-        yield "install"
-
-        if self.upgrade:
-            yield "--upgrade"
-
-        yield from self.args
