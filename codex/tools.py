@@ -76,14 +76,14 @@ class Pip:
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
-    def install(self) -> Program:
-        return Program("poetry install")
+    def install(self) -> TaskResult:
+        return Program("poetry install").run()
 
-    def lock(self) -> Program:
-        return Program("poetry lock")
+    def lock(self) -> TaskResult:
+        return Program("poetry lock").run()
 
-    def update(self) -> Program:
-        return Program("poetry update")
+    def update(self) -> TaskResult:
+        return Program("poetry update").run()
 
     def lint(self, target: Path) -> TaskResult:
         return Program("poetry check").with_a(project=target).flag(strict=True).run()
