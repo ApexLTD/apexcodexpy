@@ -30,40 +30,40 @@ class ShellProgram:
 
 
 @dataclass(frozen=True, kw_only=True)
-class Pip(ShellProgram):
+class Pip:
     name: str = "pip"
 
     def install(self, *packages: str) -> TaskResult:
-        return self.run("install", "--upgrade", *packages)
+        return ShellProgram(name=self.name).run("install", "--upgrade", *packages)
 
 
 @dataclass(frozen=True, kw_only=True)
-class Poetry(ShellProgram):
+class Poetry:
     on: Path
 
     name: str = "poetry"
 
     def install(self) -> TaskResult:
-        return self.run("install")
+        return ShellProgram(name=self.name).run("install")
 
     def lock(self) -> TaskResult:
-        return self.run("lock")
+        return ShellProgram(name=self.name).run("lock")
 
     def update(self) -> TaskResult:
-        return self.run("update")
+        return ShellProgram(name=self.name).run("update")
 
     def lint(self) -> TaskResult:
-        return self.run(f"check --strict --project={self.on}")
+        return ShellProgram(name=self.name).run(f"check --strict --project={self.on}")
 
 
 @dataclass(frozen=True, kw_only=True)
-class Ruff(ShellProgram):
+class Ruff:
     on: Path
 
     name: str = "ruff"
 
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
-        return self.run(
+        return ShellProgram(name=self.name).run(
             "check",
             self.on,
             "--fix" if fix else "--no-fix",
@@ -71,7 +71,7 @@ class Ruff(ShellProgram):
         )
 
     def format(self, check: bool = False) -> TaskResult:
-        return self.run(
+        return ShellProgram(name=self.name).run(
             "format",
             self.on,
             "--check" if check else "",
