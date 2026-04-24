@@ -70,53 +70,34 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
-    name: str = "pip"
-
     def install(self, *packages: str) -> TaskResult:
-        return (
-            Program(self.name)
-            .append("install")
-            .flag(upgrade=True)
-            .extend(packages)
-            .run()
-        )
+        return Program("pip install").flag(upgrade=True).extend(packages).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
     on: Path
 
-    name: str = "poetry"
-
     def install(self) -> TaskResult:
-        return Program(self.name).append("install").run()
+        return Program("poetry install").run()
 
     def lock(self) -> TaskResult:
-        return Program(self.name).append("lock").run()
+        return Program("poetry lock").run()
 
     def update(self) -> TaskResult:
-        return Program(self.name).append("update").run()
+        return Program("poetry update").run()
 
     def lint(self) -> TaskResult:
-        return (
-            Program(self.name)
-            .append("check")
-            .with_a(project=self.on)
-            .flag(strict=True)
-            .run()
-        )
+        return Program("poetry check").with_a(project=self.on).flag(strict=True).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:
     on: Path
 
-    name: str = "ruff"
-
     def lint(self, fix: bool = True, unsafe: bool = False) -> TaskResult:
         return (
-            Program(self.name)
-            .append("check")
+            Program("ruff check")
             .append(self.on)
             .flag(fix=fix)
             .flag(unsafe_fixes=unsafe)
@@ -124,31 +105,20 @@ class Ruff:
         )
 
     def format(self, check: bool | None = None) -> TaskResult:
-        return (
-            Program(self.name).append("format").append(self.on).flag(check=check).run()
-        )
+        return Program("ruff format").append(self.on).flag(check=check).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class MyPy:
     on: Path
 
-    name: str = "mypy"
-
     def run(self) -> TaskResult:
-        return Program(self.name).append(self.on).run()
+        return Program("mypy").append(self.on).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class Git:
-    name: str = "git"
-
     def amend(self) -> TaskResult:
         return (
-            Program(self.name)
-            .append("commit")
-            .flag(all=True)
-            .flag(amend=True)
-            .flag(edit=False)
-            .run()
+            Program("git commit").flag(all=True).flag(amend=True).flag(edit=False).run()
         )
