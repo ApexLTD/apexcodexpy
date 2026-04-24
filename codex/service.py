@@ -14,9 +14,7 @@ class Codex:
     reporter: Reporter
 
     def sync(self, dry_run: bool = False) -> int:
-        return self.reporter.report(
-            sync=Toml(of=self.target, dry_run=dry_run).sync(),
-        )
+        return self.reporter.report(sync=Toml(dry_run=dry_run).sync(self.target))
 
     def install(self) -> int:
         return self.reporter.report(

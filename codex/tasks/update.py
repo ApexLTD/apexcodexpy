@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -68,19 +67,18 @@ STANDARDS = {
 
 @dataclass(frozen=True)
 class Toml:
-    of: Path
-
     dry_run: bool = False
 
-    @cached_property
-    def _toml(self) -> Path:
-        return self.of / "pyproject.toml"
+    PYPROJECT_TOML = "pyproject.toml"
 
-    def sync(self) -> TaskResult:
-        if not self._toml.exists():
-            return TaskResult.fail(stderr=f"{self._toml.name} not found.")
+    def toml_on(self, path: Path) -> Path:
+        return path / self.PYPROJECT_TOML
 
-        document = tomlkit.parse(self._toml.read_text(encoding="utf-8"))
+    def sync(self, target: Path) -> TaskResult:
+        if not self.toml_on(target).exists():
+            return TaskResult.fail(stderr=f"{self.toml_on(target).name} not found.")
+
+        document = tomlkit.parse(self.toml_on(target).read_text(encoding="utf-8"))
 
         # Create a copy for comparison if dry-run
         original = tomlkit.dumps(document)
@@ -93,7 +91,7 @@ class Toml:
         if self.dry_run:
             return TaskResult.success(stdout=f"Changes would be applied:\n{modified}")
 
-        self._toml.write_text(modified, encoding="utf-8", newline="\n")
+        self.toml_on(target).write_text(modified, encoding="utf-8", newline="\n")
 
         return TaskResult.success(stdout="Configuration synchronized successfully.")
 
