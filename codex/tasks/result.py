@@ -11,6 +11,16 @@ class TaskResult:
     stderr: str
     exit_code: int
 
+    name: str = "Unknown"
+
+    def named(self, name: str) -> TaskResult:
+        return TaskResult(
+            stdout=self.stdout,
+            stderr=self.stderr,
+            exit_code=self.exit_code,
+            name=name.capitalize(),
+        )
+
     def __int__(self) -> int:
         return self.exit_code
 

@@ -24,15 +24,14 @@ class DefaultReporter:
 
     def report(self, **results: TaskResult) -> int:
         return sum(
-            self.report_one(name.capitalize(), result)
-            for name, result in results.items()
+            self.report_one(result.named(name)) for name, result in results.items()
         )
 
-    def report_one(self, name: str, result: TaskResult) -> int:
+    def report_one(self, result: TaskResult) -> int:
         if result:
-            self.device.with_green().echo(f"✅ {name} passed!")
+            self.device.with_green().echo(f"✅ {result.name} passed!")
         else:
-            self.device.with_red().echo(f"❌ {name} failed!")
+            self.device.with_red().echo(f"❌ {result.name} failed!")
 
         self.device.with_white().echo(result.stdout)
         self.device.with_yellow().echo(result.stderr)
