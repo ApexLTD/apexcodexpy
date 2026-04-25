@@ -110,14 +110,18 @@ class Poetry:
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:
-    def lint(self, target: Path) -> Program:
-        return Program("ruff check").append(target)
+    on: Path
 
-    def format(self, target: Path) -> Program:
-        return Program("ruff format").append(target)
+    def lint(self) -> Program:
+        return Program("ruff check").append(self.on)
+
+    def format(self) -> Program:
+        return Program("ruff format").append(self.on)
 
 
 @dataclass(frozen=True, kw_only=True)
 class MyPy:
-    def check(self, target: Path) -> Program:
-        return Program("mypy").append(target)
+    on: Path
+
+    def check(self) -> Program:
+        return Program("mypy").append(self.on)
