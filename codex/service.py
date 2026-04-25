@@ -31,15 +31,17 @@ class Codex:
     def lint(self) -> int:
         return self.reporter.report(
             Poetry().lint(self.target),
-            Poetry().run(black=Ruff().format(self.target, check=True)),
-            Poetry().run(ruff=Ruff().lint(self.target)),
-            Poetry().run(mypy=MyPy().check(self.target)),
+            Poetry(session="black").run(Ruff().format(self.target).flag(check=True)),
+            Poetry(session="ruff").run(Ruff().lint(self.target)),
+            Poetry(session="mypy").run(MyPy().check(self.target)),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            Poetry().run(black=Ruff().format(self.target)),
-            Poetry().run(ruff=Ruff().lint(self.target, fix=True, unsafe=unsafe)),
+            Poetry(session="black").run(Ruff().format(self.target)),
+            Poetry(session="ruff").run(
+                Ruff().lint(self.target).flag(fix=True).flag(unsafe_fixes=unsafe)
+            ),
         )
 
 

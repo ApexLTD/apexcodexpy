@@ -70,18 +70,22 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
+    session: str = "tools"
+
     def install(self, *packages: str) -> TaskResult:
         return (
             Program("pip install")
             .flag(upgrade=True)
             .extend(packages)
             .run()
-            .named("tools")
+            .named(self.session)
         )
 
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
+    session: str = "unknown"
+
     def install(self) -> TaskResult:
         return Program("poetry install").run().named("dependencies")
 
@@ -100,34 +104,17 @@ class Poetry:
             .named("poetry")
         )
 
-    def run(self, **program: Program) -> TaskResult:
-        assert len(program) == 1, "run supports one program at a time."
-
-        name, command = program.popitem()
-
-        return Program(f"poetry run {command}").run().named(name)
+    def run(self, program: Program) -> TaskResult:
+        return Program(f"poetry run {program}").run().named(self.session)
 
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:
-    def lint(
-        self,
-        target: Path,
-        *,
-        fix: bool = False,
-        unsafe: bool = False,
-    ) -> Program:
-        return (
-            Program("ruff check").append(target).flag(fix=fix).flag(unsafe_fixes=unsafe)
-        )
+    def lint(self, target: Path) -> Program:
+        return Program("ruff check").append(target)
 
-    def format(
-        self,
-        target: Path,
-        *,
-        check: bool | None = None,
-    ) -> Program:
-        return Program("ruff format").append(target).flag(check=check)
+    def format(self, target: Path) -> Program:
+        return Program("ruff format").append(target)
 
 
 @dataclass(frozen=True, kw_only=True)
