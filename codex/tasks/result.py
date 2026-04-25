@@ -11,7 +11,7 @@ class ComboResult:
 
     @property
     def _exit_code(self) -> int:
-        return sum(int(result) for result in self.results)
+        return sum(result.exit() for result in self.results)
 
     def attach(self, *args: TaskResult, **kwargs: TaskResult) -> ComboResult:
         for name, result in kwargs.items():
@@ -81,6 +81,12 @@ class TaskResult:
 
         using.out(self.stdout)
         using.error(self.stderr)
+
+    def exit(self, using: type[Exception] | None = None) -> int:
+        if using is None:
+            return self.exit_code
+
+        raise using(self.exit_code)
 
 
 class Reporter(Protocol):
