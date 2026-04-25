@@ -5,8 +5,8 @@ from subprocess import CompletedProcess
 from typing import Any, Protocol
 
 
-class _Result(Protocol):
-    def named(self, name: str) -> _Result:
+class TaskResult(Protocol):
+    def named(self, name: str) -> TaskResult:
         pass
 
     def report(self, using: Reporter) -> None:
@@ -18,13 +18,13 @@ class _Result(Protocol):
 
 @dataclass(frozen=True)
 class ComboResult:
-    results: list[_Result] = field(default_factory=list)
+    results: list[TaskResult] = field(default_factory=list)
 
     @property
     def _exit_code(self) -> int:
         return sum(result.exit() for result in self.results)
 
-    def attach(self, *args: _Result, **kwargs: _Result) -> ComboResult:
+    def attach(self, *args: TaskResult, **kwargs: TaskResult) -> ComboResult:
         for name, result in kwargs.items():
             self.results.append(result.named(name))
 
