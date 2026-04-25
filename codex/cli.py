@@ -31,12 +31,10 @@ def _(
         help="Show changes without applying them.",
     ),
 ) -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path(path),
-            reporter=DefaultReporter.using(TyperDevice()),
-        ).sync(dry_run=dry_run)
-    )
+    Codex(
+        target=Path(path),
+        reporter=DefaultReporter.using(TyperDevice()),
+    ).sync(dry_run=dry_run).exit(using=typer.Exit)
 
 
 @cli.command(
@@ -51,12 +49,10 @@ def _(
         help="Target directory.",
     ),
 ) -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path(path),
-            reporter=DefaultReporter.using(TyperDevice()),
-        ).install()
-    )
+    Codex(
+        target=Path(path),
+        reporter=DefaultReporter.using(TyperDevice()),
+    ).install().exit(using=typer.Exit)
 
 
 @cli.command(
@@ -64,12 +60,10 @@ def _(
     help="Lock project dependencies.",
 )
 def _() -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path("."),
-            reporter=DefaultReporter.using(TyperDevice()),
-        ).lock()
-    )
+    Codex(
+        target=Path("."),
+        reporter=DefaultReporter.using(TyperDevice()),
+    ).lock().exit(using=typer.Exit)
 
 
 @cli.command(
@@ -77,12 +71,10 @@ def _() -> None:
     help="Update project dependencies.",
 )
 def _() -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path("."),
-            reporter=DefaultReporter.using(TyperDevice()),
-        ).update()
-    )
+    Codex(
+        target=Path("."),
+        reporter=DefaultReporter.using(TyperDevice()),
+    ).update().exit(using=typer.Exit)
 
 
 @cli.command(
@@ -132,12 +124,10 @@ def _(
         help="Run unsafe Ruff fixes.",
     ),
 ) -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path(path),
-            reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
-        ).fix(unsafe=unsafe)
-    )
+    Codex(
+        target=Path(path),
+        reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
+    ).fix(unsafe=unsafe).exit(using=typer.Exit)
 
 
 @cli.command(
@@ -145,7 +135,7 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    raise typer.Exit(Git(reporter=DefaultReporter.using(TyperDevice())).amend())
+    Git(reporter=DefaultReporter.using(TyperDevice())).amend().exit(using=typer.Exit)
 
 
 @dataclass(frozen=True)
