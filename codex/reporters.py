@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from codex.tasks import TaskResult
 from codex.tasks.result import Reporter
 
 
@@ -17,20 +16,6 @@ class DefaultReporter:
 
     def silenced(self) -> _Silenced:
         return _Silenced(self)
-
-    def report(self, *results: TaskResult) -> int:
-        return sum(self.report_one(result) for result in results)
-
-    def report_one(self, result: TaskResult) -> int:
-        if result:
-            self.success_of(result.name)
-        else:
-            self.failure_of(result.name)
-
-        self.out(result.stdout)
-        self.error(result.stderr)
-
-        return int(result)
 
     def success_of(self, name: str) -> None:
         self.device.with_green().echo(f"✅ {name} passed!")
