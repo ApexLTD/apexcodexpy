@@ -31,10 +31,12 @@ def _(
         help="Show changes without applying them.",
     ),
 ) -> None:
-    Codex(
-        target=Path(path),
-        reporter=DefaultReporter.using(TyperDevice()),
-    ).sync(dry_run=dry_run).exit(using=typer.Exit)
+    (
+        Codex(target=Path(path))
+        .sync(dry_run=dry_run)
+        .report(using=DefaultReporter.using(TyperDevice()))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -49,10 +51,12 @@ def _(
         help="Target directory.",
     ),
 ) -> None:
-    Codex(
-        target=Path(path),
-        reporter=DefaultReporter.using(TyperDevice()),
-    ).install().exit(using=typer.Exit)
+    (
+        Codex(target=Path(path))
+        .install()
+        .report(using=DefaultReporter.using(TyperDevice()))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -60,10 +64,12 @@ def _(
     help="Lock project dependencies.",
 )
 def _() -> None:
-    Codex(
-        target=Path("."),
-        reporter=DefaultReporter.using(TyperDevice()),
-    ).lock().exit(using=typer.Exit)
+    (
+        Codex(target=Path("."))
+        .lock()
+        .report(using=DefaultReporter.using(TyperDevice()))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -71,10 +77,12 @@ def _() -> None:
     help="Update project dependencies.",
 )
 def _() -> None:
-    Codex(
-        target=Path("."),
-        reporter=DefaultReporter.using(TyperDevice()),
-    ).update().exit(using=typer.Exit)
+    (
+        Codex(target=Path("."))
+        .update()
+        .report(using=DefaultReporter.using(TyperDevice()))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -95,10 +103,12 @@ def _(
         help="Suppress output.",
     ),
 ) -> None:
-    Codex(
-        target=Path(path),
-        reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
-    ).lint().exit(using=typer.Exit)
+    (
+        Codex(target=Path(path))
+        .lint()
+        .report(using=DefaultReporter.using(TyperDevice()).silenced().when(silent))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -124,10 +134,12 @@ def _(
         help="Run unsafe Ruff fixes.",
     ),
 ) -> None:
-    Codex(
-        target=Path(path),
-        reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
-    ).fix(unsafe=unsafe).exit(using=typer.Exit)
+    (
+        Codex(target=Path(path))
+        .fix(unsafe=unsafe)
+        .report(using=DefaultReporter.using(TyperDevice()).silenced().when(silent))
+        .exit(using=typer.Exit)
+    )
 
 
 @cli.command(
@@ -135,7 +147,12 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    Git(reporter=DefaultReporter.using(TyperDevice())).amend().exit(using=typer.Exit)
+    (
+        Git()
+        .amend()
+        .report(using=DefaultReporter.using(TyperDevice()))
+        .exit(using=typer.Exit)
+    )
 
 
 @dataclass(frozen=True)
