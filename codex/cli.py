@@ -103,12 +103,10 @@ def _(
         help="Suppress output.",
     ),
 ) -> None:
-    raise typer.Exit(
-        Codex(
-            target=Path(path),
-            reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
-        ).lint()
-    )
+    Codex(
+        target=Path(path),
+        reporter=DefaultReporter.using(TyperDevice()).silenced().when(silent),
+    ).lint().exit(using=typer.Exit)
 
 
 @cli.command(

@@ -1,8 +1,33 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from subprocess import CompletedProcess
 from typing import Any
+
+
+@dataclass(frozen=True)
+class ComboResult:
+    results: list[TaskResult] = field(default_factory=list)
+
+    def attach(self, *args: TaskResult, **kwargs: TaskResult) -> ComboResult:
+        for name, result in kwargs.items():
+            self.results.append(result.named(name))
+
+        for result in args:
+            self.results.append(result)
+
+        return self
+
+    def report(self, using: Any) -> ComboResult:
+        using.report(*self.results)
+
+        return self
+
+    def exit(self, using: type[Exception] | None = None) -> None:
+        if using is None:
+            return
+
+        raise using(sum(result.exit_code for result in self.results))
 
 
 @dataclass(frozen=True, kw_only=True)

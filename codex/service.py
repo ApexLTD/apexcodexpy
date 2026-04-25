@@ -5,6 +5,7 @@ from pathlib import Path
 
 from codex.reporters import Reporter
 from codex.tasks import Toml
+from codex.tasks.result import ComboResult
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
@@ -28,12 +29,18 @@ class Codex:
     def update(self) -> int:
         return self.reporter.report(Poetry().update())
 
-    def lint(self) -> int:
-        return self.reporter.report(
-            Poetry().lint(self.target),
-            Poetry(session="black").run(Ruff(on=self.target).format().flag(check=True)),
-            Poetry(session="ruff").run(Ruff(on=self.target).lint()),
-            Poetry(session="mypy").run(MyPy(on=self.target).check()),
+    def lint(self) -> ComboResult:
+        return (
+            ComboResult()
+            .attach(
+                Poetry().lint(self.target),
+                Poetry(session="black").run(
+                    Ruff(on=self.target).format().flag(check=True)
+                ),
+                Poetry(session="ruff").run(Ruff(on=self.target).lint()),
+                Poetry(session="mypy").run(MyPy(on=self.target).check()),
+            )
+            .report(self.reporter)
         )
 
     def fix(self, unsafe: bool = False) -> int:
