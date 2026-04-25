@@ -9,6 +9,10 @@ from typing import Any, Protocol
 class ComboResult:
     results: list[TaskResult] = field(default_factory=list)
 
+    @property
+    def _exit_code(self) -> int:
+        return sum(int(result) for result in self.results)
+
     def attach(self, *args: TaskResult, **kwargs: TaskResult) -> ComboResult:
         for name, result in kwargs.items():
             self.results.append(result.named(name))
@@ -24,11 +28,11 @@ class ComboResult:
 
         return self
 
-    def exit(self, using: type[Exception] | None = None) -> None:
+    def exit(self, using: type[Exception] | None = None) -> int:
         if using is None:
-            return
+            return self._exit_code
 
-        raise using(sum(result.exit_code for result in self.results))
+        raise using(self._exit_code)
 
 
 @dataclass(frozen=True, kw_only=True)
