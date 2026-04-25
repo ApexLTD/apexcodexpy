@@ -9,7 +9,7 @@ class TaskResult(Protocol):
     def named(self, name: str) -> TaskResult:
         pass
 
-    def report(self, using: Reporter) -> None:
+    def report(self, using: Reporter) -> TaskResult:
         pass
 
     def exit(self, using: type[Exception] | None = None) -> int:
@@ -19,6 +19,9 @@ class TaskResult(Protocol):
 @dataclass(frozen=True)
 class ComboResult:
     results: list[TaskResult] = field(default_factory=list)
+
+    def named(self, _: str) -> ComboResult:
+        return self
 
     @property
     def _exit_code(self) -> int:
@@ -84,7 +87,7 @@ class ProgramResult:
     def fail(cls, *, stdout: str = "", stderr: str = "") -> ProgramResult:
         return cls(stdout=stdout, stderr=stderr, exit_code=1)
 
-    def report(self, using: Reporter) -> None:
+    def report(self, using: Reporter) -> ProgramResult:
         if self.exit_code == 0:
             using.success_of(self.name)
         else:
@@ -92,6 +95,8 @@ class ProgramResult:
 
         using.out(self.stdout)
         using.error(self.stderr)
+
+        return self
 
     def exit(self, using: type[Exception] | None = None) -> int:
         if using is None:

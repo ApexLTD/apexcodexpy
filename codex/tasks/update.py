@@ -6,7 +6,7 @@ from typing import Any
 
 import tomlkit
 
-from codex.tasks import ProgramResult
+from codex.tasks import ProgramResult, TaskResult
 
 
 def _mypy_config() -> dict[str, Any]:
@@ -74,10 +74,10 @@ class Toml:
     def toml_on(self, path: Path) -> Path:
         return path / self.PYPROJECT_TOML
 
-    def sync(self, target: Path) -> ProgramResult:
+    def sync(self, target: Path) -> TaskResult:
         return self._sync(self.toml_on(target))
 
-    def _sync(self, pyproject: Path) -> ProgramResult:
+    def _sync(self, pyproject: Path) -> TaskResult:
         if not pyproject.exists():
             return ProgramResult.fail(stderr=f"{self.PYPROJECT_TOML} not found.")
 

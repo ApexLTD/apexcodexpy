@@ -3,8 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from codex.tasks import Toml
-from codex.tasks.result import ComboResult
+from codex.tasks import ComboResult, Toml
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
