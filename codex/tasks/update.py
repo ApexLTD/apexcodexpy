@@ -109,10 +109,8 @@ def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
                     destination[key] = tomlkit.table()
                 deep_merge(value, destination[key])
             case list():
-                # Create a multiline array
                 new_array = tomlkit.array()
-                for item in value:
-                    new_array.append(item)
+                new_array.extend(value)
                 new_array.multiline(True)
                 destination[key] = new_array
             case _:
