@@ -4,11 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from codex.tasks import TaskResult
-
-
-class Reporter(Protocol):
-    def report(self, *results: TaskResult) -> int:
-        pass
+from codex.tasks.result import Reporter
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from subprocess import CompletedProcess
-from typing import Any
+from typing import Any, Protocol
 
 
 @dataclass(frozen=True)
@@ -18,8 +18,9 @@ class ComboResult:
 
         return self
 
-    def report(self, using: Any) -> ComboResult:
-        using.report(*self.results)
+    def report(self, using: Reporter) -> ComboResult:
+        for result in self.results:
+            result.report(using)
 
         return self
 
@@ -67,3 +68,26 @@ class TaskResult:
     @classmethod
     def fail(cls, *, stdout: str = "", stderr: str = "") -> TaskResult:
         return cls(stdout=stdout, stderr=stderr, exit_code=1)
+
+    def report(self, using: Reporter) -> None:
+        if self.exit_code == 0:
+            using.success_of(self.name)
+        else:
+            using.failure_of(self.name)
+
+        using.out(self.stdout)
+        using.error(self.stderr)
+
+
+class Reporter(Protocol):
+    def success_of(self, name: str) -> None:
+        pass
+
+    def failure_of(self, name: str) -> None:
+        pass
+
+    def out(self, message: str) -> None:
+        pass
+
+    def error(self, message: str) -> None:
+        pass
