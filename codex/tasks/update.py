@@ -102,17 +102,18 @@ class Toml:
 def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
     """Recursively merges the source into destination with TOML formatting."""
     for key, value in source.items():
-        if isinstance(value, dict):
-            # Create a table if the key doesn't exist
-            if key not in destination:
-                destination[key] = tomlkit.table()
-            deep_merge(value, destination[key])
-        elif isinstance(value, list):
-            # Create a multiline array
-            new_array = tomlkit.array()
-            for item in value:
-                new_array.append(item)
-            new_array.multiline(True)
-            destination[key] = new_array
-        else:
-            destination[key] = value
+        match value:
+            case dict():
+                # Create a table if the key doesn't exist
+                if key not in destination:
+                    destination[key] = tomlkit.table()
+                deep_merge(value, destination[key])
+            case list():
+                # Create a multiline array
+                new_array = tomlkit.array()
+                for item in value:
+                    new_array.append(item)
+                new_array.multiline(True)
+                destination[key] = new_array
+            case _:
+                destination[key] = value
