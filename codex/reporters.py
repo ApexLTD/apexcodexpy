@@ -27,14 +27,26 @@ class DefaultReporter:
 
     def report_one(self, result: TaskResult) -> int:
         if result:
-            self.device.with_green().echo(f"✅ {result.name} passed!")
+            self.success_of(result.name)
         else:
-            self.device.with_red().echo(f"❌ {result.name} failed!")
+            self.failure_of(result.name)
 
-        self.device.with_white().echo(result.stdout)
-        self.device.with_yellow().echo(result.stderr)
+        self.out(result.stdout)
+        self.error(result.stderr)
 
         return int(result)
+
+    def success_of(self, name: str) -> None:
+        self.device.with_green().echo(f"✅ {name} passed!")
+
+    def failure_of(self, name: str) -> None:
+        self.device.with_red().echo(f"❌ {name} failed!")
+
+    def out(self, message: str) -> None:
+        self.device.with_white().echo(message)
+
+    def error(self, message: str) -> None:
+        self.device.with_yellow().echo(message)
 
 
 class _Device(Protocol):
