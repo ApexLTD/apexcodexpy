@@ -70,42 +70,26 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
-    session: str = "tools"
-
     def install(self, *packages: str) -> TaskResult:
-        return (
-            Program("pip install")
-            .flag(upgrade=True)
-            .extend(packages)
-            .run()
-            .named(self.session)
-        )
+        return Program("pip install").flag(upgrade=True).extend(packages).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
-    session: str = "unknown"
-
     def install(self) -> TaskResult:
-        return Program("poetry install").run().named("dependencies")
+        return Program("poetry install").run()
 
     def lock(self) -> TaskResult:
-        return Program("poetry lock").run().named("lock")
+        return Program("poetry lock").run()
 
     def update(self) -> TaskResult:
-        return Program("poetry update").run().named("update")
+        return Program("poetry update").run()
 
     def lint(self, target: Path) -> TaskResult:
-        return (
-            Program("poetry check")
-            .with_a(project=target)
-            .flag(strict=True)
-            .run()
-            .named("poetry")
-        )
+        return Program("poetry check").with_a(project=target).flag(strict=True).run()
 
     def run(self, program: Program) -> TaskResult:
-        return Program(f"poetry run {program}").run().named(self.session)
+        return Program(f"poetry run {program}").run()
 
 
 @dataclass(frozen=True, kw_only=True)

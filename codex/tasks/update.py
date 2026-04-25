@@ -75,7 +75,7 @@ class Toml:
         return path / self.PYPROJECT_TOML
 
     def sync(self, target: Path) -> TaskResult:
-        return self._sync(self.toml_on(target)).named("sync")
+        return self._sync(self.toml_on(target))
 
     def _sync(self, pyproject: Path) -> TaskResult:
         if not pyproject.exists():

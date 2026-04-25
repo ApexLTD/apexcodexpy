@@ -13,40 +13,36 @@ class Codex:
     target: Path
 
     def sync(self, dry_run: bool = False) -> ComboResult:
-        return ComboResult().attach(Toml(dry_run=dry_run).sync(self.target))
+        return ComboResult().attach(sync=Toml(dry_run=dry_run).sync(self.target))
 
     def install(self) -> ComboResult:
         return (
             ComboResult()
-            .attach(Pip().install("pip", "poetry"))
-            .attach(Poetry().install())
+            .attach(tools=Pip().install("pip", "poetry"))
+            .attach(dependencies=Poetry().install())
         )
 
     def lock(self) -> ComboResult:
-        return ComboResult().attach(Poetry().lock())
+        return ComboResult().attach(lock=Poetry().lock())
 
     def update(self) -> ComboResult:
-        return ComboResult().attach(Poetry().update())
+        return ComboResult().attach(update=Poetry().update())
 
     def lint(self) -> ComboResult:
         return (
             ComboResult()
-            .attach(Poetry().lint(self.target))
-            .attach(
-                Poetry(session="black").run(
-                    Ruff(on=self.target).format().flag(check=True)
-                )
-            )
-            .attach(Poetry(session="ruff").run(Ruff(on=self.target).lint()))
-            .attach(Poetry(session="mypy").run(MyPy(on=self.target).check()))
+            .attach(poetry=Poetry().lint(self.target))
+            .attach(black=Poetry().run(Ruff(on=self.target).format().flag(check=True)))
+            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()))
+            .attach(mypy=Poetry().run(MyPy(on=self.target).check()))
         )
 
     def fix(self, unsafe: bool = False) -> ComboResult:
         return (
             ComboResult()
-            .attach(Poetry(session="black").run(Ruff(on=self.target).format()))
+            .attach(black=Poetry().run(Ruff(on=self.target).format()))
             .attach(
-                Poetry(session="ruff").run(
+                ruff=Poetry().run(
                     Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
                 )
             )
