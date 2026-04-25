@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from codex.tasks import TaskResult
+from codex.tasks import ProgramResult
 
 
 @dataclass(frozen=True)
@@ -48,8 +48,8 @@ class Program:
 
         return self
 
-    def run(self) -> TaskResult:
-        return TaskResult.parse(
+    def run(self) -> ProgramResult:
+        return ProgramResult.parse(
             subprocess.run(
                 str(self).split(),
                 text=True,
@@ -70,25 +70,25 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
-    def install(self, *packages: str) -> TaskResult:
+    def install(self, *packages: str) -> ProgramResult:
         return Program("pip install").flag(upgrade=True).extend(packages).run()
 
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
-    def install(self) -> TaskResult:
+    def install(self) -> ProgramResult:
         return Program("poetry install").run()
 
-    def lock(self) -> TaskResult:
+    def lock(self) -> ProgramResult:
         return Program("poetry lock").run()
 
-    def update(self) -> TaskResult:
+    def update(self) -> ProgramResult:
         return Program("poetry update").run()
 
-    def lint(self, target: Path) -> TaskResult:
+    def lint(self, target: Path) -> ProgramResult:
         return Program("poetry check").with_a(project=target).flag(strict=True).run()
 
-    def run(self, program: Program) -> TaskResult:
+    def run(self, program: Program) -> ProgramResult:
         return Program(f"poetry run {program}").run()
 
 

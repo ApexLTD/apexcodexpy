@@ -47,15 +47,15 @@ class ComboResult:
 
 
 @dataclass(frozen=True, kw_only=True)
-class TaskResult:
+class ProgramResult:
     stdout: str
     stderr: str
     exit_code: int
 
     name: str = "Unknown"
 
-    def named(self, name: str) -> TaskResult:
-        return TaskResult(
+    def named(self, name: str) -> ProgramResult:
+        return ProgramResult(
             stdout=self.stdout,
             stderr=self.stderr,
             exit_code=self.exit_code,
@@ -69,7 +69,7 @@ class TaskResult:
         return self.exit_code == 0
 
     @classmethod
-    def parse(cls, result: CompletedProcess[Any]) -> TaskResult:
+    def parse(cls, result: CompletedProcess[Any]) -> ProgramResult:
         return cls(
             stdout=result.stdout,
             stderr=result.stderr,
@@ -77,11 +77,11 @@ class TaskResult:
         )
 
     @classmethod
-    def success(cls, *, stdout: str = "", stderr: str = "") -> TaskResult:
+    def success(cls, *, stdout: str = "", stderr: str = "") -> ProgramResult:
         return cls(stdout=stdout, stderr=stderr, exit_code=0)
 
     @classmethod
-    def fail(cls, *, stdout: str = "", stderr: str = "") -> TaskResult:
+    def fail(cls, *, stdout: str = "", stderr: str = "") -> ProgramResult:
         return cls(stdout=stdout, stderr=stderr, exit_code=1)
 
     def report(self, using: Reporter) -> None:
