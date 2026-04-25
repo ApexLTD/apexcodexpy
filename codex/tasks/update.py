@@ -6,7 +6,7 @@ from typing import Any
 
 import tomlkit
 
-from codex.tasks.result import TaskResult
+from codex.tasks import TaskResult
 
 
 def _mypy_config() -> dict[str, Any]:
@@ -75,10 +75,11 @@ class Toml:
         return path / self.PYPROJECT_TOML
 
     def sync(self, target: Path) -> TaskResult:
+        return self._sync(target).named("sync")
+
+    def _sync(self, target: Path) -> TaskResult:
         if not self.toml_on(target).exists():
-            return TaskResult.fail(
-                stderr=f"{self.toml_on(target).name} not found."
-            ).named("sync")
+            return TaskResult.fail(stderr=f"{self.PYPROJECT_TOML} not found.")
 
         document = tomlkit.parse(self.toml_on(target).read_text(encoding="utf-8"))
 
@@ -88,20 +89,14 @@ class Toml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return TaskResult.success(
-                stdout="Configuration is already up to date."
-            ).named("sync")
+            return TaskResult.success(stdout="Configuration is already up to date.")
 
         if self.dry_run:
-            return TaskResult.success(
-                stdout=f"Changes would be applied:\n{modified}"
-            ).named("sync")
+            return TaskResult.success(stdout=f"Changes would be applied:\n{modified}")
 
         self.toml_on(target).write_text(modified, encoding="utf-8", newline="\n")
 
-        return TaskResult.success(
-            stdout="Configuration synchronized successfully."
-        ).named("sync")
+        return TaskResult.success(stdout="Configuration synchronized successfully.")
 
 
 def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
