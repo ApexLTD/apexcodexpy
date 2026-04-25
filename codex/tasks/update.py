@@ -75,13 +75,13 @@ class Toml:
         return path / self.PYPROJECT_TOML
 
     def sync(self, target: Path) -> TaskResult:
-        return self._sync(target).named("sync")
+        return self._sync(self.toml_on(target)).named("sync")
 
-    def _sync(self, target: Path) -> TaskResult:
-        if not self.toml_on(target).exists():
+    def _sync(self, pyproject: Path) -> TaskResult:
+        if not pyproject.exists():
             return TaskResult.fail(stderr=f"{self.PYPROJECT_TOML} not found.")
 
-        document = tomlkit.parse(self.toml_on(target).read_text(encoding="utf-8"))
+        document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
         # Create a copy for comparison if dry-run
         original = tomlkit.dumps(document)
@@ -94,7 +94,7 @@ class Toml:
         if self.dry_run:
             return TaskResult.success(stdout=f"Changes would be applied:\n{modified}")
 
-        self.toml_on(target).write_text(modified, encoding="utf-8", newline="\n")
+        pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
         return TaskResult.success(stdout="Configuration synchronized successfully.")
 
@@ -104,7 +104,6 @@ def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
     for key, value in source.items():
         match value:
             case dict():
-                # Create a table if the key doesn't exist
                 if key not in destination:
                     destination[key] = tomlkit.table()
                 deep_merge(value, destination[key])
