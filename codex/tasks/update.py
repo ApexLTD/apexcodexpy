@@ -76,7 +76,9 @@ class Toml:
 
     def sync(self, target: Path) -> TaskResult:
         if not self.toml_on(target).exists():
-            return TaskResult.fail(stderr=f"{self.toml_on(target).name} not found.")
+            return TaskResult.fail(
+                stderr=f"{self.toml_on(target).name} not found."
+            ).named("sync")
 
         document = tomlkit.parse(self.toml_on(target).read_text(encoding="utf-8"))
 
@@ -86,14 +88,20 @@ class Toml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return TaskResult.success(stdout="Configuration is already up to date.")
+            return TaskResult.success(
+                stdout="Configuration is already up to date."
+            ).named("sync")
 
         if self.dry_run:
-            return TaskResult.success(stdout=f"Changes would be applied:\n{modified}")
+            return TaskResult.success(
+                stdout=f"Changes would be applied:\n{modified}"
+            ).named("sync")
 
         self.toml_on(target).write_text(modified, encoding="utf-8", newline="\n")
 
-        return TaskResult.success(stdout="Configuration synchronized successfully.")
+        return TaskResult.success(
+            stdout="Configuration synchronized successfully."
+        ).named("sync")
 
 
 def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:

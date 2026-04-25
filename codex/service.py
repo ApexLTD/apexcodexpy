@@ -14,13 +14,11 @@ class Codex:
     reporter: Reporter
 
     def sync(self, dry_run: bool = False) -> int:
-        return self.reporter.report(
-            Toml(dry_run=dry_run).sync(self.target).named("sync")
-        )
+        return self.reporter.report(Toml(dry_run=dry_run).sync(self.target))
 
     def install(self) -> int:
         return self.reporter.report(
-            Pip().install("pip", "poetry").run().named("tools"),
+            Pip().install("pip", "poetry"),
             Poetry().install(),
         )
 
@@ -33,17 +31,15 @@ class Codex:
     def lint(self) -> int:
         return self.reporter.report(
             Poetry().lint(self.target),
-            Poetry().run(Ruff().format(self.target, check=True)).named("black"),
-            Poetry().run(Ruff().lint(self.target)).named("ruff"),
-            Poetry().run(MyPy().check(self.target)).named("mypy"),
+            Poetry().run(black=Ruff().format(self.target, check=True)),
+            Poetry().run(ruff=Ruff().lint(self.target)),
+            Poetry().run(mypy=MyPy().check(self.target)),
         )
 
     def fix(self, unsafe: bool = False) -> int:
         return self.reporter.report(
-            Poetry().run(Ruff().format(self.target)).named("black"),
-            Poetry()
-            .run(Ruff().lint(self.target, fix=True, unsafe=unsafe))
-            .named("ruff"),
+            Poetry().run(black=Ruff().format(self.target)),
+            Poetry().run(ruff=Ruff().lint(self.target, fix=True, unsafe=unsafe)),
         )
 
 

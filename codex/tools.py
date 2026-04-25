@@ -70,8 +70,14 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
-    def install(self, *packages: str) -> Program:
-        return Program("pip install").flag(upgrade=True).extend(packages)
+    def install(self, *packages: str) -> TaskResult:
+        return (
+            Program("pip install")
+            .flag(upgrade=True)
+            .extend(packages)
+            .run()
+            .named("tools")
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -94,8 +100,12 @@ class Poetry:
             .named("poetry")
         )
 
-    def run(self, program: Program) -> TaskResult:
-        return Program(f"poetry run {program}").run()
+    def run(self, **program: Program) -> TaskResult:
+        assert len(program) == 1, "run supports one program at a time."
+
+        name, command = program.popitem()
+
+        return Program(f"poetry run {command}").run().named(name)
 
 
 @dataclass(frozen=True, kw_only=True)
