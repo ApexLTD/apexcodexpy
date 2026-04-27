@@ -154,7 +154,7 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    (Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit))
+    Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit)
 
 
 @cli.command(

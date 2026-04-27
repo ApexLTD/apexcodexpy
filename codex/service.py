@@ -73,15 +73,13 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return (
-            Poetry()
-            .run(
+        return ComboResult().attach(
+            pytest=Poetry().run(
                 Program("pytest")
                 .append(self.target)
                 .flag(cov=True)
                 .flag(last_failed=True)
             )
-            .named("pytest")
         )
 
 
