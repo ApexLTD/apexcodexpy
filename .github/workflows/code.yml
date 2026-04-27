@@ -44,4 +44,4 @@ jobs:
         run: pip install -q apexcodexpy && codex install
 
       - name: Test
-        run: poetry run pytest tests
+        run: codex test --ci
