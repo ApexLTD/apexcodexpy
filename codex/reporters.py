@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 import typer
@@ -8,11 +8,7 @@ import typer
 
 @dataclass(frozen=True)
 class DefaultReporter:
-    device: _Device
-
-    @classmethod
-    def using(cls, device: _Device) -> DefaultReporter:
-        return cls(device)
+    device: _Device = field(default_factory=lambda: TyperDevice())
 
     def success_of(self, name: str) -> None:
         self.device.with_green().echo(f"✅ {name} passed!")

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import typer
 
-from codex.reporters import DefaultReporter, TyperDevice
+from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
 
 cli = typer.Typer(
@@ -33,7 +33,7 @@ def _(
     (
         Codex(target=Path(path))
         .sync(dry_run=dry_run)
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -53,7 +53,7 @@ def _(
     (
         Codex(target=Path(path))
         .install()
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -66,7 +66,7 @@ def _() -> None:
     (
         Codex(target=Path("."))
         .lock()
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -79,7 +79,7 @@ def _() -> None:
     (
         Codex(target=Path("."))
         .update()
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -106,7 +106,7 @@ def _(
         Codex(target=Path(path))
         .lint()
         .silenced(when=silent)
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -138,7 +138,7 @@ def _(
         Codex(target=Path(path))
         .fix(unsafe=unsafe)
         .silenced(when=silent)
-        .report(using=DefaultReporter.using(TyperDevice()))
+        .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
 
@@ -148,12 +148,7 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    (
-        Git()
-        .amend()
-        .report(using=DefaultReporter.using(TyperDevice()))
-        .exit(using=typer.Exit)
-    )
+    (Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit))
 
 
 if __name__ == "__main__":
