@@ -96,6 +96,11 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
     silent: bool = typer.Option(
         False,
         "--silent",
@@ -105,6 +110,7 @@ def _(
 ) -> None:
     (
         Codex(target=Path(path))
+        .ci(on=ci)
         .lint()
         .silenced(when=silent)
         .report(using=DefaultReporter())

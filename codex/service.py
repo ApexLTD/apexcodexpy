@@ -8,8 +8,26 @@ from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
 @dataclass(frozen=True)
+class CiMode:
+    codex: Codex
+
+    def lint(self) -> TaskResult:
+        return (
+            ComboResult()
+            .attach(install=self.codex.install())
+            .attach(lint=self.codex.lint())
+        )
+
+
+@dataclass(frozen=True)
 class Codex:
     target: Path
+
+    def ci(self, on: bool) -> CiMode | Codex:
+        if on:
+            return CiMode(self)
+
+        return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
         return ComboResult().attach(sync=Toml(dry_run=dry_run).sync(self.target))
