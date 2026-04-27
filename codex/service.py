@@ -18,6 +18,13 @@ class CiMode:
             .attach(lint=self.codex.lint())
         )
 
+    def test(self) -> TaskResult:
+        return (
+            ComboResult()
+            .attach(install=self.codex.install())
+            .attach(pytest=Poetry().run(Program("pytest").append(self.codex.target)))
+        )
+
 
 @dataclass(frozen=True)
 class Codex:
@@ -63,6 +70,18 @@ class Codex:
                     Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
                 )
             )
+        )
+
+    def test(self) -> TaskResult:
+        return (
+            Poetry()
+            .run(
+                Program("pytest")
+                .append(self.target)
+                .flag(cov=True)
+                .flag(last_failed=True)
+            )
+            .named("pytest")
         )
 
 
