@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 from typing import Any
 
 import tomlkit
 
-from codex.tasks.result import TaskResult
+from codex.tasks import ProgramResult, TaskResult
 
 
 def _mypy_config() -> dict[str, Any]:
@@ -67,20 +66,22 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
-class SyncToml:
-    of: Path
-
+class Toml:
     dry_run: bool = False
 
-    @cached_property
-    def _toml(self) -> Path:
-        return self.of / "pyproject.toml"
+    PYPROJECT_TOML = "pyproject.toml"
 
-    def run(self) -> TaskResult:
-        if not self._toml.exists():
-            return TaskResult.fail(stderr=f"{self._toml.name} not found.")
+    def toml_on(self, path: Path) -> Path:
+        return path / self.PYPROJECT_TOML
 
-        document = tomlkit.parse(self._toml.read_text(encoding="utf-8"))
+    def sync(self, target: Path) -> TaskResult:
+        return self._sync(self.toml_on(target))
+
+    def _sync(self, pyproject: Path) -> TaskResult:
+        if not pyproject.exists():
+            return ProgramResult.fail(stderr=f"{self.PYPROJECT_TOML} not found.")
+
+        document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
         # Create a copy for comparison if dry-run
         original = tomlkit.dumps(document)
@@ -88,30 +89,30 @@ class SyncToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return TaskResult.success(stdout="Configuration is already up to date.")
+            return ProgramResult.success(stdout="Configuration is already up to date.")
 
         if self.dry_run:
-            return TaskResult.success(stdout=f"Changes would be applied:\n{modified}")
+            return ProgramResult.success(
+                stdout=f"Changes would be applied:\n{modified}"
+            )
 
-        self._toml.write_text(modified, encoding="utf-8", newline="\n")
+        pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return TaskResult.success(stdout="Configuration synchronized successfully.")
+        return ProgramResult.success(stdout="Configuration synchronized successfully.")
 
 
 def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
     """Recursively merges the source into destination with TOML formatting."""
     for key, value in source.items():
-        if isinstance(value, dict):
-            # Create a table if the key doesn't exist
-            if key not in destination:
-                destination[key] = tomlkit.table()
-            deep_merge(value, destination[key])
-        elif isinstance(value, list):
-            # Create a multiline array
-            new_array = tomlkit.array()
-            for item in value:
-                new_array.append(item)
-            new_array.multiline(True)
-            destination[key] = new_array
-        else:
-            destination[key] = value
+        match value:
+            case dict():
+                if key not in destination:
+                    destination[key] = tomlkit.table()
+                deep_merge(value, destination[key])
+            case list():
+                new_array = tomlkit.array()
+                new_array.extend(value)
+                new_array.multiline(True)
+                destination[key] = new_array
+            case _:
+                destination[key] = value

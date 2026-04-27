@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
 
       - name: Install dependencies
-        run: make install
+        run: pip install --upgrade pip poetry && poetry install
 
       - name: Bump using poetry
         run: poetry version patch
@@ -32,6 +32,6 @@ jobs:
       - name: Publish package
         run: poetry publish --username __token__ --password ${{ secrets.PYPI_KEY }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Bump Version

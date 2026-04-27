@@ -1,10 +1,9 @@
-from codex.tasks.result import TaskResult
-from codex.tasks.shell import RunMypy, RunRuffCheck
-from codex.tasks.update import SyncToml
+from codex.tasks.result import ComboResult, ProgramResult, TaskResult
+from codex.tasks.update import Toml
 
 __all__ = [
+    "ComboResult",
+    "ProgramResult",
     "TaskResult",
-    "RunMypy",
-    "RunRuffCheck",
-    "SyncToml",
+    "Toml",
 ]

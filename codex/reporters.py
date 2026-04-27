@@ -1,43 +1,26 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
-from codex.tasks import TaskResult
-
-
-class Reporter(Protocol):
-    def report(self, **results: TaskResult) -> int:
-        pass
+import typer
 
 
 @dataclass(frozen=True)
 class DefaultReporter:
-    device: _Device
+    device: _Device = field(default_factory=lambda: TyperDevice())
 
-    @classmethod
-    def using(cls, device: _Device) -> DefaultReporter:
-        return cls(device)
+    def success_of(self, name: str) -> None:
+        self.device.with_green().echo(f"✅ {name} passed!")
 
-    def silenced(self) -> _Silenced:
-        return _Silenced(self)
+    def failure_of(self, name: str) -> None:
+        self.device.with_red().echo(f"❌ {name} failed!")
 
-    def report(self, **results: TaskResult) -> int:
-        return sum(
-            self.report_one(name.capitalize(), result)
-            for name, result in results.items()
-        )
+    def out(self, message: str) -> None:
+        self.device.with_white().echo(message)
 
-    def report_one(self, name: str, result: TaskResult) -> int:
-        if result:
-            self.device.with_green().echo(f"✅ {name} passed!")
-        else:
-            self.device.with_red().echo(f"❌ {name} failed!")
-
-        self.device.with_white().echo(result.stdout)
-        self.device.with_yellow().echo(result.stderr)
-
-        return result.exit_code
+    def error(self, message: str) -> None:
+        self.device.with_yellow().echo(message)
 
 
 class _Device(Protocol):
@@ -58,28 +41,23 @@ class _Device(Protocol):
 
 
 @dataclass(frozen=True)
-class _Silenced:
-    reporter: Reporter
+class TyperDevice:
+    color: str = typer.colors.RESET
 
-    def when(self, silenced: bool) -> Reporter:
-        return self.reporter if not silenced else DefaultReporter.using(_NoDevice())
+    def with_green(self) -> TyperDevice:
+        return TyperDevice(typer.colors.GREEN)
 
+    def with_red(self) -> TyperDevice:
+        return TyperDevice(typer.colors.RED)
 
-@dataclass(frozen=True)
-class _NoDevice:
-    def with_green(self) -> _Device:
-        return self
+    def with_white(self) -> TyperDevice:
+        return TyperDevice(typer.colors.WHITE)
 
-    def with_red(self) -> _Device:
-        return self
+    def with_yellow(self) -> TyperDevice:
+        return TyperDevice(typer.colors.YELLOW)
 
-    def with_white(self) -> _Device:
-        return self
-
-    def with_yellow(self) -> _Device:
-        return self
-
-    def echo(self, message: str) -> _Device:
-        _ = message  # suppresses IDE warning for unused argument
+    def echo(self, message: str) -> TyperDevice:
+        if message.strip():
+            typer.secho(message, fg=self.color)
 
         return self
