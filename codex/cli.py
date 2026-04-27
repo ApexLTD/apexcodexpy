@@ -6,7 +6,6 @@ import typer
 
 from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
-from codex.tools import Poetry, Program
 
 cli = typer.Typer(
     add_completion=False,
@@ -96,6 +95,11 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
     silent: bool = typer.Option(
         False,
         "--silent",
@@ -105,6 +109,7 @@ def _(
 ) -> None:
     (
         Codex(target=Path(path))
+        .ci(on=ci)
         .lint()
         .silenced(when=silent)
         .report(using=DefaultReporter())
@@ -149,7 +154,7 @@ def _(
     help="Amend the last git commit without changing the message.",
 )
 def _() -> None:
-    (Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit))
+    Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit)
 
 
 @cli.command(
@@ -168,21 +173,11 @@ def _(
         "--ci",
         help="Run in CI mode.",
     ),
-    coverage: bool = typer.Option(
-        True,
-        "--coverage/--no-coverage",
-        help="Report test coverage.",
-    ),
 ) -> None:
     (
-        Poetry()
-        .run(
-            Program("pytest")
-            .append(path)
-            .flag(cov=coverage and not ci)
-            .flag(last_failed=not ci or None)
-        )
-        .named("pytest")
+        Codex(target=Path(path))
+        .ci(on=ci)
+        .test()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
