@@ -88,8 +88,8 @@ class ProgramResult:
     @classmethod
     def parse(cls, result: CompletedProcess[Any]) -> ProgramResult:
         return cls(
-            stdout=result.stdout,
-            stderr=result.stderr,
+            stdout=result.stdout or "",
+            stderr=result.stderr or "",
             exit_code=result.returncode,
         )
 

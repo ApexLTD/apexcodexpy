@@ -23,11 +23,8 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install dependencies
-        run: pip install -q apexcodexpy && codex install
-
       - name: Lint
-        run: codex lint
+        run: pip install -q apexcodexpy && codex lint --ci
 
   test:
     runs-on: ubuntu-latest
@@ -40,8 +37,5 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install dependencies
-        run: pip install -q apexcodexpy && codex install
-
       - name: Test
-        run: codex test --ci
+        run: pip install -q apexcodexpy && codex test --ci
