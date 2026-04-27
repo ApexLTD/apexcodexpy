@@ -106,7 +106,8 @@ def _(
     (
         Codex(target=Path(path))
         .lint()
-        .report(using=DefaultReporter.using(TyperDevice()).silenced().when(silent))
+        .silenced(when=silent)
+        .report(using=DefaultReporter.using(TyperDevice()))
         .exit(using=typer.Exit)
     )
 
@@ -137,7 +138,8 @@ def _(
     (
         Codex(target=Path(path))
         .fix(unsafe=unsafe)
-        .report(using=DefaultReporter.using(TyperDevice()).silenced().when(silent))
+        .silenced(when=silent)
+        .report(using=DefaultReporter.using(TyperDevice()))
         .exit(using=typer.Exit)
     )
 
