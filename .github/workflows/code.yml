@@ -27,7 +27,7 @@ jobs:
         run: pip install -q apexcodexpy && codex install
 
       - name: Lint
-        run: poetry run codex lint
+        run: codex lint
 
   test:
     runs-on: ubuntu-latest

@@ -6,6 +6,7 @@ import typer
 
 from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
+from codex.tools import Poetry, Program
 
 cli = typer.Typer(
     add_completion=False,
@@ -149,6 +150,42 @@ def _(
 )
 def _() -> None:
     (Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit))
+
+
+@cli.command(
+    name="test",
+    help="Run programmer tests.",
+)
+def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
+    coverage: bool = typer.Option(
+        True,
+        "--coverage/--no-coverage",
+        help="Report test coverage.",
+    ),
+) -> None:
+    (
+        Poetry()
+        .run(
+            Program("pytest")
+            .append(path)
+            .flag(cov=coverage and not ci)
+            .flag(last_failed=not ci or None)
+        )
+        .named("pytest")
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
 
 
 if __name__ == "__main__":
