@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 
 import typer
 
-from codex.reporters import DefaultReporter
+from codex.reporters import DefaultReporter, TyperDevice
 from codex.service import Codex, Git
 
 cli = typer.Typer(
@@ -155,29 +154,6 @@ def _() -> None:
         .report(using=DefaultReporter.using(TyperDevice()))
         .exit(using=typer.Exit)
     )
-
-
-@dataclass(frozen=True)
-class TyperDevice:
-    color: str = typer.colors.RESET
-
-    def with_green(self) -> TyperDevice:
-        return TyperDevice(typer.colors.GREEN)
-
-    def with_red(self) -> TyperDevice:
-        return TyperDevice(typer.colors.RED)
-
-    def with_white(self) -> TyperDevice:
-        return TyperDevice(typer.colors.WHITE)
-
-    def with_yellow(self) -> TyperDevice:
-        return TyperDevice(typer.colors.YELLOW)
-
-    def echo(self, message: str) -> TyperDevice:
-        if message.strip():
-            typer.secho(message, fg=self.color)
-
-        return self
 
 
 if __name__ == "__main__":
