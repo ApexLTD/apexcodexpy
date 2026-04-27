@@ -59,7 +59,7 @@ max-complexity = 10
 [tool.coverage.run]
 branch = true
 source = [
-    "codexpy",
+    "codex",
     "tests",
 ]
 

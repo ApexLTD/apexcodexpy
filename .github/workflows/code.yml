@@ -27,7 +27,7 @@ jobs:
         run: pip install -q apexcodexpy && codex install
 
       - name: Lint
-        run: poetry run codex lint
+        run: codex lint
 
   test:
     runs-on: ubuntu-latest
@@ -44,4 +44,4 @@ jobs:
         run: pip install -q apexcodexpy && codex install
 
       - name: Test
-        run: poetry run pytest tests
+        run: codex test --ci
