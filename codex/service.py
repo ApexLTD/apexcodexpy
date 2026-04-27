@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from codex.tasks import ComboResult, Toml
+from codex.tasks import ComboResult, TaskResult, Toml
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
@@ -11,23 +11,23 @@ from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 class Codex:
     target: Path
 
-    def sync(self, dry_run: bool = False) -> ComboResult:
+    def sync(self, dry_run: bool = False) -> TaskResult:
         return ComboResult().attach(sync=Toml(dry_run=dry_run).sync(self.target))
 
-    def install(self) -> ComboResult:
+    def install(self) -> TaskResult:
         return (
             ComboResult()
             .attach(tools=Pip().install("pip", "poetry"))
             .attach(dependencies=Poetry().install())
         )
 
-    def lock(self) -> ComboResult:
+    def lock(self) -> TaskResult:
         return ComboResult().attach(lock=Poetry().lock())
 
-    def update(self) -> ComboResult:
+    def update(self) -> TaskResult:
         return ComboResult().attach(update=Poetry().update())
 
-    def lint(self) -> ComboResult:
+    def lint(self) -> TaskResult:
         return (
             ComboResult()
             .attach(poetry=Poetry().lint(self.target))
@@ -36,7 +36,7 @@ class Codex:
             .attach(mypy=Poetry().run(MyPy(on=self.target).check()))
         )
 
-    def fix(self, unsafe: bool = False) -> ComboResult:
+    def fix(self, unsafe: bool = False) -> TaskResult:
         return (
             ComboResult()
             .attach(black=Poetry().run(Ruff(on=self.target).format()))
@@ -50,7 +50,7 @@ class Codex:
 
 @dataclass(frozen=True)
 class Git:
-    def amend(self) -> ComboResult:
+    def amend(self) -> TaskResult:
         return ComboResult().attach(
             amend=(
                 Program("git commit")

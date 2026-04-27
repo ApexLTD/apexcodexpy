@@ -20,7 +20,9 @@ class TaskResult(Protocol):
 class ComboResult:
     results: list[TaskResult] = field(default_factory=list)
 
-    def named(self, _: str) -> ComboResult:
+    def named(self, name: str) -> TaskResult:
+        _ = name
+
         return self
 
     @property
