@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from codex.tasks.result import Reporter
-
 
 @dataclass(frozen=True)
 class DefaultReporter:
@@ -13,9 +11,6 @@ class DefaultReporter:
     @classmethod
     def using(cls, device: _Device) -> DefaultReporter:
         return cls(device)
-
-    def silenced(self) -> _Silenced:
-        return _Silenced(self)
 
     def success_of(self, name: str) -> None:
         self.device.with_green().echo(f"✅ {name} passed!")
@@ -45,31 +40,3 @@ class _Device(Protocol):
 
     def echo(self, message: str) -> _Device:
         pass
-
-
-@dataclass(frozen=True)
-class _Silenced:
-    reporter: Reporter
-
-    def when(self, silenced: bool) -> Reporter:
-        return self.reporter if not silenced else DefaultReporter.using(_NoDevice())
-
-
-@dataclass(frozen=True)
-class _NoDevice:
-    def with_green(self) -> _Device:
-        return self
-
-    def with_red(self) -> _Device:
-        return self
-
-    def with_white(self) -> _Device:
-        return self
-
-    def with_yellow(self) -> _Device:
-        return self
-
-    def echo(self, message: str) -> _Device:
-        _ = message  # suppresses IDE warning for unused argument
-
-        return self
