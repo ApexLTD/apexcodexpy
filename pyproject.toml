@@ -22,11 +22,15 @@ typer = "*"
 tomlkit = "*"
 mypy = "*"
 ruff = "*"
+pyyaml = "*"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
 pytest = "*"
 pytest-cov = "*"
+
+[tool.poetry.group.lint.dependencies]
+types-pyyaml = "*"
 
 [tool.mypy]
 ignore_missing_imports = true
