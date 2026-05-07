@@ -8,7 +8,7 @@ import typer
 
 @dataclass(frozen=True)
 class DefaultReporter:
-    device: _Device = field(default_factory=lambda: TyperDevice())
+    device: _Device = field(default_factory=TyperDevice)
 
     def success_of(self, name: str) -> None:
         self.device.with_green().echo(f"✅ {name} passed!")
