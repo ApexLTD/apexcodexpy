@@ -5,9 +5,16 @@ updates:
     schedule:
       interval: weekly
       day: thursday
-
+    groups:
+      all-dependencies:
+        patterns:
+          - '*'
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: thursday
+    groups:
+      all-dependencies:
+        patterns:
+          - '*'
