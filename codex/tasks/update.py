@@ -71,9 +71,6 @@ class PyProjectToml:
 
     NAME = "pyproject.toml"
 
-    def toml_on(self, path: Path) -> Path:
-        return path / self.NAME
-
     def sync(self, target: Path) -> TaskResult:
         return self._sync(self.toml_on(target))
 
@@ -99,6 +96,9 @@ class PyProjectToml:
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
         return ProgramResult.success(stdout="Configuration synchronized successfully.")
+
+    def toml_on(self, path: Path) -> Path:
+        return path / self.NAME
 
 
 def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
