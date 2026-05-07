@@ -55,12 +55,13 @@ STANDARDS = {
 class DependabotYaml:
     dry_run: bool = False
 
-    NAME = ".github/dependabot.yml"
+    NAME = "dependabot.yml"
 
     def sync(self, target: Path) -> TaskResult:
-        target.mkdir(parents=True, exist_ok=True)
+        dependabot = self.yaml_on(target)
+        dependabot.parent.mkdir(parents=True, exist_ok=True)
 
-        return self._sync(self.yaml_on(target))
+        return self._sync(dependabot)
 
     def _sync(self, dependabot: Path) -> ProgramResult:
         if self.dry_run:
@@ -80,7 +81,7 @@ class DependabotYaml:
         return ProgramResult.success(stdout="Configuration synchronized successfully.")
 
     def yaml_on(self, path: Path) -> Path:
-        return path / self.NAME
+        return path / ".github" / self.NAME
 
 
 class IndentDumper(yaml.Dumper):
