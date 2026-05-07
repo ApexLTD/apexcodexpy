@@ -66,20 +66,20 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
-class Toml:
+class PyProjectToml:
     dry_run: bool = False
 
-    PYPROJECT_TOML = "pyproject.toml"
+    NAME = "pyproject.toml"
 
     def toml_on(self, path: Path) -> Path:
-        return path / self.PYPROJECT_TOML
+        return path / self.NAME
 
     def sync(self, target: Path) -> TaskResult:
         return self._sync(self.toml_on(target))
 
     def _sync(self, pyproject: Path) -> TaskResult:
         if not pyproject.exists():
-            return ProgramResult.fail(stderr=f"{self.PYPROJECT_TOML} not found.")
+            return ProgramResult.fail(stderr=f"{self.NAME} not found.")
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 

@@ -3,8 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from codex.tasks import ComboResult, TaskResult, Toml
-from codex.tasks.dependabot import DependabotYaml
+from codex.tasks import ComboResult, DependabotYaml, PyProjectToml, TaskResult
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
@@ -40,7 +39,7 @@ class Codex:
     def sync(self, dry_run: bool = False) -> TaskResult:
         return (
             ComboResult()
-            .attach(pyproject=Toml(dry_run=dry_run).sync(self.target))
+            .attach(pyproject=PyProjectToml(dry_run=dry_run).sync(self.target))
             .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
         )
 

@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from codex.tasks import ProgramResult, TaskResult
+from codex.tasks.result import ProgramResult, TaskResult
 
 
 def _pip_config() -> dict[str, Any]:
