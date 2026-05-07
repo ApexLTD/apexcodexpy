@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from codex.tasks import ComboResult, TaskResult, Toml
+from codex.tasks.dependabot import DependabotYaml
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
@@ -37,7 +38,11 @@ class Codex:
         return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
-        return ComboResult().attach(sync=Toml(dry_run=dry_run).sync(self.target))
+        return (
+            ComboResult()
+            .attach(pyproject=Toml(dry_run=dry_run).sync(self.target))
+            .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
+        )
 
     def install(self) -> TaskResult:
         return (
