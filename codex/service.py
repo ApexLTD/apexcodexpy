@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from time import time
 
 from codex.tasks import ComboResult, DependabotYaml, PyProjectToml, TaskResult
 from codex.tools import MyPy, Pip, Poetry, Program, Ruff
@@ -86,9 +87,38 @@ class Codex:
             )
         )
 
+    def build(self, tag: str) -> TaskResult:
+        return (
+            ComboResult()
+            .attach(
+                setup=(
+                    ComboResult()
+                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
+                    .attach(export=Poetry().export(self.target))
+                )
+            )
+            .attach(
+                docker=(
+                    Program("docker build")
+                    .flag(tag=True)
+                    .append(tag)
+                    .flag(build_arg=True)
+                    .with_a(RELEASE=Git().revision() or str(int(time())))
+                    .append(self.target)
+                    .run()
+                )
+            )
+            .attach(
+                teardown=Program("rm").append(self.target / "requirements.txt").run()
+            )
+        )
+
 
 @dataclass(frozen=True)
 class Git:
+    def revision(self, of: str = "HEAD", short: bool = True) -> str:
+        return Program("git rev-parse").flag(short=short).append(of).run().stdout
+
     def amend(self) -> TaskResult:
         return ComboResult().attach(
             amend=(
