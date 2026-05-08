@@ -97,6 +97,15 @@ class Poetry:
     def run(self, program: Program) -> ProgramResult:
         return Program(f"poetry run {program}").run()
 
+    def export(self, target: Path) -> ProgramResult:
+        return (
+            Program("poetry export")
+            .flag(without_hashes=True)
+            .with_a(output="requirements.txt")
+            .with_a(directory=target)
+            .run()
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class Ruff:

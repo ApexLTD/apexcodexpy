@@ -85,6 +85,32 @@ def _() -> None:
 
 
 @cli.command(
+    name="build",
+    help="Build a Docker image.",
+)
+def _(
+    tag: str = typer.Option(
+        ...,
+        "--tag",
+        "-t",
+        help="Target tag, e.g. my-project:latest",
+    ),
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+) -> None:
+    (
+        Codex(target=Path(path))
+        .build(tag=tag)
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
+@cli.command(
     name="lint",
     help="Run linting (Ruff) and type checking (MyPy).",
 )
