@@ -19,7 +19,7 @@ def _pip_config() -> dict[str, Any]:
             "day": "thursday",
         },
         "groups": {
-            "all-dependencies": {
+            "python": {
                 "patterns": ["*"],
             }
         },
@@ -35,7 +35,7 @@ def _gh_actions_config() -> dict[str, Any]:
             "day": "thursday",
         },
         "groups": {
-            "all-dependencies": {
+            "gh-actions": {
                 "patterns": ["*"],
             }
         },
