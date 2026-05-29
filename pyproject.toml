@@ -25,6 +25,7 @@ ruff = "*"
 pyyaml = "*"
 
 [tool.poetry.group.dev.dependencies]
+behave = "*"
 coverage = "*"
 pytest = "*"
 pytest-cov = "*"
