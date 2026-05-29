@@ -1,5 +1,5 @@
+from behave import given, then, when
 from behave.runner import Context
-from behave import given, use_step_matcher, then, when
 
 
 @given("nothing")
