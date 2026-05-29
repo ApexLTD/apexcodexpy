@@ -26,6 +26,9 @@ class CiMode:
             .attach(pytest=Poetry().run(Pytest.on(self.codex.target).run()))
         )
 
+    def test_integration(self) -> TaskResult:
+        return self.codex.test_integration()
+
 
 @dataclass(frozen=True)
 class Codex:
@@ -84,6 +87,26 @@ class Codex:
                     with_coverage=True,
                     last_failed=True,
                 )
+            )
+        )
+
+    def test_integration(self) -> TaskResult:
+        return (
+            ComboResult()
+            .attach(
+                setup=(
+                    ComboResult()
+                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
+                    .attach(export=Poetry().export(self.target))
+                )
+            )
+            .attach(
+                pytest=Poetry().run(
+                    Pytest.on(self.target / "tests" / "integration").run()
+                )
+            )
+            .attach(
+                teardown=Program("rm").append(self.target / "requirements.txt").run()
             )
         )
 
