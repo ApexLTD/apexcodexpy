@@ -81,6 +81,9 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
+        return self.test_unit()
+
+    def test_unit(self) -> TaskResult:
         return CodexTest(self.target).unit()
 
     def test_integration(self) -> TaskResult:
