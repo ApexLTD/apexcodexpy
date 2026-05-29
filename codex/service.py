@@ -23,7 +23,7 @@ class CiMode:
         return (
             ComboResult()
             .attach(install=self.codex.install())
-            .attach(pytest=Poetry().run(Program("pytest").append(self.codex.target)))
+            .attach(pytest=Poetry().run(Pytest.on(self.codex.target).run()))
         )
 
 
@@ -80,10 +80,10 @@ class Codex:
     def test(self) -> TaskResult:
         return ComboResult().attach(
             pytest=Poetry().run(
-                Program("pytest")
-                .append(self.target)
-                .flag(cov=True)
-                .flag(last_failed=True)
+                Pytest.on(self.target).run(
+                    with_coverage=True,
+                    last_failed=True,
+                )
             )
         )
 
@@ -111,6 +111,27 @@ class Codex:
             .attach(
                 teardown=Program("rm").append(self.target / "requirements.txt").run()
             )
+        )
+
+
+@dataclass(frozen=True)
+class Pytest:
+    target: Path | None = None
+
+    @classmethod
+    def on(cls, target: Path) -> Pytest:
+        return cls(target) if target.resolve() != Path.cwd() else cls()
+
+    def run(
+        self,
+        with_coverage: bool | None = None,
+        last_failed: bool | None = None,
+    ) -> Program:
+        return (
+            Program("pytest")
+            .append(self.target)
+            .flag(cov=with_coverage)
+            .flag(last_failed=last_failed)
         )
 
 

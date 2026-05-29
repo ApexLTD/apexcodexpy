@@ -44,7 +44,8 @@ class Program:
         return self
 
     def append(self, argument: Any) -> Program:
-        self._arguments.extend(str(argument).split())
+        if argument is not None:
+            self._arguments.extend(str(argument).split())
 
         return self
 
