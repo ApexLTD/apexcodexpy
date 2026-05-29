@@ -23,7 +23,7 @@ class CiMode:
         return (
             ComboResult()
             .attach(install=self.codex.install())
-            .attach(pytest=Poetry().run(Pytest.on(self.codex.target).run()))
+            .attach(pytest=CodexTest(self.codex.target).ci(on=True).unit())
         )
 
     def test_integration(self) -> TaskResult:
@@ -81,41 +81,13 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return ComboResult().attach(
-            pytest=Poetry().run(
-                Pytest.on(self.target).run(
-                    with_coverage=True,
-                    last_failed=True,
-                )
-            )
-        )
+        return CodexTest(self.target).unit()
 
     def test_integration(self) -> TaskResult:
-        return (
-            ComboResult()
-            .attach(
-                setup=(
-                    ComboResult()
-                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
-                    .attach(export=Poetry().export(self.target))
-                )
-            )
-            .attach(
-                pytest=Poetry().run(
-                    Pytest.on(self.target / "tests" / "integration").run()
-                )
-            )
-            .attach(
-                teardown=Program("rm").append(self.target / "requirements.txt").run()
-            )
-        )
+        return CodexTest(self.target).integration()
 
     def test_behaviour(self) -> TaskResult:
-        return ComboResult().attach(
-            behave=Poetry().run(
-                Program("behave").append(self.target / "tests" / "features")
-            )
-        )
+        return CodexTest(self.target).behaviour()
 
     def build(self, tag: str) -> TaskResult:
         return (
@@ -140,6 +112,53 @@ class Codex:
             )
             .attach(
                 teardown=Program("rm").append(self.target / "requirements.txt").run()
+            )
+        )
+
+
+@dataclass(frozen=True)
+class CodexTest:
+    target: Path
+
+    in_ci: bool = False
+
+    def ci(self, on: bool = False) -> CodexTest:
+        return CodexTest(self.target, in_ci=on)
+
+    def unit(self) -> TaskResult:
+        return ComboResult().attach(
+            pytest=Poetry().run(
+                Pytest.on(self.target).run(
+                    with_coverage=None if self.in_ci else True,
+                    last_failed=None if self.in_ci else True,
+                )
+            )
+        )
+
+    def integration(self) -> TaskResult:
+        return (
+            ComboResult()
+            .attach(
+                setup=(
+                    ComboResult()
+                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
+                    .attach(export=Poetry().export(self.target))
+                )
+            )
+            .attach(
+                pytest=Poetry().run(
+                    Pytest.on(self.target / "tests" / "integration").run()
+                )
+            )
+            .attach(
+                teardown=Program("rm").append(self.target / "requirements.txt").run()
+            )
+        )
+
+    def behaviour(self) -> TaskResult:
+        return ComboResult().attach(
+            behave=Poetry().run(
+                Program("behave").append(self.target / "tests" / "features")
             )
         )
 
