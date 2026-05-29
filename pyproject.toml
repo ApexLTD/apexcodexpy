@@ -71,3 +71,8 @@ source = [
 skip_empty = true
 skip_covered = true
 show_missing = true
+
+[tool.pytest]
+testpaths = [
+    "tests/unit",
+]

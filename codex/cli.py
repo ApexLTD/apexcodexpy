@@ -221,5 +221,25 @@ def run_unit_tests(
     )
 
 
+@test_cli.command(
+    name="integration",
+    help="Run integration tests.",
+)
+def _(
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
+) -> None:
+    (
+        Codex(target=Path("./tests/integration"))
+        .ci(on=ci)
+        .test()
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
 if __name__ == "__main__":
     cli()
