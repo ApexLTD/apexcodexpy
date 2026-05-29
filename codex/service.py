@@ -129,11 +129,14 @@ class CodexTest:
         return ComboResult().attach(
             pytest=Poetry().run(
                 Pytest.on(self.target).run(
-                    with_coverage=None if self.in_ci else True,
-                    last_failed=None if self.in_ci else True,
+                    with_coverage=self._when_not_in_ci(),
+                    last_failed=self._when_not_in_ci(),
                 )
             )
         )
+
+    def _when_not_in_ci(self) -> bool | None:
+        return None if self.in_ci else True
 
     def integration(self) -> TaskResult:
         return (
