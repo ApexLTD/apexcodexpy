@@ -7,10 +7,7 @@ import typer
 from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
 
-cli = typer.Typer(
-    add_completion=False,
-    no_args_is_help=True,
-)
+cli = typer.Typer(no_args_is_help=True)
 
 
 @cli.command(
@@ -183,11 +180,23 @@ def _() -> None:
     Git().amend().report(using=DefaultReporter()).exit(using=typer.Exit)
 
 
-@cli.command(
-    name="test",
+test_cli = typer.Typer()
+cli.add_typer(test_cli, name="test", short_help="Run tests.")
+
+
+@test_cli.callback(invoke_without_command=True)
+def _(ctx: typer.Context) -> None:
+    if ctx.invoked_subcommand is not None:
+        return
+
+    run_unit_tests(path=".", ci=False)
+
+
+@test_cli.command(
+    name="unit",
     help="Run programmer tests.",
 )
-def _(
+def run_unit_tests(
     path: str = typer.Option(
         ".",
         "--path",
@@ -204,6 +213,39 @@ def _(
         Codex(target=Path(path))
         .ci(on=ci)
         .test()
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
+@test_cli.command(
+    name="integration",
+    help="Run integration tests.",
+)
+def _(
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
+) -> None:
+    (
+        Codex(target=Path("./tests/integration"))
+        .ci(on=ci)
+        .test()
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
+@test_cli.command(
+    name="behaviour",
+    help="Run behaviour tests.",
+)
+def _() -> None:
+    (
+        Codex(target=Path("."))
+        .test_behaviour()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
