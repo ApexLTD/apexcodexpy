@@ -81,11 +81,14 @@ class Codex:
         return ComboResult().attach(
             pytest=Poetry().run(
                 Program("pytest")
-                .append(self.target)
+                .append(self._target_or_none_when_cwd())
                 .flag(cov=True)
                 .flag(last_failed=True)
             )
         )
+
+    def _target_or_none_when_cwd(self) -> Path | None:
+        return self.target if self.target.resolve() != Path.cwd() else None
 
     def build(self, tag: str) -> TaskResult:
         return (
