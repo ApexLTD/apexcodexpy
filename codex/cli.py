@@ -7,10 +7,7 @@ import typer
 from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
 
-cli = typer.Typer(
-    add_completion=False,
-    no_args_is_help=True,
-)
+cli = typer.Typer(no_args_is_help=True)
 
 
 @cli.command(
