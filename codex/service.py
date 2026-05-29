@@ -87,6 +87,13 @@ class Codex:
             )
         )
 
+    def test_behaviour(self) -> TaskResult:
+        return ComboResult().attach(
+            behave=Poetry().run(
+                Program("behave").append(self.target / "tests" / "features")
+            )
+        )
+
     def build(self, tag: str) -> TaskResult:
         return (
             ComboResult()

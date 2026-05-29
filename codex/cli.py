@@ -241,5 +241,18 @@ def _(
     )
 
 
+@test_cli.command(
+    name="behaviour",
+    help="Run behaviour tests.",
+)
+def _() -> None:
+    (
+        Codex(target=Path("."))
+        .test_behaviour()
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
 if __name__ == "__main__":
     cli()
