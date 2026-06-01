@@ -6,7 +6,8 @@ from typing import Any
 
 import tomlkit
 
-from codex.infra.result import ProgramResult, TaskResult
+from codex.infra.program import Executable, FinishedProgram
+from codex.infra.result import ProgramResult
 
 
 def _mypy_config() -> dict[str, Any]:
@@ -71,12 +72,12 @@ class PyProjectToml:
 
     NAME = "pyproject.toml"
 
-    def sync(self, target: Path) -> TaskResult:
+    def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
-    def _sync(self, pyproject: Path) -> TaskResult:
+    def _sync(self, pyproject: Path) -> Executable:
         if not pyproject.exists():
-            return ProgramResult.fail(stderr=f"{self.NAME} not found.")
+            return FinishedProgram(ProgramResult.fail(stderr=f"{self.NAME} not found."))
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
@@ -86,16 +87,20 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return ProgramResult.success(stdout="Configuration is already up to date.")
+            return FinishedProgram(
+                ProgramResult.success(stdout="Configuration is already up to date.")
+            )
 
         if self.dry_run:
-            return ProgramResult.success(
-                stdout=f"Changes would be applied:\n{modified}"
+            return FinishedProgram(
+                ProgramResult.success(stdout=f"Changes would be applied:\n{modified}")
             )
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return ProgramResult.success(stdout="Configuration synchronized successfully.")
+        return FinishedProgram(
+            ProgramResult.success(stdout="Configuration synchronized successfully.")
+        )
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME

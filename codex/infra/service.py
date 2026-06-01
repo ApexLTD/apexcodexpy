@@ -7,7 +7,7 @@ from time import time
 from codex.infra.dependabot import DependabotYaml
 from codex.infra.program import MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
-from codex.infra.result import ComboResult, TaskResult
+from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, Pytest, Ruff
 
 
@@ -22,9 +22,10 @@ class Codex:
 
     def sync(self, dry_run: bool = False) -> TaskResult:
         return (
-            ComboResult()
+            MultiProgram()
             .attach(pyproject=PyProjectToml(dry_run=dry_run).sync(self.target))
             .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
+            .execute()
         )
 
     def install(self) -> TaskResult:

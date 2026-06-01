@@ -7,7 +7,8 @@ from typing import Any
 
 import yaml
 
-from codex.infra.result import ProgramResult, TaskResult
+from codex.infra.program import Executable, FinishedProgram
+from codex.infra.result import ProgramResult
 
 
 def _pip_config() -> dict[str, Any]:
@@ -57,16 +58,17 @@ class DependabotYaml:
 
     NAME = "dependabot.yml"
 
-    def sync(self, target: Path) -> TaskResult:
+    def sync(self, target: Path) -> Executable:
         dependabot = self.yaml_on(target)
         dependabot.parent.mkdir(parents=True, exist_ok=True)
 
         return self._sync(dependabot)
 
-    def _sync(self, dependabot: Path) -> ProgramResult:
+    def _sync(self, dependabot: Path) -> Executable:
         if self.dry_run:
-            return ProgramResult.success(
-                stdout=f"Changes would be applied:\n{json.dumps(STANDARDS, indent=2)}"
+            dumped = json.dumps(STANDARDS, indent=2)
+            return FinishedProgram(
+                ProgramResult.success(stdout=f"Changes would be applied:\n{dumped}")
             )
 
         with dependabot.open(mode="w", encoding="utf-8", newline="\n") as stream:
@@ -78,7 +80,9 @@ class DependabotYaml:
                 default_flow_style=False,
             )
 
-        return ProgramResult.success(stdout="Configuration synchronized successfully.")
+        return FinishedProgram(
+            ProgramResult.success(stdout="Configuration synchronized successfully.")
+        )
 
     def yaml_on(self, path: Path) -> Path:
         return path / ".github" / self.NAME
