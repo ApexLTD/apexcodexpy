@@ -31,7 +31,7 @@ class Codex:
         return (
             (
                 ComboResult()
-                .attach(tools=Pip().install("pip", "poetry"))
+                .attach(tools=Pip().install("pip", "poetry").execute())
                 .attach(dependencies=Poetry().install().execute())
             )
             if when
@@ -88,7 +88,9 @@ class Codex:
             .attach(
                 setup=(
                     ComboResult()
-                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
+                    .attach(
+                        tools=Pip().install("poetry", "poetry-plugin-export").execute()
+                    )
                     .attach(export=Poetry().export(self.target).execute())
                 )
             )
@@ -141,7 +143,9 @@ class CodexTest:
             .attach(
                 setup=(
                     ComboResult()
-                    .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
+                    .attach(
+                        tools=Pip().install("poetry", "poetry-plugin-export").execute()
+                    )
                     .attach(export=Poetry().export(self.target).execute())
                 )
             )

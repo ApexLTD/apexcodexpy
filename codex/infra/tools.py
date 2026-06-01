@@ -71,13 +71,12 @@ class Program:
 
 @dataclass(frozen=True, kw_only=True)
 class Pip:
-    def install(self, *packages: str) -> ProgramResult:
+    def install(self, *packages: str) -> Program:
         return (
             Program("python -m pip")
             .append("install")
             .flag(upgrade=True)
             .extend(packages)
-            .execute()
         )
 
 
