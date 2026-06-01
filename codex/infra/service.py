@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import Program
+from codex.infra.program import MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import ComboResult, TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, Pytest, Ruff
@@ -33,12 +33,13 @@ class Codex:
     def _install(self, when: bool) -> ComboResult:
         return (
             (
-                ComboResult()
-                .attach(tools=Pip().install("pip", "poetry").execute())
-                .attach(dependencies=Poetry().install().execute())
+                MultiProgram()
+                .attach(tools=Pip().install("pip", "poetry"))
+                .attach(dependencies=Poetry().install())
+                .execute()
             )
             if when
-            else ComboResult()
+            else MultiProgram().execute()
         )
 
     def lock(self) -> TaskResult:

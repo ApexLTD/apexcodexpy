@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable
+from collections.abc import Iterable, MutableMapping
 from dataclasses import dataclass, field
 from typing import Any
 
-from codex.infra.result import ProgramResult
+from codex.infra.result import ComboResult, ProgramResult
 
 
 @dataclass(frozen=True)
@@ -66,3 +66,22 @@ class Program:
 
         for argument in self._arguments:
             yield from str(argument).split()
+
+
+@dataclass(frozen=True)
+class MultiProgram:
+    sub_programs: MutableMapping[str, Program] = field(default_factory=dict)
+
+    def attach(self, **program: Program) -> MultiProgram:
+        for name, value in program.items():
+            self.sub_programs[name] = value
+
+        return self
+
+    def execute(self) -> ComboResult:
+        return ComboResult(
+            [
+                program.execute().named(name)
+                for name, program in self.sub_programs.items()
+            ]
+        )
