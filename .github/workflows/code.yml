@@ -64,4 +64,4 @@ jobs:
       - *setup-dependencies
 
       - name: Test behaviour
-        run: codex test behaviour --ci
+        run: codex test behaviour
