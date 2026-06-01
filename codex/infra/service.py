@@ -32,22 +32,22 @@ class Codex:
             (
                 ComboResult()
                 .attach(tools=Pip().install("pip", "poetry"))
-                .attach(dependencies=Poetry().install())
+                .attach(dependencies=Poetry().install().execute())
             )
             if when
             else ComboResult()
         )
 
     def lock(self) -> TaskResult:
-        return ComboResult().attach(lock=Poetry().lock())
+        return ComboResult().attach(lock=Poetry().lock().execute())
 
     def update(self) -> TaskResult:
-        return ComboResult().attach(update=Poetry().update())
+        return ComboResult().attach(update=Poetry().update().execute())
 
     def lint(self) -> TaskResult:
         return (
             self._install(when=self.in_ci)
-            .attach(poetry=Poetry().lint(self.target))
+            .attach(poetry=Poetry().lint(self.target).execute())
             .attach(
                 black=Poetry()
                 .run(Ruff(on=self.target).format().flag(check=True))
@@ -89,7 +89,7 @@ class Codex:
                 setup=(
                     ComboResult()
                     .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
-                    .attach(export=Poetry().export(self.target))
+                    .attach(export=Poetry().export(self.target).execute())
                 )
             )
             .attach(
@@ -142,7 +142,7 @@ class CodexTest:
                 setup=(
                     ComboResult()
                     .attach(tools=Pip().install("poetry", "poetry-plugin-export"))
-                    .attach(export=Poetry().export(self.target))
+                    .attach(export=Poetry().export(self.target).execute())
                 )
             )
             .attach(

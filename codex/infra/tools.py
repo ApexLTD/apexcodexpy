@@ -83,30 +83,27 @@ class Pip:
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
-    def install(self) -> ProgramResult:
-        return Program("poetry install").execute()
+    def install(self) -> Program:
+        return Program("poetry install")
 
-    def lock(self) -> ProgramResult:
-        return Program("poetry lock").execute()
+    def lock(self) -> Program:
+        return Program("poetry lock")
 
-    def update(self) -> ProgramResult:
-        return Program("poetry update").execute()
+    def update(self) -> Program:
+        return Program("poetry update")
 
-    def lint(self, target: Path) -> ProgramResult:
-        return (
-            Program("poetry check").with_a(project=target).flag(strict=True).execute()
-        )
+    def lint(self, target: Path) -> Program:
+        return Program("poetry check").with_a(project=target).flag(strict=True)
 
     def run(self, program: Program) -> Program:
         return Program(f"poetry run {program}")
 
-    def export(self, target: Path) -> ProgramResult:
+    def export(self, target: Path) -> Program:
         return (
             Program("poetry export")
             .flag(without_hashes=True)
             .with_a(output="requirements.txt")
             .with_a(directory=target)
-            .execute()
         )
 
 
