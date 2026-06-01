@@ -95,8 +95,8 @@ class Poetry:
     def lint(self, target: Path) -> ProgramResult:
         return Program("poetry check").with_a(project=target).flag(strict=True).run()
 
-    def run(self, program: Program) -> ProgramResult:
-        return Program(f"poetry run {program}").run()
+    def run(self, program: Program) -> Program:
+        return Program(f"poetry run {program}")
 
     def export(self, target: Path) -> ProgramResult:
         return (

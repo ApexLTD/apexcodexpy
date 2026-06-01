@@ -48,19 +48,23 @@ class Codex:
         return (
             self._install(when=self.in_ci)
             .attach(poetry=Poetry().lint(self.target))
-            .attach(black=Poetry().run(Ruff(on=self.target).format().flag(check=True)))
-            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()))
-            .attach(mypy=Poetry().run(MyPy(on=self.target).check()))
+            .attach(
+                black=Poetry().run(Ruff(on=self.target).format().flag(check=True)).run()
+            )
+            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()).run())
+            .attach(mypy=Poetry().run(MyPy(on=self.target).check()).run())
         )
 
     def fix(self, unsafe: bool = False) -> TaskResult:
         return (
             ComboResult()
-            .attach(black=Poetry().run(Ruff(on=self.target).format()))
+            .attach(black=Poetry().run(Ruff(on=self.target).format()).run())
             .attach(
-                ruff=Poetry().run(
+                ruff=Poetry()
+                .run(
                     Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
                 )
+                .run()
             )
         )
 
@@ -114,12 +118,14 @@ class CodexTest:
 
     def unit(self) -> TaskResult:
         return ComboResult().attach(
-            pytest=Poetry().run(
+            pytest=Poetry()
+            .run(
                 Pytest.on(self.target).run(
                     with_coverage=self._when_not_in_ci(),
                     last_failed=self._when_not_in_ci(),
                 )
             )
+            .run()
         )
 
     def _when_not_in_ci(self) -> bool | None:
@@ -136,9 +142,9 @@ class CodexTest:
                 )
             )
             .attach(
-                pytest=Poetry().run(
-                    Pytest.on(self.target / "tests" / "integration").run()
-                )
+                pytest=Poetry()
+                .run(Pytest.on(self.target / "tests" / "integration").run())
+                .run()
             )
             .attach(
                 teardown=Program("rm").append(self.target / "requirements.txt").run()
@@ -147,9 +153,9 @@ class CodexTest:
 
     def behaviour(self) -> TaskResult:
         return ComboResult().attach(
-            behave=Poetry().run(
-                Program("behave").append(self.target / "tests" / "features")
-            )
+            behave=Poetry()
+            .run(Program("behave").append(self.target / "tests" / "features"))
+            .run()
         )
 
 
