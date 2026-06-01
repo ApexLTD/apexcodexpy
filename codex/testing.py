@@ -10,14 +10,6 @@ from codex.service import Codex
 cli = typer.Typer()
 
 
-@cli.callback(invoke_without_command=True)
-def _(ctx: typer.Context) -> None:
-    if ctx.invoked_subcommand is not None:
-        return
-
-    run_unit_tests(path=".", ci=False)
-
-
 @cli.command(
     name="unit",
     help="Run programmer tests.",
@@ -94,3 +86,11 @@ def _(
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
+
+
+@cli.callback(invoke_without_command=True)
+def _(ctx: typer.Context) -> None:
+    if ctx.invoked_subcommand is not None:
+        return
+
+    run_unit_tests(path=".", ci=False)
