@@ -242,9 +242,16 @@ def _(
     name="behaviour",
     help="Run behaviour tests.",
 )
-def _() -> None:
+def _(
+    ci: bool = typer.Option(
+        False,
+        "--ci",
+        help="Run in CI mode.",
+    ),
+) -> None:
     (
         Codex(target=Path("."))
+        .ci(on=ci)
         .test_behaviour()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
