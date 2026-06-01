@@ -49,6 +49,12 @@ def run_unit_tests(
     help="Run integration tests.",
 )
 def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
     ci: bool = typer.Option(
         False,
         "--ci",
@@ -56,7 +62,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path("."))
+        Codex(target=Path(path))
         .ci(on=ci)
         .test_integration()
         .report(using=DefaultReporter())
@@ -69,6 +75,12 @@ def _(
     help="Run behaviour tests.",
 )
 def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
     ci: bool = typer.Option(
         False,
         "--ci",
@@ -76,7 +88,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path("."))
+        Codex(target=Path(path))
         .ci(on=ci)
         .test_behaviour()
         .report(using=DefaultReporter())
