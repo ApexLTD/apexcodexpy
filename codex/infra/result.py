@@ -9,9 +9,6 @@ class TaskResult(Protocol):
     def named(self, name: str) -> TaskResult:
         pass
 
-    def silenced(self, *, when: bool) -> TaskResult:
-        pass
-
     def report(self, using: Reporter) -> TaskResult:
         pass
 
@@ -27,9 +24,6 @@ class ComboResult:
         _ = name
 
         return self
-
-    def silenced(self, *, when: bool) -> TaskResult:
-        return ComboResult([result.silenced(when=when) for result in self.results])
 
     @property
     def _exit_code(self) -> int:

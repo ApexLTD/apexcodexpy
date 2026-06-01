@@ -146,8 +146,7 @@ def _(
         Codex(target=Path(path))
         .ci(on=ci)
         .lint()
-        .silenced(when=silent)
-        .report(using=DefaultReporter())
+        .report(using=DefaultReporter().silenced(when=silent))
         .exit(using=typer.Exit)
     )
 
@@ -178,8 +177,7 @@ def _(
     (
         Codex(target=Path(path))
         .fix(unsafe=unsafe)
-        .silenced(when=silent)
-        .report(using=DefaultReporter())
+        .report(using=DefaultReporter().silenced(when=silent))
         .exit(using=typer.Exit)
     )
 
