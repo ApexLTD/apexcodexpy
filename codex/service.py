@@ -34,6 +34,8 @@ class CiMode:
 class Codex:
     target: Path
 
+    in_ci: bool = False
+
     def ci(self, on: bool) -> CiMode | Codex:
         if on:
             return CiMode(self)
@@ -48,10 +50,17 @@ class Codex:
         )
 
     def install(self) -> TaskResult:
+        return self._install(when=True)
+
+    def _install(self, when: bool) -> ComboResult:
         return (
-            ComboResult()
-            .attach(tools=Pip().install("pip", "poetry"))
-            .attach(dependencies=Poetry().install())
+            (
+                ComboResult()
+                .attach(tools=Pip().install("pip", "poetry"))
+                .attach(dependencies=Poetry().install())
+            )
+            if when
+            else ComboResult()
         )
 
     def lock(self) -> TaskResult:
@@ -62,7 +71,7 @@ class Codex:
 
     def lint(self) -> TaskResult:
         return (
-            ComboResult()
+            self._install(when=self.in_ci)
             .attach(poetry=Poetry().lint(self.target))
             .attach(black=Poetry().run(Ruff(on=self.target).format().flag(check=True)))
             .attach(ruff=Poetry().run(Ruff(on=self.target).lint()))
@@ -81,7 +90,7 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return self.test_unit()
+        return self._install(when=self.in_ci).attach(self.test_unit())
 
     def test_unit(self) -> TaskResult:
         return CodexTest(self.target).unit()
