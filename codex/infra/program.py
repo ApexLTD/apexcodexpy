@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 from collections.abc import Iterable, MutableMapping
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Protocol
 
 from codex.infra.result import ComboResult, ProgramResult
 
@@ -69,10 +69,23 @@ class Program:
 
 
 @dataclass(frozen=True)
-class MultiProgram:
-    sub_programs: MutableMapping[str, Program] = field(default_factory=dict)
+class FinishedProgram:
+    result: ProgramResult
 
-    def attach(self, **program: Program) -> MultiProgram:
+    def execute(self) -> ProgramResult:
+        return self.result
+
+
+class Executable(Protocol):
+    def execute(self) -> ProgramResult:
+        pass
+
+
+@dataclass(frozen=True)
+class MultiProgram:
+    sub_programs: MutableMapping[str, Executable] = field(default_factory=dict)
+
+    def attach(self, **program: Executable) -> MultiProgram:
         for name, value in program.items():
             self.sub_programs[name] = value
 
