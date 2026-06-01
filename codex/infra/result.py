@@ -35,24 +35,6 @@ class ComboResult:
     def _exit_code(self) -> int:
         return sum(result.exit() for result in self.results)
 
-    def attach(self, *args: TaskResult, **kwargs: TaskResult) -> ComboResult:
-        for name, result in kwargs.items():
-            self._attach_one(result.named(name))
-
-        for result in args:
-            self._attach_one(result)
-
-        return self
-
-    def _attach_one(self, result: TaskResult) -> ComboResult:
-        match result:
-            case ComboResult():
-                self.results.extend(result.results)
-            case _:
-                self.results.append(result)
-
-        return self
-
     def report(self, using: Reporter) -> ComboResult:
         for result in self.results:
             result.report(using)
