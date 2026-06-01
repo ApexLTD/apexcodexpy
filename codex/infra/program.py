@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-from codex.infra.tasks import ProgramResult
+from codex.infra.result import ProgramResult
 
 
 @dataclass(frozen=True)
