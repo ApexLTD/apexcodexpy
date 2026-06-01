@@ -38,4 +38,4 @@ jobs:
           python-version: 3.11
 
       - name: Test
-        run: pip install -q apexcodexpy && codex test --ci
+        run: pip install -q apexcodexpy && codex test unit --ci
