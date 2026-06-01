@@ -49,22 +49,24 @@ class Codex:
             self._install(when=self.in_ci)
             .attach(poetry=Poetry().lint(self.target))
             .attach(
-                black=Poetry().run(Ruff(on=self.target).format().flag(check=True)).run()
+                black=Poetry()
+                .run(Ruff(on=self.target).format().flag(check=True))
+                .execute()
             )
-            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()).run())
-            .attach(mypy=Poetry().run(MyPy(on=self.target).check()).run())
+            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()).execute())
+            .attach(mypy=Poetry().run(MyPy(on=self.target).check()).execute())
         )
 
     def fix(self, unsafe: bool = False) -> TaskResult:
         return (
             ComboResult()
-            .attach(black=Poetry().run(Ruff(on=self.target).format()).run())
+            .attach(black=Poetry().run(Ruff(on=self.target).format()).execute())
             .attach(
                 ruff=Poetry()
                 .run(
                     Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
                 )
-                .run()
+                .execute()
             )
         )
 
@@ -98,11 +100,13 @@ class Codex:
                     .flag(build_arg=True)
                     .with_a(RELEASE=Git().revision() or str(int(time())))
                     .append(self.target)
-                    .run()
+                    .execute()
                 )
             )
             .attach(
-                teardown=Program("rm").append(self.target / "requirements.txt").run()
+                teardown=Program("rm")
+                .append(self.target / "requirements.txt")
+                .execute()
             )
         )
 
@@ -125,7 +129,7 @@ class CodexTest:
                     last_failed=self._when_not_in_ci(),
                 )
             )
-            .run()
+            .execute()
         )
 
     def _when_not_in_ci(self) -> bool | None:
@@ -144,10 +148,12 @@ class CodexTest:
             .attach(
                 pytest=Poetry()
                 .run(Pytest.on(self.target / "tests" / "integration").run())
-                .run()
+                .execute()
             )
             .attach(
-                teardown=Program("rm").append(self.target / "requirements.txt").run()
+                teardown=Program("rm")
+                .append(self.target / "requirements.txt")
+                .execute()
             )
         )
 
@@ -155,7 +161,7 @@ class CodexTest:
         return ComboResult().attach(
             behave=Poetry()
             .run(Program("behave").append(self.target / "tests" / "features"))
-            .run()
+            .execute()
         )
 
 
@@ -183,7 +189,7 @@ class Pytest:
 @dataclass(frozen=True)
 class Git:
     def revision(self, of: str = "HEAD", short: bool = True) -> str:
-        return Program("git rev-parse").flag(short=short).append(of).run().stdout
+        return Program("git rev-parse").flag(short=short).append(of).execute().stdout
 
     def amend(self) -> TaskResult:
         return ComboResult().attach(
@@ -192,6 +198,6 @@ class Git:
                 .flag(all=True)
                 .flag(amend=True)
                 .flag(edit=False)
-                .run()
+                .execute()
             )
         )

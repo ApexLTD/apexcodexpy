@@ -49,7 +49,7 @@ class Program:
 
         return self
 
-    def run(self) -> ProgramResult:
+    def execute(self) -> ProgramResult:
         return ProgramResult.parse(
             subprocess.run(
                 str(self).split(),
@@ -77,23 +77,25 @@ class Pip:
             .append("install")
             .flag(upgrade=True)
             .extend(packages)
-            .run()
+            .execute()
         )
 
 
 @dataclass(frozen=True, kw_only=True)
 class Poetry:
     def install(self) -> ProgramResult:
-        return Program("poetry install").run()
+        return Program("poetry install").execute()
 
     def lock(self) -> ProgramResult:
-        return Program("poetry lock").run()
+        return Program("poetry lock").execute()
 
     def update(self) -> ProgramResult:
-        return Program("poetry update").run()
+        return Program("poetry update").execute()
 
     def lint(self, target: Path) -> ProgramResult:
-        return Program("poetry check").with_a(project=target).flag(strict=True).run()
+        return (
+            Program("poetry check").with_a(project=target).flag(strict=True).execute()
+        )
 
     def run(self, program: Program) -> Program:
         return Program(f"poetry run {program}")
@@ -104,7 +106,7 @@ class Poetry:
             .flag(without_hashes=True)
             .with_a(output="requirements.txt")
             .with_a(directory=target)
-            .run()
+            .execute()
         )
 
 
