@@ -36,11 +36,8 @@ class Codex:
 
     in_ci: bool = False
 
-    def ci(self, on: bool) -> CiMode | Codex:
-        if on:
-            return CiMode(self)
-
-        return self
+    def ci(self, on: bool) -> Codex:
+        return Codex(self.target, in_ci=on)
 
     def sync(self, dry_run: bool = False) -> TaskResult:
         return (
@@ -93,7 +90,7 @@ class Codex:
         return self._install(when=self.in_ci).attach(self.test_unit())
 
     def test_unit(self) -> TaskResult:
-        return CodexTest(self.target).unit()
+        return CodexTest(self.target).ci(on=self.in_ci).unit()
 
     def test_integration(self) -> TaskResult:
         return CodexTest(self.target).integration()
