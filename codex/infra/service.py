@@ -74,7 +74,7 @@ class Codex:
         return self._install(when=self.in_ci).execute().attach(self.test_unit())
 
     def test_unit(self) -> TaskResult:
-        return CodexTest(self.target).ci(on=self.in_ci).unit()
+        return CodexTest(self.target).ci(on=self.in_ci).unit().execute()
 
     def test_integration(self) -> TaskResult:
         return CodexTest(self.target).integration()
@@ -111,18 +111,14 @@ class CodexTest:
     def ci(self, on: bool = False) -> CodexTest:
         return CodexTest(self.target, in_ci=on)
 
-    def unit(self) -> TaskResult:
-        return (
-            MultiProgram()
-            .attach(
-                pytest=Poetry().run(
-                    Pytest.on(self.target).run(
-                        with_coverage=self._when_not_in_ci(),
-                        last_failed=self._when_not_in_ci(),
-                    )
+    def unit(self) -> MultiProgram:
+        return MultiProgram().attach(
+            pytest=Poetry().run(
+                Pytest.on(self.target).run(
+                    with_coverage=self._when_not_in_ci(),
+                    last_failed=self._when_not_in_ci(),
                 )
             )
-            .execute()
         )
 
     def _when_not_in_ci(self) -> bool | None:
