@@ -57,9 +57,16 @@ def _(
     name="lock",
     help="Lock project dependencies.",
 )
-def _() -> None:
+def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+) -> None:
     (
-        Codex(target=Path("."))
+        Codex(target=Path(path))
         .lock()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -70,9 +77,16 @@ def _() -> None:
     name="update",
     help="Update project dependencies.",
 )
-def _() -> None:
+def _(
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+) -> None:
     (
-        Codex(target=Path("."))
+        Codex(target=Path(path))
         .update()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
