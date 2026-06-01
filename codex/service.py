@@ -9,28 +9,6 @@ from codex.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
 @dataclass(frozen=True)
-class CiMode:
-    codex: Codex
-
-    def lint(self) -> TaskResult:
-        return (
-            ComboResult()
-            .attach(install=self.codex.install())
-            .attach(lint=self.codex.lint())
-        )
-
-    def test(self) -> TaskResult:
-        return (
-            ComboResult()
-            .attach(install=self.codex.install())
-            .attach(pytest=CodexTest(self.codex.target).ci(on=True).unit())
-        )
-
-    def test_integration(self) -> TaskResult:
-        return self.codex.test_integration()
-
-
-@dataclass(frozen=True)
 class Codex:
     target: Path
 
