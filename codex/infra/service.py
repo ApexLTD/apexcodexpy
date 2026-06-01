@@ -42,10 +42,10 @@ class Codex:
         )
 
     def lock(self) -> TaskResult:
-        return ComboResult().attach(lock=Poetry().lock().execute())
+        return MultiProgram().attach(lock=Poetry().lock()).execute()
 
     def update(self) -> TaskResult:
-        return ComboResult().attach(update=Poetry().update().execute())
+        return MultiProgram().attach(update=Poetry().update()).execute()
 
     def lint(self) -> TaskResult:
         return (
@@ -59,15 +59,14 @@ class Codex:
 
     def fix(self, unsafe: bool = False) -> TaskResult:
         return (
-            ComboResult()
-            .attach(black=Poetry().run(Ruff(on=self.target).format()).execute())
+            MultiProgram()
+            .attach(black=Poetry().run(Ruff(on=self.target).format()))
             .attach(
-                ruff=Poetry()
-                .run(
+                ruff=Poetry().run(
                     Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
                 )
-                .execute()
             )
+            .execute()
         )
 
     def test(self) -> TaskResult:
@@ -84,32 +83,21 @@ class Codex:
 
     def build(self, tag: str) -> TaskResult:
         return (
-            ComboResult()
+            MultiProgram()
+            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
+            .attach(export=Poetry().export(self.target))
             .attach(
-                setup=(
-                    ComboResult()
-                    .attach(
-                        tools=Pip().install("poetry", "poetry-plugin-export").execute()
-                    )
-                    .attach(export=Poetry().export(self.target).execute())
-                )
-            )
-            .attach(
-                docker=(
+                build=(
                     Program("docker build")
                     .flag(tag=True)
                     .append(tag)
                     .flag(build_arg=True)
                     .with_a(RELEASE=Git().revision() or str(int(time())))
                     .append(self.target)
-                    .execute()
                 )
             )
-            .attach(
-                teardown=Program("rm")
-                .append(self.target / "requirements.txt")
-                .execute()
-            )
+            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
+            .execute()
         )
 
 
@@ -123,12 +111,14 @@ class CodexTest:
         return CodexTest(self.target, in_ci=on)
 
     def unit(self) -> TaskResult:
-        return ComboResult().attach(
-            pytest=Poetry()
-            .run(
-                Pytest.on(self.target).run(
-                    with_coverage=self._when_not_in_ci(),
-                    last_failed=self._when_not_in_ci(),
+        return (
+            MultiProgram()
+            .attach(
+                pytest=Poetry().run(
+                    Pytest.on(self.target).run(
+                        with_coverage=self._when_not_in_ci(),
+                        last_failed=self._when_not_in_ci(),
+                    )
                 )
             )
             .execute()
@@ -139,32 +129,26 @@ class CodexTest:
 
     def integration(self) -> TaskResult:
         return (
-            ComboResult()
+            MultiProgram()
+            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
+            .attach(export=Poetry().export(self.target))
             .attach(
-                setup=(
-                    ComboResult()
-                    .attach(
-                        tools=Pip().install("poetry", "poetry-plugin-export").execute()
-                    )
-                    .attach(export=Poetry().export(self.target).execute())
+                test=Poetry().run(
+                    Pytest.on(self.target / "tests" / "integration").run()
                 )
             )
-            .attach(
-                pytest=Poetry()
-                .run(Pytest.on(self.target / "tests" / "integration").run())
-                .execute()
-            )
-            .attach(
-                teardown=Program("rm")
-                .append(self.target / "requirements.txt")
-                .execute()
-            )
+            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
+            .execute()
         )
 
     def behaviour(self) -> TaskResult:
-        return ComboResult().attach(
-            behave=Poetry()
-            .run(Program("behave").append(self.target / "tests" / "features"))
+        return (
+            MultiProgram()
+            .attach(
+                behave=Poetry().run(
+                    Program("behave").append(self.target / "tests" / "features")
+                )
+            )
             .execute()
         )
 
@@ -175,12 +159,11 @@ class Git:
         return Program("git rev-parse").flag(short=short).append(of).execute().stdout
 
     def amend(self) -> TaskResult:
-        return ComboResult().attach(
-            amend=(
-                Program("git commit")
-                .flag(all=True)
-                .flag(amend=True)
-                .flag(edit=False)
-                .execute()
-            )
+        return (
+            Program("git commit")
+            .flag(all=True)
+            .flag(amend=True)
+            .flag(edit=False)
+            .execute()
+            .named("amend")
         )
