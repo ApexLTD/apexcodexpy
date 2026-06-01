@@ -58,12 +58,6 @@ class ProgramResult:
             name=name.capitalize(),
         )
 
-    def silenced(self, *, when: bool) -> TaskResult:
-        if when:
-            return SilentResult(self)
-
-        return self
-
     def __int__(self) -> int:
         return self.exit_code
 
@@ -116,25 +110,3 @@ class Reporter(Protocol):
 
     def error(self, message: str) -> None:
         pass
-
-
-@dataclass(frozen=True)
-class SilentResult:
-    result: TaskResult
-
-    def named(self, name: str) -> TaskResult:
-        return SilentResult(self.result.named(name))
-
-    def silenced(self, *, when: bool) -> TaskResult:
-        if when:
-            return self
-
-        return self.result
-
-    def report(self, using: Reporter) -> TaskResult:
-        _ = using
-
-        return self
-
-    def exit(self, using: type[Exception] | None = None) -> int:
-        return self.result.exit(using)
