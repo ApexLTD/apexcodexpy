@@ -230,9 +230,9 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path("./tests/integration"))
+        Codex(target=Path("."))
         .ci(on=ci)
-        .test()
+        .test_integration()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
