@@ -7,10 +7,10 @@ import typer
 from codex.reporters import DefaultReporter
 from codex.service import Codex
 
-test_cli = typer.Typer()
+cli = typer.Typer()
 
 
-@test_cli.callback(invoke_without_command=True)
+@cli.callback(invoke_without_command=True)
 def _(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is not None:
         return
@@ -18,7 +18,7 @@ def _(ctx: typer.Context) -> None:
     run_unit_tests(path=".", ci=False)
 
 
-@test_cli.command(
+@cli.command(
     name="unit",
     help="Run programmer tests.",
 )
@@ -44,7 +44,7 @@ def run_unit_tests(
     )
 
 
-@test_cli.command(
+@cli.command(
     name="integration",
     help="Run integration tests.",
 )
@@ -64,7 +64,7 @@ def _(
     )
 
 
-@test_cli.command(
+@cli.command(
     name="behaviour",
     help="Run behaviour tests.",
 )

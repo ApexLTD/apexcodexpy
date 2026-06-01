@@ -6,10 +6,10 @@ import typer
 
 from codex.reporters import DefaultReporter
 from codex.service import Codex, Git
-from codex.testing import test_cli
+from codex.testing import cli as testing_cli
 
 cli = typer.Typer(no_args_is_help=True)
-cli.add_typer(test_cli, name="test", short_help="Run tests.")
+cli.add_typer(testing_cli, name="test", short_help="Run tests.")
 
 
 @cli.command(
