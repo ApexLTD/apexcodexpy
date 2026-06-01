@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import MultiProgram, Program
+from codex.infra.program import Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, Pytest, Ruff
@@ -71,10 +71,10 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return self._install(when=self.in_ci).execute().attach(self.test_unit())
+        return self._install(when=self.in_ci).attach(pytest=self.test_unit()).execute()
 
-    def test_unit(self) -> TaskResult:
-        return CodexTest(self.target).ci(on=self.in_ci).unit().execute()
+    def test_unit(self) -> Executable:
+        return CodexTest(self.target).ci(on=self.in_ci).unit()
 
     def test_integration(self) -> TaskResult:
         return CodexTest(self.target).integration()
@@ -111,13 +111,11 @@ class CodexTest:
     def ci(self, on: bool = False) -> CodexTest:
         return CodexTest(self.target, in_ci=on)
 
-    def unit(self) -> MultiProgram:
-        return MultiProgram().attach(
-            pytest=Poetry().run(
-                Pytest.on(self.target).run(
-                    with_coverage=self._when_not_in_ci(),
-                    last_failed=self._when_not_in_ci(),
-                )
+    def unit(self) -> Executable:
+        return Poetry().run(
+            Pytest.on(self.target).run(
+                with_coverage=self._when_not_in_ci(),
+                last_failed=self._when_not_in_ci(),
             )
         )
 

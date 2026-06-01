@@ -5,7 +5,7 @@ from collections.abc import Iterable, MutableMapping
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
-from codex.infra.result import ComboResult, ProgramResult
+from codex.infra.result import ComboResult, ProgramResult, TaskResult
 
 
 @dataclass(frozen=True)
@@ -91,7 +91,7 @@ class MultiProgram:
 
         return self
 
-    def execute(self) -> ComboResult:
+    def execute(self) -> TaskResult:
         return ComboResult(
             [
                 program.execute().named(name)
