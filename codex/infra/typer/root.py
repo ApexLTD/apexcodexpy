@@ -2,8 +2,8 @@ from pathlib import Path
 
 import typer
 
-from codex.reporters import DefaultReporter
-from codex.service import Codex, Git
+from codex.infra.reporters import DefaultReporter
+from codex.infra.service import Codex, Git
 
 cli = typer.Typer(no_args_is_help=True)
 

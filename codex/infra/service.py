@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import time
 
-from codex.tasks import ComboResult, DependabotYaml, PyProjectToml, TaskResult
-from codex.tools import MyPy, Pip, Poetry, Program, Ruff
+from codex.infra.tasks import ComboResult, DependabotYaml, PyProjectToml, TaskResult
+from codex.infra.tools import MyPy, Pip, Poetry, Program, Ruff
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from codex.tasks import ProgramResult
+from codex.infra.tasks import ProgramResult
 
 
 @dataclass(frozen=True)

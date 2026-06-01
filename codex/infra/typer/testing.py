@@ -2,8 +2,8 @@ from pathlib import Path
 
 import typer
 
-from codex.reporters import DefaultReporter
-from codex.service import Codex
+from codex.infra.reporters import DefaultReporter
+from codex.infra.service import Codex
 
 cli = typer.Typer()
 
@@ -91,4 +91,4 @@ def _(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is not None:
         return
 
-    run_unit_tests(path=".", ci=False)
+    run_unit_tests(path="", ci=False)

@@ -6,7 +6,7 @@ from typing import Any
 
 import tomlkit
 
-from codex.tasks import ProgramResult, TaskResult
+from codex.infra.tasks import ProgramResult, TaskResult
 
 
 def _mypy_config() -> dict[str, Any]:
