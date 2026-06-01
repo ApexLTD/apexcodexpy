@@ -18,8 +18,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.11
-          pip-install: -q apexcodexpy
+          python-version: 3.13
+          pip-install: apexcodexpy
 
       - name: Install dependencies
         run: codex install
