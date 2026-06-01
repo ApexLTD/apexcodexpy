@@ -28,18 +28,17 @@ class Codex:
         )
 
     def install(self) -> TaskResult:
-        return self._install(when=True)
+        return self._install(when=True).execute()
 
-    def _install(self, when: bool) -> ComboResult:
+    def _install(self, when: bool) -> MultiProgram:
         return (
             (
                 MultiProgram()
                 .attach(tools=Pip().install("pip", "poetry"))
                 .attach(dependencies=Poetry().install())
-                .execute()
             )
             if when
-            else MultiProgram().execute()
+            else MultiProgram()
         )
 
     def lock(self) -> TaskResult:
@@ -51,14 +50,11 @@ class Codex:
     def lint(self) -> TaskResult:
         return (
             self._install(when=self.in_ci)
-            .attach(poetry=Poetry().lint(self.target).execute())
-            .attach(
-                black=Poetry()
-                .run(Ruff(on=self.target).format().flag(check=True))
-                .execute()
-            )
-            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()).execute())
-            .attach(mypy=Poetry().run(MyPy(on=self.target).check()).execute())
+            .attach(poetry=Poetry().lint(self.target))
+            .attach(black=Poetry().run(Ruff(on=self.target).format().flag(check=True)))
+            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()))
+            .attach(mypy=Poetry().run(MyPy(on=self.target).check()))
+            .execute()
         )
 
     def fix(self, unsafe: bool = False) -> TaskResult:
@@ -75,7 +71,7 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return self._install(when=self.in_ci).attach(self.test_unit())
+        return self._install(when=self.in_ci).execute().attach(self.test_unit())
 
     def test_unit(self) -> TaskResult:
         return CodexTest(self.target).ci(on=self.in_ci).unit()
