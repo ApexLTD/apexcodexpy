@@ -63,9 +63,6 @@ class Command:
 
         return self
 
-    def execute(self) -> ProgramResult:
-        return Program(self).execute()
-
     def __str__(self) -> str:
         return " ".join(self)
 
@@ -93,9 +90,13 @@ class Executable(Protocol):
 class MultiProgram:
     sub_programs: MutableMapping[str, Executable] = field(default_factory=dict)
 
-    def attach(self, **program: Executable) -> MultiProgram:
+    def attach(self, **program: Executable | Command) -> MultiProgram:
         for name, value in program.items():
-            self.sub_programs[name] = value
+            match value:
+                case Command():
+                    self.sub_programs[name] = Program(value)
+                case _:
+                    self.sub_programs[name] = value
 
         return self
 
