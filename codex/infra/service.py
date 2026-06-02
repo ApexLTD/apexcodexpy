@@ -12,25 +12,6 @@ from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 
 
 @dataclass(frozen=True)
-class TestingCodex:
-    target: Path
-
-    def ci(self, on: bool) -> TestingCodex:
-        _ = on
-
-        return self
-
-    def unit(self) -> TaskResult:
-        return CodexTools(self.target).unit().execute()
-
-    def integration(self) -> TaskResult:
-        return CodexTools(self.target).integration().execute()
-
-    def behaviour(self) -> TaskResult:
-        return CodexTools(self.target).behaviour().execute()
-
-
-@dataclass(frozen=True)
 class Codex:
     target: Path
 
@@ -61,6 +42,15 @@ class Codex:
     def fix(self, unsafe: bool = False) -> TaskResult:
         return self.tools().fix(unsafe=unsafe).execute()
 
+    def unit(self) -> TaskResult:
+        return self.tools().unit().execute()
+
+    def integration(self) -> TaskResult:
+        return self.tools().integration().execute()
+
+    def behaviour(self) -> TaskResult:
+        return self.tools().behaviour().execute()
+
     def build(self, tag: str) -> TaskResult:
         return self.tools().build(tag).execute()
 
@@ -76,6 +66,15 @@ class CiCodex:
             .attach(self.tools.lint())
             .execute()
         )
+
+    def unit(self) -> TaskResult:
+        return self.tools.unit().execute()
+
+    def integration(self) -> TaskResult:
+        return self.tools.integration().execute()
+
+    def behaviour(self) -> TaskResult:
+        return self.tools.behaviour().execute()
 
 
 @dataclass(frozen=True)
