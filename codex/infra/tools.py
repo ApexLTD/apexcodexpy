@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import Program
+from codex.infra.program import MultiProgram, Program
+from codex.infra.result import TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -41,6 +42,24 @@ class Poetry:
             .with_a(output="requirements.txt")
             .with_a(directory=target)
         )
+
+
+@dataclass(frozen=True)
+class PoetryRun:
+    program: MultiProgram = field(default_factory=MultiProgram)
+
+    def attach(self, **program: Program) -> PoetryRun:
+        self.program.attach(
+            **{
+                name: Program(f"poetry run {program}")
+                for name, program in program.items()
+            }
+        )
+
+        return self
+
+    def execute(self) -> TaskResult:
+        return self.program.execute()
 
 
 @dataclass(frozen=True, kw_only=True)

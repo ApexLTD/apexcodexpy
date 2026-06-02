@@ -77,7 +77,7 @@ class FinishedProgram:
 
 
 class Executable(Protocol):
-    def execute(self) -> ProgramResult:
+    def execute(self) -> TaskResult:
         pass
 
 

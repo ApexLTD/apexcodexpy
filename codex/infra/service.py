@@ -8,7 +8,7 @@ from codex.infra.dependabot import DependabotYaml
 from codex.infra.program import Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
-from codex.infra.tools import MyPy, Pip, Poetry, Pytest, Ruff
+from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 
 
 @dataclass(frozen=True)
@@ -51,10 +51,15 @@ class Codex:
     def lint(self) -> TaskResult:
         return (
             self._install(when=self.in_ci)
-            .attach(poetry=Poetry().lint(self.target))
-            .attach(black=Poetry().run(Ruff(on=self.target).format().flag(check=True)))
-            .attach(ruff=Poetry().run(Ruff(on=self.target).lint()))
-            .attach(mypy=Poetry().run(MyPy(on=self.target).check()))
+            .attach(
+                lint=(
+                    PoetryRun()
+                    .attach(poetry=Poetry().lint(self.target))
+                    .attach(black=Ruff(on=self.target).format().flag(check=True))
+                    .attach(ruff=Ruff(on=self.target).lint())
+                    .attach(mypy=MyPy(on=self.target).check())
+                )
+            )
             .execute()
         )
 
