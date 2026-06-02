@@ -82,7 +82,7 @@ class CiCodex:
         return (
             MultiProgram()
             .attach(self.tools.install())
-            .attach(self.tools.behaviour())
+            .attach(self.tools.behaviour(in_ci=True))
             .execute()
         )
 
@@ -183,11 +183,14 @@ class CodexTools:
             )
         )
 
-    def behaviour(self) -> Executable:
+    def behaviour(self, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
             Program(
                 name="behave",
-                command=Command("behave").append(self.target / "tests" / "features"),
+                command=Command("behave")
+                .append(self.target / "tests" / "features")
+                .with_a(format="progress" if in_ci else "pretty")
+                .flag(summary=not in_ci),
             )
         )
 
