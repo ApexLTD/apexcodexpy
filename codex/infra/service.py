@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import Command, Executable, MultiProgram
+from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
@@ -43,10 +43,10 @@ class Codex:
         return CodexTools(self.target).sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
-        return Poetry().lock().execute().named("lock")
+        return Program(Poetry().lock()).execute().named("lock")
 
     def update(self) -> TaskResult:
-        return Poetry().update().execute().named("update")
+        return Program(Poetry().update()).execute().named("update")
 
     def install(self) -> TaskResult:
         return CodexTools(self.target).install().execute()
@@ -145,14 +145,18 @@ class CodexTools:
 @dataclass(frozen=True)
 class Git:
     def revision(self, of: str = "HEAD", short: bool = True) -> str:
-        return Command("git rev-parse").flag(short=short).append(of).execute().stdout
+        return (
+            Program(Command("git rev-parse").flag(short=short).append(of))
+            .execute()
+            .stdout
+        )
 
     def amend(self) -> TaskResult:
+
         return (
-            Command("git commit")
-            .flag(all=True)
-            .flag(amend=True)
-            .flag(edit=False)
+            Program(
+                Command("git commit").flag(all=True).flag(amend=True).flag(edit=False)
+            )
             .execute()
             .named("amend")
         )
