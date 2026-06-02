@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +56,8 @@ STANDARDS = {
 class DependabotYaml:
     dry_run: bool = False
 
+    _result: ProgramResult = field(init=False, default=ProgramResult(name="Dependabot"))
+
     NAME = "dependabot.yml"
 
     def sync(self, target: Path) -> Executable:
@@ -67,9 +69,7 @@ class DependabotYaml:
     def _sync(self, dependabot: Path) -> Executable:
         if self.dry_run:
             dumped = json.dumps(STANDARDS, indent=2)
-            return ProgramResult(name="Dependabot").success(
-                stdout=f"Changes would be applied:\n{dumped}",
-            )
+            return self._result.success(stdout=f"Changes to apply:\n{dumped}")
 
         with dependabot.open(mode="w", encoding="utf-8", newline="\n") as stream:
             yaml.dump(
@@ -80,9 +80,7 @@ class DependabotYaml:
                 default_flow_style=False,
             )
 
-        return ProgramResult(name="Dependabot").success(
-            stdout="Configuration synchronized successfully.",
-        )
+        return self._result.success(stdout="Configuration synchronized successfully.")
 
     def yaml_on(self, path: Path) -> Path:
         return path / ".github" / self.NAME
