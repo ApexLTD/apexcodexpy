@@ -43,10 +43,10 @@ class Codex:
         return CodexTools(self.target).sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
-        return Program(Poetry().lock()).execute().named("lock")
+        return Program(name="lock", command=Poetry().lock()).execute()
 
     def update(self) -> TaskResult:
-        return Program(Poetry().update()).execute().named("update")
+        return Program(name="update", command=Poetry().update()).execute()
 
     def install(self) -> TaskResult:
         return CodexTools(self.target).install().execute()
@@ -195,10 +195,10 @@ class Git:
         )
 
     def amend(self) -> TaskResult:
-        return (
-            Program(
-                Command("git commit").flag(all=True).flag(amend=True).flag(edit=False)
-            )
-            .execute()
-            .named("amend")
-        )
+        return Program(
+            name="amend",
+            command=Command("git commit")
+            .flag(all=True)
+            .flag(amend=True)
+            .flag(edit=False),
+        ).execute()
