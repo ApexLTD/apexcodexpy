@@ -181,10 +181,12 @@ class CodexTools:
         return PoetryRun().attach(
             Program(
                 name="test",
-                command=Pytest.on(self.target)
-                .run()
-                .flag(cov=not in_ci or None)
-                .flag(last_failed=not in_ci or None),
+                command=(
+                    Pytest.on(self.target)
+                    .run()
+                    .flag(cov=not in_ci or None)
+                    .flag(last_failed=not in_ci or None)
+                ),
             )
         )
 
