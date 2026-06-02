@@ -64,11 +64,11 @@ class ProgramResult:
             exit_code=0,
         )
 
-    def fail(self, *, stdout: str = "", stderr: str = "") -> ProgramResult:
+    def fail(self, *, message: str = "") -> ProgramResult:
         return ProgramResult(
             name=self.name,
-            stdout=stdout,
-            stderr=stderr,
+            stdout=self.stdout,
+            stderr=message or self.stderr,
             exit_code=1,
         )
 

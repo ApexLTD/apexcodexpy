@@ -79,7 +79,7 @@ class PyProjectToml:
 
     def _sync(self, pyproject: Path) -> Executable:
         if not pyproject.exists():
-            return self._result.fail(stderr=f"{self.NAME} not found.")
+            return self._result.fail(message=f"{self.NAME} not found.")
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
