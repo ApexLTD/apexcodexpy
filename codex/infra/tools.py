@@ -50,10 +50,7 @@ class PoetryRun:
 
     def attach(self, **program: Program) -> PoetryRun:
         self.program.attach(
-            **{
-                name: Program(f"poetry run {program}")
-                for name, program in program.items()
-            }
+            **{name: Poetry().run(program) for name, program in program.items()}
         )
 
         return self
