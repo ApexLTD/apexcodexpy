@@ -56,11 +56,11 @@ class ProgramResult:
             exit_code=result.returncode,
         )
 
-    def success(self, *, stdout: str = "", stderr: str = "") -> ProgramResult:
+    def success(self, *, message: str = "") -> ProgramResult:
         return ProgramResult(
             name=self.name,
-            stdout=stdout,
-            stderr=stderr,
+            stdout=message or self.stdout,
+            stderr=self.stderr,
             exit_code=0,
         )
 
