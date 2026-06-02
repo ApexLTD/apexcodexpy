@@ -65,12 +65,13 @@ class Codex:
 
     def fix(self, unsafe: bool = False) -> TaskResult:
         return (
-            MultiProgram()
-            .attach(black=Poetry().run(Ruff(on=self.target).format()))
+            PoetryRun()
+            .attach(black=Ruff(on=self.target).format())
             .attach(
-                ruff=Poetry().run(
-                    Ruff(on=self.target).lint().flag(fix=True).flag(unsafe_fixes=unsafe)
-                )
+                ruff=Ruff(on=self.target)
+                .lint()
+                .flag(fix=True)
+                .flag(unsafe_fixes=unsafe)
             )
             .execute()
         )
