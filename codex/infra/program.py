@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, MutableMapping
+from collections.abc import Iterable, Iterator, MutableMapping
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -51,7 +51,7 @@ class Command:
     def execute(self) -> ProgramResult:
         return ProgramResult.parse(
             subprocess.run(
-                str(self).split(),
+                list(self),
                 text=True,
                 encoding="utf-8",
                 capture_output=True,
@@ -59,9 +59,9 @@ class Command:
         )
 
     def __str__(self) -> str:
-        return " ".join(self._command())
+        return " ".join(self)
 
-    def _command(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         yield from self.name.split()
 
         for argument in self._arguments:

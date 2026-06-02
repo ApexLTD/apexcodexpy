@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import MultiProgram, Command
+from codex.infra.program import Command, MultiProgram
 from codex.infra.result import TaskResult
 
 
