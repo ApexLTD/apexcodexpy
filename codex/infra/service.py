@@ -34,13 +34,16 @@ class TestingCodex:
 class Codex:
     target: Path
 
+    def tools(self) -> CodexTools:
+        return CodexTools(self.target)
+
     def ci(self, on: bool) -> Codex:
         _ = on
 
         return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
-        return CodexTools(self.target).sync(dry_run=dry_run).execute()
+        return self.tools().sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
         return Program(name="lock", command=Poetry().lock()).execute()
@@ -49,16 +52,16 @@ class Codex:
         return Program(name="update", command=Poetry().update()).execute()
 
     def install(self) -> TaskResult:
-        return CodexTools(self.target).install().execute()
+        return self.tools().install().execute()
 
     def lint(self) -> TaskResult:
-        return CodexTools(self.target).lint().execute()
+        return self.tools().lint().execute()
 
     def fix(self, unsafe: bool = False) -> TaskResult:
-        return CodexTools(self.target).fix(unsafe=unsafe).execute()
+        return self.tools().fix(unsafe=unsafe).execute()
 
     def build(self, tag: str) -> TaskResult:
-        return CodexTools(self.target).build(tag).execute()
+        return self.tools().build(tag).execute()
 
 
 @dataclass(frozen=True)
