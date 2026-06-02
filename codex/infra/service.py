@@ -37,8 +37,9 @@ class Codex:
     def tools(self) -> CodexTools:
         return CodexTools(self.target)
 
-    def ci(self, on: bool) -> Codex:
-        _ = on
+    def ci(self, on: bool) -> Codex | CiCodex:
+        if on:
+            return CiCodex(tools=self.tools())
 
         return self
 
@@ -62,6 +63,19 @@ class Codex:
 
     def build(self, tag: str) -> TaskResult:
         return self.tools().build(tag).execute()
+
+
+@dataclass(frozen=True)
+class CiCodex:
+    tools: CodexTools
+
+    def lint(self) -> TaskResult:
+        return (
+            MultiProgram()
+            .attach(self.tools.install())
+            .attach(self.tools.lint())
+            .execute()
+        )
 
 
 @dataclass(frozen=True)
