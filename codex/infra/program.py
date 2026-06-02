@@ -9,6 +9,21 @@ from codex.infra.result import ComboResult, ProgramResult, TaskResult
 
 
 @dataclass(frozen=True)
+class Program:
+    command: Command
+
+    def execute(self) -> ProgramResult:
+        return ProgramResult.parse(
+            subprocess.run(
+                list(self.command),
+                text=True,
+                encoding="utf-8",
+                capture_output=True,
+            )
+        )
+
+
+@dataclass(frozen=True)
 class Command:
     name: str
 
@@ -49,14 +64,7 @@ class Command:
         return self
 
     def execute(self) -> ProgramResult:
-        return ProgramResult.parse(
-            subprocess.run(
-                list(self),
-                text=True,
-                encoding="utf-8",
-                capture_output=True,
-            )
-        )
+        return Program(self).execute()
 
     def __str__(self) -> str:
         return " ".join(self)
