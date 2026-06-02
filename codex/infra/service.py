@@ -37,10 +37,10 @@ class Codex:
         )
 
     def lock(self) -> TaskResult:
-        return MultiProgram().attach(lock=Poetry().lock()).execute()
+        return Poetry().lock().execute().named("lock")
 
     def update(self) -> TaskResult:
-        return MultiProgram().attach(update=Poetry().update()).execute()
+        return Poetry().update().execute().named("update")
 
     def lint(self) -> TaskResult:
         return (
