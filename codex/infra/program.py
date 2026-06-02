@@ -12,6 +12,8 @@ from codex.infra.result import ComboResult, ProgramResult, TaskResult
 class Program:
     command: Command
 
+    name: str = "Unknown"
+
     def execute(self) -> ProgramResult:
         return ProgramResult.parse(
             subprocess.run(

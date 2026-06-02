@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import Command, MultiProgram
+from codex.infra.program import Command, MultiProgram, Program
 from codex.infra.result import TaskResult
 
 
@@ -46,17 +46,16 @@ class Poetry:
 
 @dataclass(frozen=True)
 class PoetryRun:
-    program: MultiProgram = field(default_factory=MultiProgram)
+    programs: list[Program] = field(default_factory=list)
 
     def attach(self, **program: Command) -> PoetryRun:
-        self.program.attach(
-            **{name: Poetry().run(program) for name, program in program.items()}
-        )
+        for name, value in program.items():
+            self.programs.append(Program(name=name, command=value))
 
         return self
 
     def execute(self) -> TaskResult:
-        return self.program.execute()
+        return MultiProgram({p.name: p for p in self.programs}).execute()
 
 
 @dataclass(frozen=True, kw_only=True)
