@@ -9,22 +9,22 @@ from codex.infra.result import ComboResult, ProgramResult, TaskResult
 
 
 @dataclass(frozen=True)
-class Program:
+class Command:
     name: str
 
     _arguments: list[str] = field(init=False, default_factory=list)
 
-    def with_a(self, **kwargs: Any) -> Program:
+    def with_a(self, **kwargs: Any) -> Command:
         return self.and_a(**kwargs)
 
-    def and_a(self, **kwargs: Any) -> Program:
+    def and_a(self, **kwargs: Any) -> Command:
         assert len(kwargs) == 1, "with_a/and_a supports one argument at a time."
 
         name, value = kwargs.popitem()
 
         return self.append(f"--{name}={value}")
 
-    def flag(self, **kwargs: bool | None) -> Program:
+    def flag(self, **kwargs: bool | None) -> Command:
         for name, value in kwargs.items():
             flag = self.dashify(name)
 
@@ -36,13 +36,13 @@ class Program:
     def dashify(self, name: str) -> str:
         return name.replace("_", "-")
 
-    def extend(self, arguments: Iterable[Any]) -> Program:
+    def extend(self, arguments: Iterable[Any]) -> Command:
         for argument in arguments:
             self.append(argument)
 
         return self
 
-    def append(self, argument: Any) -> Program:
+    def append(self, argument: Any) -> Command:
         if argument is not None:
             self._arguments.extend(str(argument).split())
 

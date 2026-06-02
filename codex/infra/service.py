@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import Executable, MultiProgram, Program
+from codex.infra.program import Executable, MultiProgram, Command
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
@@ -107,7 +107,7 @@ class CodexTools:
 
     def behaviour(self) -> Executable:
         return PoetryRun().attach(
-            behave=Program("behave").append(self.target / "tests" / "features")
+            behave=Command("behave").append(self.target / "tests" / "features")
         )
 
     def integration(self) -> Executable:
@@ -120,7 +120,7 @@ class CodexTools:
                     pytest=Pytest.on(self.target / "tests" / "integration").run()
                 )
             )
-            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
+            .attach(teardown=Command("rm").append(self.target / "requirements.txt"))
         )
 
     def build(self, tag: str) -> Executable:
@@ -130,7 +130,7 @@ class CodexTools:
             .attach(export=Poetry().export(self.target))
             .attach(
                 build=(
-                    Program("docker build")
+                    Command("docker build")
                     .flag(tag=True)
                     .append(tag)
                     .flag(build_arg=True)
@@ -138,18 +138,18 @@ class CodexTools:
                     .append(self.target)
                 )
             )
-            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
+            .attach(teardown=Command("rm").append(self.target / "requirements.txt"))
         )
 
 
 @dataclass(frozen=True)
 class Git:
     def revision(self, of: str = "HEAD", short: bool = True) -> str:
-        return Program("git rev-parse").flag(short=short).append(of).execute().stdout
+        return Command("git rev-parse").flag(short=short).append(of).execute().stdout
 
     def amend(self) -> TaskResult:
         return (
-            Program("git commit")
+            Command("git commit")
             .flag(all=True)
             .flag(amend=True)
             .flag(edit=False)
