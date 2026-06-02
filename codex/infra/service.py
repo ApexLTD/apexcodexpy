@@ -108,18 +108,25 @@ class CodexTest:
     target: Path
 
     def unit(self) -> TaskResult:
-        return (
-            PoetryRun()
-            .attach(
-                pytest=Pytest.on(self.target)
-                .run()
-                .flag(cov=True)
-                .flag(last_failed=True)
-            )
-            .execute()
-        )
+        return CodexTestTools(self.target).unit().execute()
 
     def integration(self) -> TaskResult:
+        return CodexTestTools(self.target).integration().execute()
+
+    def behaviour(self) -> TaskResult:
+        return CodexTestTools(self.target).behaviour().execute()
+
+
+@dataclass(frozen=True)
+class CodexTestTools:
+    target: Path
+
+    def unit(self) -> Executable:
+        return PoetryRun().attach(
+            pytest=Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
+        )
+
+    def integration(self) -> Executable:
         return (
             MultiProgram()
             .attach(install=Pip().install("poetry", "poetry-plugin-export"))
@@ -130,14 +137,11 @@ class CodexTest:
                 )
             )
             .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
-            .execute()
         )
 
-    def behaviour(self) -> TaskResult:
-        return (
-            PoetryRun()
-            .attach(behave=Program("behave").append(self.target / "tests" / "features"))
-            .execute()
+    def behaviour(self) -> Executable:
+        return PoetryRun().attach(
+            behave=Program("behave").append(self.target / "tests" / "features")
         )
 
 
