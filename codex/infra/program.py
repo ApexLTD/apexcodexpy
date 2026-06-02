@@ -77,14 +77,6 @@ class Command:
             yield from str(argument).split()
 
 
-@dataclass(frozen=True)
-class FinishedProgram:
-    result: ProgramResult
-
-    def execute(self) -> ProgramResult:
-        return self.result
-
-
 class Executable(Protocol):
     def execute(self) -> TaskResult:
         pass
