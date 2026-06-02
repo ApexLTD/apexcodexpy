@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import Executable, MultiProgram, Program
+from codex.infra.program import MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
@@ -77,9 +77,13 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return self._install(when=self.in_ci).attach(pytest=self.test_unit()).execute()
+        return (
+            self._install(when=self.in_ci)
+            .attach(test=PoetryRun().attach(pytest=self.test_unit()))
+            .execute()
+        )
 
-    def test_unit(self) -> Executable:
+    def test_unit(self) -> Program:
         return CodexTest(self.target).ci(on=self.in_ci).unit()
 
     def test_integration(self) -> TaskResult:
@@ -117,8 +121,8 @@ class CodexTest:
     def ci(self, on: bool = False) -> CodexTest:
         return CodexTest(self.target, in_ci=on)
 
-    def unit(self) -> Executable:
-        return Poetry().run(
+    def unit(self) -> Program:
+        return (
             Pytest.on(self.target)
             .run()
             .flag(cov=self._when_not_in_ci())
