@@ -18,46 +18,47 @@ from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 
 @dataclass(frozen=True)
 class Codex:
-    target: Path
+    tools: CodexTools
 
-    def tools(self) -> CodexTools:
-        return CodexTools(self.target)
+    @classmethod
+    def target(cls, target: Path) -> Codex:
+        return cls(CodexTools(target))
 
     def ci(self, on: bool) -> Codex | CiCodex:
         if on:
-            return CiCodex(tools=self.tools())
+            return CiCodex(tools=self.tools)
 
         return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
-        return self.tools().sync(dry_run=dry_run).execute()
+        return self.tools.sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
-        return self.tools().lock().execute()
+        return self.tools.lock().execute()
 
     def update(self) -> TaskResult:
-        return self.tools().update().execute()
+        return self.tools.update().execute()
 
     def install(self) -> TaskResult:
-        return self.tools().install().execute()
+        return self.tools.install().execute()
 
     def lint(self) -> TaskResult:
-        return self.tools().lint().execute()
+        return self.tools.lint().execute()
 
     def fix(self, unsafe: bool = False) -> TaskResult:
-        return self.tools().fix(unsafe=unsafe).execute()
+        return self.tools.fix(unsafe=unsafe).execute()
 
     def unit(self) -> TaskResult:
-        return self.tools().unit().execute()
+        return self.tools.unit().execute()
 
     def integration(self) -> TaskResult:
-        return self.tools().integration().execute()
+        return self.tools.integration().execute()
 
     def behaviour(self) -> TaskResult:
-        return self.tools().behaviour().execute()
+        return self.tools.behaviour().execute()
 
     def build(self, tag: str) -> TaskResult:
-        return self.tools().build(tag).execute()
+        return self.tools.build(tag).execute()
 
 
 @dataclass(frozen=True)

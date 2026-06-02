@@ -26,7 +26,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .sync(dry_run=dry_run)
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -46,7 +46,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .install()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -66,7 +66,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .lock()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -86,7 +86,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .update()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -112,7 +112,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .build(tag=tag)
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -143,7 +143,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .ci(on=ci)
         .lint()
         .report(using=DefaultReporter().silenced(when=silent))
@@ -175,7 +175,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .fix(unsafe=unsafe)
         .report(using=DefaultReporter().silenced(when=silent))
         .exit(using=typer.Exit)

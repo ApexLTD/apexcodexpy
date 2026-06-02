@@ -26,7 +26,7 @@ def run_unit_tests(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .ci(on=ci)
         .unit()
         .report(using=DefaultReporter())
@@ -52,7 +52,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .ci(on=ci)
         .integration()
         .report(using=DefaultReporter())
@@ -78,7 +78,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .ci(on=ci)
         .behaviour()
         .report(using=DefaultReporter())
