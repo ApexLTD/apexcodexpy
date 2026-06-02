@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+from collections.abc import MutableSequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import BoundedProgram, Command, Program
-from codex.infra.result import ComboResult, TaskResult
+from codex.infra.program import (
+    BoundedProgram,
+    Command,
+    Executable,
+    MultiProgram,
+    Program,
+)
+from codex.infra.result import TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -66,7 +73,7 @@ class Poetry:
 
 @dataclass(frozen=True)
 class PoetryRun:
-    programs: list[Program] = field(default_factory=list)
+    programs: MutableSequence[Executable] = field(default_factory=list)
 
     def attach(self, program: Program) -> PoetryRun:
         self.programs.append(
@@ -79,7 +86,7 @@ class PoetryRun:
         return self
 
     def execute(self) -> TaskResult:
-        return ComboResult([program.execute() for program in self.programs])
+        return MultiProgram(self.programs).execute()
 
 
 @dataclass(frozen=True, kw_only=True)

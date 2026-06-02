@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, MutableSequence
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
@@ -84,7 +84,7 @@ class Executable(Protocol):
 
 @dataclass(frozen=True)
 class MultiProgram:
-    sub_programs: list[Executable] = field(default_factory=list)
+    sub_programs: MutableSequence[Executable] = field(default_factory=list)
 
     def attach(self, program: Executable) -> MultiProgram:
         self.sub_programs.append(program)
