@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, Iterator, MutableMapping
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
@@ -93,22 +93,17 @@ class Executable(Protocol):
 
 @dataclass(frozen=True)
 class MultiProgram:
-    sub_programs: MutableMapping[str, Executable] = field(default_factory=dict)
+    sub_programs: list[Executable] = field(default_factory=list)
 
     def attach(self, **program: Executable | Command) -> MultiProgram:
         for name, value in program.items():
             match value:
                 case Command():
-                    self.sub_programs[name] = Program(value)
+                    self.sub_programs.append(Program(name=name, command=value))
                 case _:
-                    self.sub_programs[name] = value
+                    self.sub_programs.append(value)
 
         return self
 
     def execute(self) -> TaskResult:
-        return ComboResult(
-            [
-                program.execute().named(name)
-                for name, program in self.sub_programs.items()
-            ]
-        )
+        return ComboResult([program.execute() for program in self.sub_programs])

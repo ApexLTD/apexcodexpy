@@ -6,9 +6,6 @@ from typing import Any, Protocol
 
 
 class TaskResult(Protocol):
-    def named(self, name: str) -> TaskResult:
-        pass
-
     def report(self, using: Reporter) -> TaskResult:
         pass
 
