@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +70,8 @@ STANDARDS = {
 class PyProjectToml:
     dry_run: bool = False
 
+    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
+
     NAME = "pyproject.toml"
 
     def sync(self, target: Path) -> Executable:
@@ -77,9 +79,7 @@ class PyProjectToml:
 
     def _sync(self, pyproject: Path) -> Executable:
         if not pyproject.exists():
-            return ProgramResult(name="PyProject").fail(
-                stderr=f"{self.NAME} not found.",
-            )
+            return self._result.fail(stderr=f"{self.NAME} not found.")
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
@@ -89,20 +89,14 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return ProgramResult(name="PyProject").success(
-                stdout="Configuration is already up to date."
-            )
+            return self._result.success(stdout="Configuration is already up to date.")
 
         if self.dry_run:
-            return ProgramResult(name="PyProject").success(
-                stdout=f"Changes would be applied:\n{modified}"
-            )
+            return self._result.success(stdout=f"Changes to apply:\n{modified}")
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return ProgramResult(name="PyProject").success(
-            stdout="Configuration synchronized successfully.",
-        )
+        return self._result.success(stdout="Configuration synchronized successfully.")
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
