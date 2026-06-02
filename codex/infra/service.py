@@ -16,13 +16,13 @@ class CodexTest:
     target: Path
 
     def unit(self) -> TaskResult:
-        return CodexTestTools(self.target).unit().execute()
+        return CodexTools(self.target).unit().execute()
 
     def integration(self) -> TaskResult:
-        return CodexTestTools(self.target).integration().execute()
+        return CodexTools(self.target).integration().execute()
 
     def behaviour(self) -> TaskResult:
-        return CodexTestTools(self.target).behaviour().execute()
+        return CodexTools(self.target).behaviour().execute()
 
 
 @dataclass(frozen=True)
@@ -115,11 +115,6 @@ class CodexTools:
             )
             .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
         )
-
-
-@dataclass(frozen=True)
-class CodexTestTools:
-    target: Path
 
     def unit(self) -> Executable:
         return PoetryRun().attach(
