@@ -68,13 +68,23 @@ class CiCodex:
         )
 
     def unit(self) -> TaskResult:
-        return self.tools.unit().execute()
+        return (
+            MultiProgram()
+            .attach(self.tools.install())
+            .attach(self.tools.unit())
+            .execute()
+        )
 
     def integration(self) -> TaskResult:
         return self.tools.integration().execute()
 
     def behaviour(self) -> TaskResult:
-        return self.tools.behaviour().execute()
+        return (
+            MultiProgram()
+            .attach(self.tools.install())
+            .attach(self.tools.behaviour())
+            .execute()
+        )
 
 
 @dataclass(frozen=True)
