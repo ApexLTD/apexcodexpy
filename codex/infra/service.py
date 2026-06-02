@@ -113,10 +113,10 @@ class CodexTest:
 
     def unit(self) -> Executable:
         return Poetry().run(
-            Pytest.on(self.target).run(
-                with_coverage=self._when_not_in_ci(),
-                last_failed=self._when_not_in_ci(),
-            )
+            Pytest.on(self.target)
+            .run()
+            .flag(cov=self._when_not_in_ci())
+            .flag(last_failed=self._when_not_in_ci())
         )
 
     def _when_not_in_ci(self) -> bool | None:

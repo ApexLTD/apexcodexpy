@@ -70,14 +70,5 @@ class Pytest:
     def on(cls, target: Path) -> Pytest:
         return cls(target) if target.resolve() != Path.cwd() else cls()
 
-    def run(
-        self,
-        with_coverage: bool | None = None,
-        last_failed: bool | None = None,
-    ) -> Program:
-        return (
-            Program("pytest")
-            .append(self.target)
-            .flag(cov=with_coverage)
-            .flag(last_failed=last_failed)
-        )
+    def run(self) -> Program:
+        return Program("pytest").append(self.target)
