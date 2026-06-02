@@ -29,6 +29,7 @@ def run_unit_tests(
         Codex(target=Path(path))
         .ci(on=ci)
         .test()
+        .unit()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
@@ -54,7 +55,8 @@ def _(
     (
         Codex(target=Path(path))
         .ci(on=ci)
-        .test_integration()
+        .test()
+        .integration()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
@@ -80,7 +82,8 @@ def _(
     (
         Codex(target=Path(path))
         .ci(on=ci)
-        .test_behaviour()
+        .test()
+        .behaviour()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )

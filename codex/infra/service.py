@@ -65,17 +65,8 @@ class Codex:
             .execute()
         )
 
-    def test(self) -> TaskResult:
-        return self.test_unit()
-
-    def test_unit(self) -> TaskResult:
-        return CodexTest(self.target).unit()
-
-    def test_integration(self) -> TaskResult:
-        return CodexTest(self.target).integration()
-
-    def test_behaviour(self) -> TaskResult:
-        return CodexTest(self.target).behaviour()
+    def test(self) -> CodexTest:
+        return CodexTest(self.target)
 
     def build(self, tag: str) -> TaskResult:
         return (
