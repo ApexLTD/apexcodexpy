@@ -51,11 +51,15 @@ class ProgramResult:
     name: str = "Unknown"
 
     def named(self, name: str) -> ProgramResult:
-        return ProgramResult(
-            stdout=self.stdout,
-            stderr=self.stderr,
-            exit_code=self.exit_code,
-            name=name.capitalize(),
+        return (
+            ProgramResult(
+                stdout=self.stdout,
+                stderr=self.stderr,
+                exit_code=self.exit_code,
+                name=name.capitalize(),
+            )
+            if self.name == "Unknown"
+            else self
         )
 
     def __int__(self) -> int:
