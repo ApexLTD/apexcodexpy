@@ -15,6 +15,11 @@ from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 class CodexTest:
     target: Path
 
+    def ci(self, on: bool) -> CodexTest:
+        _ = on
+
+        return self
+
     def unit(self) -> TaskResult:
         return CodexTools(self.target).unit().execute()
 
@@ -51,9 +56,6 @@ class Codex:
 
     def fix(self, unsafe: bool = False) -> TaskResult:
         return CodexTools(self.target).fix(unsafe=unsafe).execute()
-
-    def test(self) -> CodexTest:
-        return CodexTest(self.target)
 
     def build(self, tag: str) -> TaskResult:
         return CodexTools(self.target).build(tag).execute()

@@ -3,7 +3,7 @@ from pathlib import Path
 import typer
 
 from codex.infra.reporters import DefaultReporter
-from codex.infra.service import Codex
+from codex.infra.service import Codex, CodexTest
 
 cli = typer.Typer()
 
@@ -26,9 +26,8 @@ def run_unit_tests(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        CodexTest(target=Path(path))
         .ci(on=ci)
-        .test()
         .unit()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -53,9 +52,8 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        CodexTest(target=Path(path))
         .ci(on=ci)
-        .test()
         .integration()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -80,9 +78,8 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        CodexTest(target=Path(path))
         .ci(on=ci)
-        .test()
         .behaviour()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
