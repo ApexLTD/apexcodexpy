@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import Command, MultiProgram, Program
-from codex.infra.result import TaskResult
+from codex.infra.program import Command, Program
+from codex.infra.result import ComboResult, TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -55,7 +55,7 @@ class PoetryRun:
         return self
 
     def execute(self) -> TaskResult:
-        return MultiProgram({p.name: p for p in self.programs}).execute()
+        return ComboResult([program.execute() for program in self.programs])
 
 
 @dataclass(frozen=True, kw_only=True)

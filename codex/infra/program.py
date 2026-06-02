@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess
 from collections.abc import Iterable, Iterator, MutableMapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
 from codex.infra.result import ComboResult, ProgramResult, TaskResult
@@ -12,16 +12,19 @@ from codex.infra.result import ComboResult, ProgramResult, TaskResult
 class Program:
     command: Command
 
-    name: str = "Unknown"
+    name: str = "unknown"
 
     def execute(self) -> ProgramResult:
-        return ProgramResult.parse(
-            subprocess.run(
-                list(self.command),
-                text=True,
-                encoding="utf-8",
-                capture_output=True,
-            )
+        return replace(
+            ProgramResult.parse(
+                subprocess.run(
+                    list(self.command),
+                    text=True,
+                    encoding="utf-8",
+                    capture_output=True,
+                )
+            ),
+            name=self.name.capitalize(),
         )
 
 
