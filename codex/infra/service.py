@@ -98,6 +98,29 @@ class CodexTools:
             )
         )
 
+    def unit(self) -> Executable:
+        return PoetryRun().attach(
+            pytest=Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
+        )
+
+    def behaviour(self) -> Executable:
+        return PoetryRun().attach(
+            behave=Program("behave").append(self.target / "tests" / "features")
+        )
+
+    def integration(self) -> Executable:
+        return (
+            MultiProgram()
+            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
+            .attach(export=Poetry().export(self.target))
+            .attach(
+                test=PoetryRun().attach(
+                    pytest=Pytest.on(self.target / "tests" / "integration").run()
+                )
+            )
+            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
+        )
+
     def build(self, tag: str) -> Executable:
         return (
             MultiProgram()
@@ -114,29 +137,6 @@ class CodexTools:
                 )
             )
             .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
-        )
-
-    def unit(self) -> Executable:
-        return PoetryRun().attach(
-            pytest=Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
-        )
-
-    def integration(self) -> Executable:
-        return (
-            MultiProgram()
-            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
-            .attach(export=Poetry().export(self.target))
-            .attach(
-                test=PoetryRun().attach(
-                    pytest=Pytest.on(self.target / "tests" / "integration").run()
-                )
-            )
-            .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
-        )
-
-    def behaviour(self) -> Executable:
-        return PoetryRun().attach(
-            behave=Program("behave").append(self.target / "tests" / "features")
         )
 
 
