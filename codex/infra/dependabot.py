@@ -62,13 +62,13 @@ class DependabotYaml:
         dependabot = self.yaml_on(target)
         dependabot.parent.mkdir(parents=True, exist_ok=True)
 
-        return self._sync(dependabot).named("dependabot")
+        return self._sync(dependabot)
 
     def _sync(self, dependabot: Path) -> FinishedProgram:
         if self.dry_run:
             dumped = json.dumps(STANDARDS, indent=2)
             return FinishedProgram(
-                ProgramResult(name="dependabot").success(
+                ProgramResult(name="Dependabot").success(
                     stdout=f"Changes would be applied:\n{dumped}",
                 )
             )
@@ -83,7 +83,7 @@ class DependabotYaml:
             )
 
         return FinishedProgram(
-            ProgramResult(name="dependabot").success(
+            ProgramResult(name="Dependabot").success(
                 stdout="Configuration synchronized successfully.",
             )
         )

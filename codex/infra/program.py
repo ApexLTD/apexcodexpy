@@ -81,9 +81,6 @@ class Command:
 class FinishedProgram:
     result: ProgramResult
 
-    def named(self, name: str) -> FinishedProgram:
-        return FinishedProgram(replace(self.result, name=name.capitalize()))
-
     def execute(self) -> ProgramResult:
         return self.result
 
