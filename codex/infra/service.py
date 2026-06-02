@@ -68,8 +68,8 @@ class CodexTools:
     def sync(self, dry_run: bool = False) -> Executable:
         return (
             MultiProgram()
-            .attach(PyProjectToml(dry_run=dry_run).sync(self.target))  # pyproject
-            .attach(DependabotYaml(dry_run=dry_run).sync(self.target))  # dependabot
+            .attach(PyProjectToml(dry_run=dry_run).sync(self.target))
+            .attach(DependabotYaml(dry_run=dry_run).sync(self.target))
         )
 
     def install(self) -> Executable:

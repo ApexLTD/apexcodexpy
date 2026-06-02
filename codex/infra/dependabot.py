@@ -62,9 +62,9 @@ class DependabotYaml:
         dependabot = self.yaml_on(target)
         dependabot.parent.mkdir(parents=True, exist_ok=True)
 
-        return self._sync(dependabot)
+        return self._sync(dependabot).named("dependabot")
 
-    def _sync(self, dependabot: Path) -> Executable:
+    def _sync(self, dependabot: Path) -> FinishedProgram:
         if self.dry_run:
             dumped = json.dumps(STANDARDS, indent=2)
             return FinishedProgram(

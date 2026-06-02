@@ -73,9 +73,9 @@ class PyProjectToml:
     NAME = "pyproject.toml"
 
     def sync(self, target: Path) -> Executable:
-        return self._sync(self.toml_on(target))
+        return self._sync(self.toml_on(target)).named("PyProject")
 
-    def _sync(self, pyproject: Path) -> Executable:
+    def _sync(self, pyproject: Path) -> FinishedProgram:
         if not pyproject.exists():
             return FinishedProgram(ProgramResult.fail(stderr=f"{self.NAME} not found."))
 
