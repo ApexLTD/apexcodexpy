@@ -21,13 +21,13 @@ class Codex:
         return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
-        return CodexTools(self.target).sync(dry_run=dry_run).execute().named("sync")
+        return CodexTools(self.target).sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
-        return CodexTools(self.target).lock().execute().named("lock")
+        return Poetry().lock().execute().named("lock")
 
     def update(self) -> TaskResult:
-        return CodexTools(self.target).update().execute().named("update")
+        return Poetry().update().execute().named("update")
 
     def install(self) -> TaskResult:
         return CodexTools(self.target).install().execute()
@@ -55,12 +55,6 @@ class CodexTools:
             .attach(pyproject=PyProjectToml(dry_run=dry_run).sync(self.target))
             .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
         )
-
-    def lock(self) -> Executable:
-        return Poetry().lock()
-
-    def update(self) -> Executable:
-        return Poetry().update()
 
     def install(self) -> Executable:
         return (
