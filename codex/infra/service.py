@@ -29,17 +29,11 @@ class Codex:
         )
 
     def install(self) -> TaskResult:
-        return self._install(when=True).execute()
-
-    def _install(self, when: bool) -> MultiProgram:
         return (
-            (
-                MultiProgram()
-                .attach(tools=Pip().install("pip", "poetry"))
-                .attach(dependencies=Poetry().install())
-            )
-            if when
-            else MultiProgram()
+            MultiProgram()
+            .attach(tools=Pip().install("pip", "poetry"))
+            .attach(dependencies=Poetry().install())
+            .execute()
         )
 
     def lock(self) -> TaskResult:
