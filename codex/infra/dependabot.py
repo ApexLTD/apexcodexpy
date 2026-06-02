@@ -56,7 +56,7 @@ STANDARDS = {
 class DependabotYaml:
     dry_run: bool = False
 
-    _result: ProgramResult = field(init=False, default=ProgramResult(name="Dependabot"))
+    _result: ProgramResult = field(init=False, default=ProgramResult(name="DependaBot"))
 
     NAME = "dependabot.yml"
 
@@ -80,7 +80,7 @@ class DependabotYaml:
                 default_flow_style=False,
             )
 
-        return self._result.success(message="Configuration synchronized successfully.")
+        return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
 
     def yaml_on(self, path: Path) -> Path:
         return path / ".github" / self.NAME

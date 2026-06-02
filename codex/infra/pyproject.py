@@ -89,14 +89,14 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return self._result.success(message="Configuration is already up to date.")
+            return self._result.success(message=f"{self.NAME} is already up to date.\n")
 
         if self.dry_run:
             return self._result.success(message=f"Changes to apply:\n{modified}")
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return self._result.success(message="Configuration synchronized successfully.")
+        return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
