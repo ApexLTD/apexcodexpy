@@ -3,12 +3,19 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Protocol
 
-import typer
+from codex.infra.result import Reporter
+from codex.infra.typer.device import TyperDevice
 
 
 @dataclass(frozen=True)
 class DefaultReporter:
-    device: _Device = field(default_factory=lambda: TyperDevice())
+    device: _Device = field(default_factory=TyperDevice)
+
+    def silenced(self, *, when: bool) -> Reporter:
+        if when:
+            return DefaultReporter(SilentDevice())
+
+        return self
 
     def success_of(self, name: str) -> None:
         self.device.with_green().echo(f"✅ {name} passed!")
@@ -40,24 +47,20 @@ class _Device(Protocol):
         pass
 
 
-@dataclass(frozen=True)
-class TyperDevice:
-    color: str = typer.colors.RESET
+class SilentDevice:  # pragma: no cover
+    def with_green(self) -> _Device:
+        return self
 
-    def with_green(self) -> TyperDevice:
-        return TyperDevice(typer.colors.GREEN)
+    def with_red(self) -> _Device:
+        return self
 
-    def with_red(self) -> TyperDevice:
-        return TyperDevice(typer.colors.RED)
+    def with_white(self) -> _Device:
+        return self
 
-    def with_white(self) -> TyperDevice:
-        return TyperDevice(typer.colors.WHITE)
+    def with_yellow(self) -> _Device:
+        return self
 
-    def with_yellow(self) -> TyperDevice:
-        return TyperDevice(typer.colors.YELLOW)
-
-    def echo(self, message: str) -> TyperDevice:
-        if message.strip():
-            typer.secho(message, fg=self.color)
+    def echo(self, message: str) -> _Device:
+        _ = message
 
         return self

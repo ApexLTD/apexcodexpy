@@ -1,4 +1,4 @@
-from codex.typer import root_cli, testing_cli
+from codex.infra.typer import root_cli, testing_cli
 
 
 def cli() -> None:

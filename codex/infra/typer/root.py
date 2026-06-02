@@ -2,8 +2,8 @@ from pathlib import Path
 
 import typer
 
-from codex.reporters import DefaultReporter
-from codex.service import Codex, Git
+from codex.infra.reporters import DefaultReporter
+from codex.infra.service import Codex, Git
 
 cli = typer.Typer(no_args_is_help=True)
 
@@ -26,7 +26,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .sync(dry_run=dry_run)
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -46,7 +46,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .install()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -66,7 +66,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .lock()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -86,7 +86,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .update()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -112,7 +112,7 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .build(tag=tag)
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
@@ -143,11 +143,10 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .ci(on=ci)
         .lint()
-        .silenced(when=silent)
-        .report(using=DefaultReporter())
+        .report(using=DefaultReporter().silenced(when=silent))
         .exit(using=typer.Exit)
     )
 
@@ -176,10 +175,9 @@ def _(
     ),
 ) -> None:
     (
-        Codex(target=Path(path))
+        Codex.target(Path(path))
         .fix(unsafe=unsafe)
-        .silenced(when=silent)
-        .report(using=DefaultReporter())
+        .report(using=DefaultReporter().silenced(when=silent))
         .exit(using=typer.Exit)
     )
 

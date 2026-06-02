@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import tomlkit
 
-from codex.tasks import ProgramResult, TaskResult
+from codex.infra.program import Executable
+from codex.infra.result import ProgramResult
 
 
 def _mypy_config() -> dict[str, Any]:
@@ -69,14 +70,16 @@ STANDARDS = {
 class PyProjectToml:
     dry_run: bool = False
 
+    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
+
     NAME = "pyproject.toml"
 
-    def sync(self, target: Path) -> TaskResult:
+    def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
-    def _sync(self, pyproject: Path) -> TaskResult:
+    def _sync(self, pyproject: Path) -> Executable:
         if not pyproject.exists():
-            return ProgramResult.fail(stderr=f"{self.NAME} not found.")
+            return self._result.fail(message=f"{self.NAME} not found.")
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
@@ -86,16 +89,14 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return ProgramResult.success(stdout="Configuration is already up to date.")
+            return self._result.success(message=f"{self.NAME} is already up to date.\n")
 
         if self.dry_run:
-            return ProgramResult.success(
-                stdout=f"Changes would be applied:\n{modified}"
-            )
+            return self._result.success(message=f"Changes to apply:\n{modified}")
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return ProgramResult.success(stdout="Configuration synchronized successfully.")
+        return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
