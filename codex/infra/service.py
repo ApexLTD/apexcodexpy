@@ -138,8 +138,8 @@ class CodexTest:
             .attach(install=Pip().install("poetry", "poetry-plugin-export"))
             .attach(export=Poetry().export(self.target))
             .attach(
-                test=Poetry().run(
-                    Pytest.on(self.target / "tests" / "integration").run()
+                test=PoetryRun().attach(
+                    pytest=Pytest.on(self.target / "tests" / "integration").run()
                 )
             )
             .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
@@ -150,8 +150,8 @@ class CodexTest:
         return (
             MultiProgram()
             .attach(
-                behave=Poetry().run(
-                    Program("behave").append(self.target / "tests" / "features")
+                test=PoetryRun().attach(
+                    behave=Program("behave").append(self.target / "tests" / "features")
                 )
             )
             .execute()
