@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import MultiProgram, Program
+from codex.infra.program import Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
@@ -21,38 +21,64 @@ class Codex:
         return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
+        return CodexTools(self.target).sync(dry_run=dry_run).execute().named("sync")
+
+    def lock(self) -> TaskResult:
+        return CodexTools(self.target).lock().execute().named("lock")
+
+    def update(self) -> TaskResult:
+        return CodexTools(self.target).update().execute().named("update")
+
+    def install(self) -> TaskResult:
+        return CodexTools(self.target).install().execute()
+
+    def lint(self) -> TaskResult:
+        return CodexTools(self.target).lint().execute()
+
+    def fix(self, unsafe: bool = False) -> TaskResult:
+        return CodexTools(self.target).fix(unsafe=unsafe).execute()
+
+    def test(self) -> CodexTest:
+        return CodexTest(self.target)
+
+    def build(self, tag: str) -> TaskResult:
+        return CodexTools(self.target).build(tag).execute()
+
+
+@dataclass(frozen=True)
+class CodexTools:
+    target: Path
+
+    def sync(self, dry_run: bool = False) -> Executable:
         return (
             MultiProgram()
             .attach(pyproject=PyProjectToml(dry_run=dry_run).sync(self.target))
             .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
-            .execute()
         )
 
-    def lock(self) -> TaskResult:
-        return Poetry().lock().execute().named("lock")
+    def lock(self) -> Executable:
+        return Poetry().lock()
 
-    def update(self) -> TaskResult:
-        return Poetry().update().execute().named("update")
+    def update(self) -> Executable:
+        return Poetry().update()
 
-    def install(self) -> TaskResult:
+    def install(self) -> Executable:
         return (
             MultiProgram()
             .attach(tools=Pip().install("pip", "poetry"))
             .attach(dependencies=Poetry().install())
-            .execute()
         )
 
-    def lint(self) -> TaskResult:
+    def lint(self) -> Executable:
         return (
             PoetryRun()
             .attach(poetry=Poetry().lint(self.target))
             .attach(black=Ruff(on=self.target).format().flag(check=True))
             .attach(ruff=Ruff(on=self.target).lint())
             .attach(mypy=MyPy(on=self.target).check())
-            .execute()
         )
 
-    def fix(self, unsafe: bool = False) -> TaskResult:
+    def fix(self, unsafe: bool = False) -> Executable:
         return (
             PoetryRun()
             .attach(black=Ruff(on=self.target).format())
@@ -62,13 +88,9 @@ class Codex:
                 .flag(fix=True)
                 .flag(unsafe_fixes=unsafe)
             )
-            .execute()
         )
 
-    def test(self) -> CodexTest:
-        return CodexTest(self.target)
-
-    def build(self, tag: str) -> TaskResult:
+    def build(self, tag: str) -> Executable:
         return (
             MultiProgram()
             .attach(install=Pip().install("poetry", "poetry-plugin-export"))
@@ -84,7 +106,6 @@ class Codex:
                 )
             )
             .attach(teardown=Program("rm").append(self.target / "requirements.txt"))
-            .execute()
         )
 
 
