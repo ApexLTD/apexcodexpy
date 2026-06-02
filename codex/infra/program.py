@@ -93,3 +93,34 @@ class MultiProgram:
 
     def execute(self) -> TaskResult:
         return ComboResult([program.execute() for program in self.sub_programs])
+
+
+@dataclass(frozen=True)
+class BoundedProgram:
+    before: MultiProgram = field(init=False, default_factory=MultiProgram)
+    action: MultiProgram = field(init=False, default_factory=MultiProgram)
+    after: MultiProgram = field(init=False, default_factory=MultiProgram)
+
+    def setup(self, program: Executable) -> BoundedProgram:
+        self.before.attach(program)
+
+        return self
+
+    def teardown(self, program: Executable) -> BoundedProgram:
+        self.after.attach(program)
+
+        return self
+
+    def attach(self, program: Executable) -> BoundedProgram:
+        self.action.attach(program)
+
+        return self
+
+    def execute(self) -> TaskResult:
+        return (
+            MultiProgram()
+            .attach(self.before)
+            .attach(self.action)
+            .attach(self.after)
+            .execute()
+        )

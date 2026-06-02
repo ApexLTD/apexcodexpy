@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codex.infra.program import Command, Program
+from codex.infra.program import BoundedProgram, Command, Program
 from codex.infra.result import ComboResult, TaskResult
 
 
@@ -35,12 +35,32 @@ class Poetry:
     def run(self, program: Command) -> Command:
         return Command(f"poetry run {program}")
 
-    def export(self, target: Path) -> Command:
+    def export(self, target: Path) -> BoundedProgram:
         return (
-            Command("poetry export")
-            .flag(without_hashes=True)
-            .with_a(output="requirements.txt")
-            .with_a(directory=target)
+            BoundedProgram()
+            .setup(
+                Program(
+                    name="install",
+                    command=Pip().install("poetry", "poetry-plugin-export"),
+                )
+            )
+            .setup(
+                Program(
+                    name="export",
+                    command=(
+                        Command("poetry export")
+                        .flag(without_hashes=True)
+                        .with_a(output="requirements.txt")
+                        .with_a(directory=target)
+                    ),
+                )
+            )
+            .teardown(
+                Program(
+                    name="teardown",
+                    command=Command("rm").append(target / "requirements.txt"),
+                )
+            )
         )
 
 
