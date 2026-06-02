@@ -68,7 +68,9 @@ class DependabotYaml:
         if self.dry_run:
             dumped = json.dumps(STANDARDS, indent=2)
             return FinishedProgram(
-                ProgramResult.success(stdout=f"Changes would be applied:\n{dumped}")
+                ProgramResult(name="dependabot").success(
+                    stdout=f"Changes would be applied:\n{dumped}",
+                )
             )
 
         with dependabot.open(mode="w", encoding="utf-8", newline="\n") as stream:
@@ -81,7 +83,9 @@ class DependabotYaml:
             )
 
         return FinishedProgram(
-            ProgramResult.success(stdout="Configuration synchronized successfully.")
+            ProgramResult(name="dependabot").success(
+                stdout="Configuration synchronized successfully.",
+            )
         )
 
     def yaml_on(self, path: Path) -> Path:

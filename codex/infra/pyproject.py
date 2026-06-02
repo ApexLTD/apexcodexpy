@@ -77,7 +77,11 @@ class PyProjectToml:
 
     def _sync(self, pyproject: Path) -> FinishedProgram:
         if not pyproject.exists():
-            return FinishedProgram(ProgramResult.fail(stderr=f"{self.NAME} not found."))
+            return FinishedProgram(
+                ProgramResult(name="PyProject").fail(
+                    stderr=f"{self.NAME} not found.",
+                )
+            )
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
 
@@ -88,18 +92,24 @@ class PyProjectToml:
 
         if original == modified:
             return FinishedProgram(
-                ProgramResult.success(stdout="Configuration is already up to date.")
+                ProgramResult(name="PyProject").success(
+                    stdout="Configuration is already up to date."
+                )
             )
 
         if self.dry_run:
             return FinishedProgram(
-                ProgramResult.success(stdout=f"Changes would be applied:\n{modified}")
+                ProgramResult(name="PyProject").success(
+                    stdout=f"Changes would be applied:\n{modified}"
+                )
             )
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
         return FinishedProgram(
-            ProgramResult.success(stdout="Configuration synchronized successfully.")
+            ProgramResult(name="PyProject").success(
+                stdout="Configuration synchronized successfully.",
+            )
         )
 
     def toml_on(self, path: Path) -> Path:

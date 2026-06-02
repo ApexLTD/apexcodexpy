@@ -16,7 +16,7 @@ class Program:
 
     def execute(self) -> ProgramResult:
         return replace(
-            ProgramResult.parse(
+            ProgramResult(name=self.name.capitalize()).parse(
                 subprocess.run(
                     list(self.command),
                     text=True,
@@ -24,7 +24,6 @@ class Program:
                     capture_output=True,
                 )
             ),
-            name=self.name.capitalize(),
         )
 
 

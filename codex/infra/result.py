@@ -36,11 +36,11 @@ class ComboResult:
 
 @dataclass(frozen=True, kw_only=True)
 class ProgramResult:
-    stdout: str
-    stderr: str
-    exit_code: int
+    name: str
 
-    name: str = "Unknown"
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int = 0
 
     def __int__(self) -> int:
         return self.exit_code
@@ -48,21 +48,29 @@ class ProgramResult:
     def __bool__(self) -> bool:
         return self.exit_code == 0
 
-    @classmethod
-    def parse(cls, result: CompletedProcess[Any]) -> ProgramResult:
-        return cls(
+    def parse(self, result: CompletedProcess[Any]) -> ProgramResult:
+        return ProgramResult(
+            name=self.name,
             stdout=result.stdout or "",
             stderr=result.stderr or "",
             exit_code=result.returncode,
         )
 
-    @classmethod
-    def success(cls, *, stdout: str = "", stderr: str = "") -> ProgramResult:
-        return cls(stdout=stdout, stderr=stderr, exit_code=0)
+    def success(self, *, stdout: str = "", stderr: str = "") -> ProgramResult:
+        return ProgramResult(
+            name=self.name,
+            stdout=stdout,
+            stderr=stderr,
+            exit_code=0,
+        )
 
-    @classmethod
-    def fail(cls, *, stdout: str = "", stderr: str = "") -> ProgramResult:
-        return cls(stdout=stdout, stderr=stderr, exit_code=1)
+    def fail(self, *, stdout: str = "", stderr: str = "") -> ProgramResult:
+        return ProgramResult(
+            name=self.name,
+            stdout=stdout,
+            stderr=stderr,
+            exit_code=1,
+        )
 
     def report(self, using: Reporter) -> ProgramResult:
         if self.exit_code == 0:
