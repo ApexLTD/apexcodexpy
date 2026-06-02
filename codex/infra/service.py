@@ -120,12 +120,8 @@ class CodexTest:
 
     def behaviour(self) -> TaskResult:
         return (
-            MultiProgram()
-            .attach(
-                test=PoetryRun().attach(
-                    behave=Program("behave").append(self.target / "tests" / "features")
-                )
-            )
+            PoetryRun()
+            .attach(behave=Program("behave").append(self.target / "tests" / "features"))
             .execute()
         )
 
