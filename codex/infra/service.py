@@ -66,9 +66,9 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return PoetryRun().attach(pytest=self.test_unit()).execute()
+        return self.test_unit()
 
-    def test_unit(self) -> Program:
+    def test_unit(self) -> TaskResult:
         return CodexTest(self.target).unit()
 
     def test_integration(self) -> TaskResult:
@@ -101,8 +101,17 @@ class Codex:
 class CodexTest:
     target: Path
 
-    def unit(self) -> Program:
-        return Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
+    def unit(self) -> TaskResult:
+        return (
+            PoetryRun()
+            .attach(
+                pytest=Pytest.on(self.target)
+                .run()
+                .flag(cov=True)
+                .flag(last_failed=True)
+            )
+            .execute()
+        )
 
     def integration(self) -> TaskResult:
         return (
