@@ -71,7 +71,7 @@ class CiCodex:
         return (
             MultiProgram()
             .attach(self.tools.install())
-            .attach(self.tools.unit())
+            .attach(self.tools.unit(in_ci=True))
             .execute()
         )
 
@@ -172,14 +172,14 @@ class CodexTools:
             )
         )
 
-    def unit(self) -> Executable:
+    def unit(self, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
             Program(
                 name="test",
                 command=Pytest.on(self.target)
                 .run()
-                .flag(cov=True)
-                .flag(last_failed=True),
+                .flag(cov=not in_ci or None)
+                .flag(last_failed=not in_ci or None),
             )
         )
 
