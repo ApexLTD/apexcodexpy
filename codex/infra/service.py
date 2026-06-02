@@ -15,10 +15,10 @@ from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 class Codex:
     target: Path
 
-    in_ci: bool = False
-
     def ci(self, on: bool) -> Codex:
-        return Codex(self.target, in_ci=on)
+        _ = on
+
+        return self
 
     def sync(self, dry_run: bool = False) -> TaskResult:
         return (
@@ -50,16 +50,11 @@ class Codex:
 
     def lint(self) -> TaskResult:
         return (
-            self._install(when=self.in_ci)
-            .attach(
-                lint=(
-                    PoetryRun()
-                    .attach(poetry=Poetry().lint(self.target))
-                    .attach(black=Ruff(on=self.target).format().flag(check=True))
-                    .attach(ruff=Ruff(on=self.target).lint())
-                    .attach(mypy=MyPy(on=self.target).check())
-                )
-            )
+            PoetryRun()
+            .attach(poetry=Poetry().lint(self.target))
+            .attach(black=Ruff(on=self.target).format().flag(check=True))
+            .attach(ruff=Ruff(on=self.target).lint())
+            .attach(mypy=MyPy(on=self.target).check())
             .execute()
         )
 
@@ -77,14 +72,10 @@ class Codex:
         )
 
     def test(self) -> TaskResult:
-        return (
-            self._install(when=self.in_ci)
-            .attach(test=PoetryRun().attach(pytest=self.test_unit()))
-            .execute()
-        )
+        return PoetryRun().attach(pytest=self.test_unit()).execute()
 
     def test_unit(self) -> Program:
-        return CodexTest(self.target).ci(on=self.in_ci).unit()
+        return CodexTest(self.target).unit()
 
     def test_integration(self) -> TaskResult:
         return CodexTest(self.target).integration()
@@ -116,21 +107,8 @@ class Codex:
 class CodexTest:
     target: Path
 
-    in_ci: bool = False
-
-    def ci(self, on: bool = False) -> CodexTest:
-        return CodexTest(self.target, in_ci=on)
-
     def unit(self) -> Program:
-        return (
-            Pytest.on(self.target)
-            .run()
-            .flag(cov=self._when_not_in_ci())
-            .flag(last_failed=self._when_not_in_ci())
-        )
-
-    def _when_not_in_ci(self) -> bool | None:
-        return None if self.in_ci else True
+        return Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
 
     def integration(self) -> TaskResult:
         return (
