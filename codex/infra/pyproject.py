@@ -6,7 +6,7 @@ from typing import Any
 
 import tomlkit
 
-from codex.infra.program import Executable, FinishedProgram
+from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
 
 
@@ -75,12 +75,10 @@ class PyProjectToml:
     def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
-    def _sync(self, pyproject: Path) -> FinishedProgram:
+    def _sync(self, pyproject: Path) -> Executable:
         if not pyproject.exists():
-            return FinishedProgram(
-                ProgramResult(name="PyProject").fail(
-                    stderr=f"{self.NAME} not found.",
-                )
+            return ProgramResult(name="PyProject").fail(
+                stderr=f"{self.NAME} not found.",
             )
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
@@ -91,25 +89,19 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return FinishedProgram(
-                ProgramResult(name="PyProject").success(
-                    stdout="Configuration is already up to date."
-                )
+            return ProgramResult(name="PyProject").success(
+                stdout="Configuration is already up to date."
             )
 
         if self.dry_run:
-            return FinishedProgram(
-                ProgramResult(name="PyProject").success(
-                    stdout=f"Changes would be applied:\n{modified}"
-                )
+            return ProgramResult(name="PyProject").success(
+                stdout=f"Changes would be applied:\n{modified}"
             )
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 
-        return FinishedProgram(
-            ProgramResult(name="PyProject").success(
-                stdout="Configuration synchronized successfully.",
-            )
+        return ProgramResult(name="PyProject").success(
+            stdout="Configuration synchronized successfully.",
         )
 
     def toml_on(self, path: Path) -> Path:

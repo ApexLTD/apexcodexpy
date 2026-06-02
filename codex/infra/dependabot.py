@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from codex.infra.program import Executable, FinishedProgram
+from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
 
 
@@ -64,13 +64,11 @@ class DependabotYaml:
 
         return self._sync(dependabot)
 
-    def _sync(self, dependabot: Path) -> FinishedProgram:
+    def _sync(self, dependabot: Path) -> Executable:
         if self.dry_run:
             dumped = json.dumps(STANDARDS, indent=2)
-            return FinishedProgram(
-                ProgramResult(name="Dependabot").success(
-                    stdout=f"Changes would be applied:\n{dumped}",
-                )
+            return ProgramResult(name="Dependabot").success(
+                stdout=f"Changes would be applied:\n{dumped}",
             )
 
         with dependabot.open(mode="w", encoding="utf-8", newline="\n") as stream:
@@ -82,10 +80,8 @@ class DependabotYaml:
                 default_flow_style=False,
             )
 
-        return FinishedProgram(
-            ProgramResult(name="Dependabot").success(
-                stdout="Configuration synchronized successfully.",
-            )
+        return ProgramResult(name="Dependabot").success(
+            stdout="Configuration synchronized successfully.",
         )
 
     def yaml_on(self, path: Path) -> Path:

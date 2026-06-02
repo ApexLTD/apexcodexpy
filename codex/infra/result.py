@@ -72,6 +72,9 @@ class ProgramResult:
             exit_code=1,
         )
 
+    def execute(self) -> ProgramResult:
+        return self
+
     def report(self, using: Reporter) -> ProgramResult:
         if self.exit_code == 0:
             using.success_of(self.name)
