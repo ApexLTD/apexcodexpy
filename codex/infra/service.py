@@ -195,7 +195,6 @@ class Git:
         )
 
     def amend(self) -> TaskResult:
-
         return (
             Program(
                 Command("git commit").flag(all=True).flag(amend=True).flag(edit=False)

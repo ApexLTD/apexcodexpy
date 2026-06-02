@@ -50,7 +50,7 @@ class PoetryRun:
 
     def attach(self, **program: Command) -> PoetryRun:
         for name, value in program.items():
-            self.programs.append(Program(name=name, command=value))
+            self.programs.append(Program(name=name, command=Poetry().run(value)))
 
         return self
 
