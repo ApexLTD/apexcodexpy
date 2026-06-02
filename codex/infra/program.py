@@ -95,13 +95,8 @@ class Executable(Protocol):
 class MultiProgram:
     sub_programs: list[Executable] = field(default_factory=list)
 
-    def attach(self, **program: Executable | Command) -> MultiProgram:
-        for name, value in program.items():
-            match value:
-                case Command():
-                    self.sub_programs.append(Program(name=name, command=value))
-                case _:
-                    self.sub_programs.append(value)
+    def attach(self, program: Executable) -> MultiProgram:
+        self.sub_programs.append(program)
 
         return self
 

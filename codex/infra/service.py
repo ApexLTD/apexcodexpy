@@ -68,15 +68,25 @@ class CodexTools:
     def sync(self, dry_run: bool = False) -> Executable:
         return (
             MultiProgram()
-            .attach(pyproject=PyProjectToml(dry_run=dry_run).sync(self.target))
-            .attach(dependabot=DependabotYaml(dry_run=dry_run).sync(self.target))
+            .attach(PyProjectToml(dry_run=dry_run).sync(self.target))  # pyproject
+            .attach(DependabotYaml(dry_run=dry_run).sync(self.target))  # dependabot
         )
 
     def install(self) -> Executable:
         return (
             MultiProgram()
-            .attach(tools=Pip().install("pip", "poetry"))
-            .attach(dependencies=Poetry().install())
+            .attach(
+                Program(
+                    name="tools",
+                    command=Pip().install("pip", "poetry"),
+                )
+            )
+            .attach(
+                Program(
+                    name="dependencies",
+                    command=Poetry().install(),
+                )
+            )
         )
 
     def lint(self) -> Executable:
@@ -113,32 +123,65 @@ class CodexTools:
     def integration(self) -> Executable:
         return (
             MultiProgram()
-            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
-            .attach(export=Poetry().export(self.target))
             .attach(
-                test=PoetryRun().attach(
-                    pytest=Pytest.on(self.target / "tests" / "integration").run()
+                Program(
+                    name="install",
+                    command=Pip().install("poetry", "poetry-plugin-export"),
                 )
             )
-            .attach(teardown=Command("rm").append(self.target / "requirements.txt"))
+            .attach(
+                Program(
+                    name="export",
+                    command=Poetry().export(self.target),
+                )
+            )
+            .attach(
+                PoetryRun().attach(
+                    test=Pytest.on(self.target / "tests" / "integration").run()
+                )
+            )
+            .attach(
+                Program(
+                    name="teardown",
+                    command=Command("rm").append(self.target / "requirements.txt"),
+                )
+            )
         )
 
     def build(self, tag: str) -> Executable:
         return (
             MultiProgram()
-            .attach(install=Pip().install("poetry", "poetry-plugin-export"))
-            .attach(export=Poetry().export(self.target))
             .attach(
-                build=(
-                    Command("docker build")
-                    .flag(tag=True)
-                    .append(tag)
-                    .flag(build_arg=True)
-                    .with_a(RELEASE=Git().revision() or str(int(time())))
-                    .append(self.target)
+                Program(
+                    name="install",
+                    command=Pip().install("poetry", "poetry-plugin-export"),
                 )
             )
-            .attach(teardown=Command("rm").append(self.target / "requirements.txt"))
+            .attach(
+                Program(
+                    name="export",
+                    command=Poetry().export(self.target),
+                )
+            )
+            .attach(
+                Program(
+                    name="build",
+                    command=(
+                        Command("docker build")
+                        .flag(tag=True)
+                        .append(tag)
+                        .flag(build_arg=True)
+                        .with_a(RELEASE=Git().revision() or str(int(time())))
+                        .append(self.target)
+                    ),
+                )
+            )
+            .attach(
+                Program(
+                    name="teardown",
+                    command=Command("rm").append(self.target / "requirements.txt"),
+                )
+            )
         )
 
 
