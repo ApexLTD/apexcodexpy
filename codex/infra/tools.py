@@ -48,9 +48,13 @@ class Poetry:
 class PoetryRun:
     programs: list[Program] = field(default_factory=list)
 
-    def attach(self, **program: Command) -> PoetryRun:
-        for name, value in program.items():
-            self.programs.append(Program(name=name, command=Poetry().run(value)))
+    def attach(self, program: Program) -> PoetryRun:
+        self.programs.append(
+            Program(
+                name=program.name,
+                command=Poetry().run(program.command),
+            )
+        )
 
         return self
 

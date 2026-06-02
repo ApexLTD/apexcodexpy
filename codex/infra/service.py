@@ -92,32 +92,71 @@ class CodexTools:
     def lint(self) -> Executable:
         return (
             PoetryRun()
-            .attach(poetry=Poetry().lint(self.target))
-            .attach(black=Ruff(on=self.target).format().flag(check=True))
-            .attach(ruff=Ruff(on=self.target).lint())
-            .attach(mypy=MyPy(on=self.target).check())
+            .attach(
+                Program(
+                    name="poetry",
+                    command=Poetry().lint(self.target),
+                )
+            )
+            .attach(
+                Program(
+                    name="black",
+                    command=Ruff(on=self.target).format().flag(check=True),
+                )
+            )
+            .attach(
+                Program(
+                    name="ruff",
+                    command=Ruff(on=self.target).lint(),
+                )
+            )
+            .attach(
+                Program(
+                    name="mypy",
+                    command=MyPy(on=self.target).check(),
+                )
+            )
         )
 
     def fix(self, unsafe: bool = False) -> Executable:
         return (
             PoetryRun()
-            .attach(black=Ruff(on=self.target).format())
             .attach(
-                ruff=Ruff(on=self.target)
-                .lint()
-                .flag(fix=True)
-                .flag(unsafe_fixes=unsafe)
+                Program(
+                    name="black",
+                    command=Ruff(on=self.target).format(),
+                )
+            )
+            .attach(
+                Program(
+                    name="ruff",
+                    command=(
+                        Ruff(on=self.target)
+                        .lint()
+                        .flag(fix=True)
+                        .flag(unsafe_fixes=unsafe)
+                    ),
+                ),
             )
         )
 
     def unit(self) -> Executable:
         return PoetryRun().attach(
-            pytest=Pytest.on(self.target).run().flag(cov=True).flag(last_failed=True)
+            Program(
+                name="test",
+                command=Pytest.on(self.target)
+                .run()
+                .flag(cov=True)
+                .flag(last_failed=True),
+            )
         )
 
     def behaviour(self) -> Executable:
         return PoetryRun().attach(
-            behave=Command("behave").append(self.target / "tests" / "features")
+            Program(
+                name="behave",
+                command=Command("behave").append(self.target / "tests" / "features"),
+            )
         )
 
     def integration(self) -> Executable:
@@ -137,7 +176,10 @@ class CodexTools:
             )
             .attach(
                 PoetryRun().attach(
-                    test=Pytest.on(self.target / "tests" / "integration").run()
+                    Program(
+                        name="test",
+                        command=Pytest.on(self.target / "tests" / "integration").run(),
+                    )
                 )
             )
             .attach(
