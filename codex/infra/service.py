@@ -28,6 +28,12 @@ class Codex:
             .execute()
         )
 
+    def lock(self) -> TaskResult:
+        return Poetry().lock().execute().named("lock")
+
+    def update(self) -> TaskResult:
+        return Poetry().update().execute().named("update")
+
     def install(self) -> TaskResult:
         return (
             MultiProgram()
@@ -35,12 +41,6 @@ class Codex:
             .attach(dependencies=Poetry().install())
             .execute()
         )
-
-    def lock(self) -> TaskResult:
-        return Poetry().lock().execute().named("lock")
-
-    def update(self) -> TaskResult:
-        return Poetry().update().execute().named("update")
 
     def lint(self) -> TaskResult:
         return (
