@@ -46,10 +46,10 @@ class Codex:
         return self.tools().sync(dry_run=dry_run).execute()
 
     def lock(self) -> TaskResult:
-        return Program(name="lock", command=Poetry().lock()).execute()
+        return self.tools().lock().execute()
 
     def update(self) -> TaskResult:
-        return Program(name="update", command=Poetry().update()).execute()
+        return self.tools().update().execute()
 
     def install(self) -> TaskResult:
         return self.tools().install().execute()
@@ -74,6 +74,12 @@ class CodexTools:
             .attach(PyProjectToml(dry_run=dry_run).sync(self.target))
             .attach(DependabotYaml(dry_run=dry_run).sync(self.target))
         )
+
+    def lock(self) -> Executable:
+        return Program(name="lock", command=Poetry().lock())
+
+    def update(self) -> Executable:
+        return Program(name="update", command=Poetry().update())
 
     def install(self) -> Executable:
         return (
