@@ -12,10 +12,10 @@ from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
 
 
 @dataclass(frozen=True)
-class CodexTest:
+class TestingCodex:
     target: Path
 
-    def ci(self, on: bool) -> CodexTest:
+    def ci(self, on: bool) -> TestingCodex:
         _ = on
 
         return self
