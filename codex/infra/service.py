@@ -5,12 +5,7 @@ from pathlib import Path
 from time import time
 
 from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import (
-    Command,
-    Executable,
-    MultiProgram,
-    Program,
-)
+from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
