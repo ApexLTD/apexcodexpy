@@ -1,9 +1,6 @@
-name: Check Python Code
+name: Validate Python Code
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -26,10 +23,6 @@ jobs:
           python-version: 3.13
           pip-install: apexcodexpy
 
-      - &setup-dependencies
-        name: Install dependencies
-        run: codex install
-
       - name: Lint
         run: codex lint --ci
 
@@ -39,7 +32,6 @@ jobs:
     steps:
       - *checkout
       - *setup-python
-      - *setup-dependencies
 
       - name: Test unit
         run: codex test unit --ci
@@ -50,7 +42,6 @@ jobs:
     steps:
       - *checkout
       - *setup-python
-      - *setup-dependencies
 
       - name: Test integration
         run: codex test integration --ci
@@ -61,7 +52,6 @@ jobs:
     steps:
       - *checkout
       - *setup-python
-      - *setup-dependencies
 
       - name: Test behaviour
-        run: codex test behaviour
+        run: codex test behaviour --ci
