@@ -19,15 +19,10 @@ def _(
         "-p",
         help="Target directory.",
     ),
-    dry_run: bool = typer.Option(
-        False,
-        "--dry-run",
-        help="Show changes without applying them.",
-    ),
 ) -> None:
     (
         Codex.target(Path(path))
-        .sync(dry_run=dry_run)
+        .sync()
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
