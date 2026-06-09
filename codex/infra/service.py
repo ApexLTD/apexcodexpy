@@ -99,14 +99,14 @@ class CodexTools:
             .attach(
                 DependabotWorkflow(
                     name="Dependabot",
-                    path=self.target / ".github" / "dependabot.yml",
-                ).sync()
+                    path=Path(".github") / "dependabot.yml",
+                ).sync(self.target)
             )
             .attach(
                 CheckCodeWorkflow(
                     name="CheckCode",
-                    path=self.target / ".github" / "workflows" / "check_code.yml",
-                ).sync()
+                    path=Path(".github") / "workflows" / "check_code.yml",
+                ).sync(self.target)
             )
         )
 

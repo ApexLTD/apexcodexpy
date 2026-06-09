@@ -25,9 +25,10 @@ class YamlWorkflow(ABC):
     def standards(self) -> Mapping[Any, Any]:
         pass
 
-    def sync(self) -> Executable:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(
+    def sync(self, target: Path) -> Executable:
+        path = target / self.path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
             "# Auto Generated\n"
             "# By: Apex Codex\n"
             f"# At: {self._utcnow()}\n"
