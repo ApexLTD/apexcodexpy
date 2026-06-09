@@ -101,7 +101,7 @@ class CodexTools:
             .attach(
                 CheckCodeWorkflow(
                     name="CheckCode",
-                    path=self.target / ".github" / "workflows" / "code.yml",
+                    path=self.target / ".github" / "workflows" / "check_code.yml",
                 ).sync()
             )
         )
