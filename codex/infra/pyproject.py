@@ -68,8 +68,6 @@ STANDARDS = {
 
 @dataclass(frozen=True)
 class PyProjectToml:
-    dry_run: bool = False
-
     _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
 
     NAME = "pyproject.toml"
@@ -82,17 +80,12 @@ class PyProjectToml:
             return self._result.fail(message=f"{self.NAME} not found.")
 
         document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
-
-        # Create a copy for comparison if dry-run
         original = tomlkit.dumps(document)
         deep_merge(STANDARDS, document)
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return self._result.success(message=f"{self.NAME} is already up to date.\n")
-
-        if self.dry_run:
-            return self._result.success(message=f"Changes to apply:\n{modified}")
+            return self._result.success(message="Already up to date.\n")
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 

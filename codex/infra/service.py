@@ -4,16 +4,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import time
 
-from codex.infra.dependabot import DependabotYaml
-from codex.infra.program import (
-    Command,
-    Executable,
-    MultiProgram,
-    Program,
-)
+from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import TaskResult
 from codex.infra.tools import MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
+from codex.infra.workflows import CheckCodeWorkflow, DependabotWorkflow
 
 
 @dataclass(frozen=True)
@@ -30,8 +25,8 @@ class Codex:
 
         return self
 
-    def sync(self, dry_run: bool = False) -> TaskResult:
-        return self.tools.sync(dry_run=dry_run).execute()
+    def sync(self) -> TaskResult:
+        return self.tools.sync().execute()
 
     def lock(self) -> TaskResult:
         return self.tools.lock().execute()
@@ -102,11 +97,12 @@ class CiCodex:
 class CodexTools:
     target: Path
 
-    def sync(self, dry_run: bool = False) -> Executable:
+    def sync(self) -> Executable:
         return (
             MultiProgram()
-            .attach(PyProjectToml(dry_run=dry_run).sync(self.target))
-            .attach(DependabotYaml(dry_run=dry_run).sync(self.target))
+            .attach(PyProjectToml().sync(self.target))
+            .attach(DependabotWorkflow().sync(self.target))
+            .attach(CheckCodeWorkflow().sync(self.target))
         )
 
     def lock(self) -> Executable:
