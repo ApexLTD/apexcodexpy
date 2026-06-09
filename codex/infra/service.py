@@ -77,7 +77,12 @@ class CiCodex:
         )
 
     def integration(self) -> TaskResult:
-        return self.tools.integration().execute()
+        return (
+            MultiProgram()
+            .attach(self.tools.install())
+            .attach(self.tools.integration())
+            .execute()
+        )
 
     def behaviour(self) -> TaskResult:
         return (
