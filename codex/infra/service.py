@@ -96,18 +96,8 @@ class CodexTools:
         return (
             MultiProgram()
             .attach(PyProjectToml(dry_run=dry_run).sync(self.target))
-            .attach(
-                DependabotWorkflow(
-                    name="Dependabot",
-                    path=Path(".github") / "dependabot.yml",
-                ).sync(self.target)
-            )
-            .attach(
-                CheckCodeWorkflow(
-                    name="CheckCode",
-                    path=Path(".github") / "workflows" / "check_code.yml",
-                ).sync(self.target)
-            )
+            .attach(DependabotWorkflow().sync(self.target))
+            .attach(CheckCodeWorkflow().sync(self.target))
         )
 
     def lock(self) -> Executable:

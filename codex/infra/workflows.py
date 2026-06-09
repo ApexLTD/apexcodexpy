@@ -74,6 +74,9 @@ class CustomDumper(yaml.Dumper):
 
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
+    name: str = "CheckCode"
+    path: Path = Path(".github") / "workflows" / "check_code.yml"
+
     python_version: float | int = 3.13
     checkout_version: str = "v6"
     setup_python_version: str = "v6"
@@ -124,7 +127,11 @@ class CheckCodeWorkflow(YamlWorkflow):
         }
 
 
+@dataclass(frozen=True, kw_only=True)
 class DependabotWorkflow(YamlWorkflow):
+    name: str = "Dependabot"
+    path: Path = Path(".github") / "dependabot.yml"
+
     @property
     def standards(self) -> Mapping[str, Any]:
         return {
