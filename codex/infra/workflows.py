@@ -121,3 +121,47 @@ class CheckCodeWorkflow(YamlWorkflow):
                 "pip-install": "apexcodexpy",
             },
         }
+
+
+class DependabotWorkflow(YamlWorkflow):
+    @property
+    def standards(self) -> Mapping[str, Any]:
+        return {
+            "version": 2,
+            "updates": [
+                self._pip_config(),
+                self._gh_actions_config(),
+            ],
+        }
+
+    @staticmethod
+    def _pip_config() -> dict[str, Any]:
+        return {
+            "package-ecosystem": "pip",
+            "directory": "/",
+            "schedule": {
+                "interval": "weekly",
+                "day": "thursday",
+            },
+            "groups": {
+                "python": {
+                    "patterns": ["*"],
+                }
+            },
+        }
+
+    @staticmethod
+    def _gh_actions_config() -> dict[str, Any]:
+        return {
+            "package-ecosystem": "github-actions",
+            "directory": "/",
+            "schedule": {
+                "interval": "weekly",
+                "day": "thursday",
+            },
+            "groups": {
+                "gh-actions": {
+                    "patterns": ["*"],
+                }
+            },
+        }
