@@ -114,10 +114,6 @@ class MyPy:
         return Command("mypy").append(self.on)
 
 
-class MyPyProgram:
-    pass
-
-
 @dataclass(frozen=True)
 class Pytest:
     target: Path | None = None
