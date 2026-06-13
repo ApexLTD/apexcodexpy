@@ -99,6 +99,14 @@ class Ruff:
 
 
 @dataclass(frozen=True, kw_only=True)
+class Deptry:
+    on: Path
+
+    def lint(self) -> Command:
+        return Command("deptry").append(self.on).append("||").append("true")
+
+
+@dataclass(frozen=True, kw_only=True)
 class MyPy:
     on: Path
 

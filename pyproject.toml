@@ -7,7 +7,7 @@ authors = [
     { name = "Apex Dev", email = "dev@apex.ge" }
 ]
 dynamic = ["dependencies"]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4"
 
 [project.scripts]
 codex = "codex.runner:cli"
@@ -23,6 +23,7 @@ tomlkit = "*"
 mypy = "*"
 ruff = "*"
 pyyaml = "*"
+deptry = "*"
 
 [tool.poetry.group.dev.dependencies]
 behave = "*"
@@ -60,6 +61,13 @@ select = [
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+    "mypy",
+    "ruff",
+    "deptry",
+]
 
 [tool.coverage.run]
 branch = true

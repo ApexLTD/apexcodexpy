@@ -62,8 +62,13 @@ class Command:
         return self
 
     def append(self, argument: Any) -> Command:
-        if argument is not None:
-            self._arguments.extend(str(argument).split())
+        match argument:
+            case None:
+                pass
+            case str(text) if not text.startswith("'"):
+                self._arguments.extend(argument.split())
+            case _:
+                self._arguments.append(str(argument))
 
         return self
 
@@ -72,9 +77,7 @@ class Command:
 
     def __iter__(self) -> Iterator[str]:
         yield from self.name.split()
-
-        for argument in self._arguments:
-            yield from str(argument).split()
+        yield from self._arguments
 
 
 class Executable(Protocol):
