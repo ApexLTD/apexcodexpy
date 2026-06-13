@@ -104,7 +104,7 @@ class Deptry:
     on: Path
 
     def lint(self) -> Command:
-        return Command("deptry").append(self.on).append("||").append("true")
+        return Command("deptry").append(self.on).append("||").append("True")
 
 
 @dataclass(frozen=True, kw_only=True)
