@@ -6,8 +6,17 @@ from time import time
 
 from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
-from codex.infra.result import TaskResult
-from codex.infra.tools import Deptry, MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
+from codex.infra.result import ProgramResult, TaskResult
+from codex.infra.tools import (
+    Deptry,
+    MyPy,
+    Pip,
+    Poetry,
+    PoetryRun,
+    Pytest,
+    Ruff,
+    Version,
+)
 from codex.infra.workflows import CheckCodeWorkflow, DependabotWorkflow
 
 
@@ -24,6 +33,10 @@ class Codex:
             return CiCodex(tools=self.tools)
 
         return self
+
+    @staticmethod
+    def version() -> TaskResult:
+        return ProgramResult(name="version").success(message=str(Version()))
 
     def sync(self) -> TaskResult:
         return self.tools.sync().execute()

@@ -13,6 +13,7 @@ from yaml import MappingNode
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
+from codex.infra.tools import Version
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -90,8 +91,16 @@ class CheckCodeWorkflow(YamlWorkflow):
             "jobs": self._jobs(
                 lint="codex lint --ci",
                 test_unit="codex test unit --ci",
-                test_integration="codex test integration --ci",
-                test_behaviour="codex test behaviour --ci",
+                test_integration=(
+                    "codex test integration --ci"
+                    if Version().is_installed("pytest-docker")
+                    else ""
+                ),
+                test_behaviour=(
+                    "codex test behaviour --ci"
+                    if Version().is_installed("behave")
+                    else ""
+                ),
             ),
         }
 
@@ -109,6 +118,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                 ],
             }
             for name, value in commands.items()
+            if value
         }
 
     @cached_property
@@ -122,7 +132,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             "uses": "actions/setup-python@v6",
             "with": {
                 "python-version": self.python_version,
-                "pip-install": "apexcodexpy",
+                "pip-install": f"apexcodexpy=={Version()}",
             },
         }
 

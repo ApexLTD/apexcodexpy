@@ -2,10 +2,18 @@ from pathlib import Path
 
 import typer
 
-from codex.infra.reporters import DefaultReporter
+from codex.infra.reporters import DefaultReporter, SimpleReporter
 from codex.infra.service import Codex, Git
 
 cli = typer.Typer(no_args_is_help=True)
+
+
+@cli.command(
+    name="version",
+    help="Show the codex version and exit.",
+)
+def _() -> None:
+    Codex.version().report(using=SimpleReporter()).exit(using=typer.Exit)
 
 
 @cli.command(

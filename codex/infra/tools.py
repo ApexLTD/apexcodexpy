@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from importlib import metadata
 from pathlib import Path
 
 from codex.infra.program import (
@@ -103,7 +104,7 @@ class Deptry:
     on: Path
 
     def lint(self) -> Command:
-        return Command("deptry").append(self.on).append("||").append("true")
+        return Command("deptry").append(self.on).append("||").append("True")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -124,3 +125,19 @@ class Pytest:
 
     def run(self) -> Command:
         return Command("pytest").append(self.target)
+
+
+@dataclass(frozen=True)
+class Version:
+    @staticmethod
+    def of(package: str) -> str | None:
+        try:
+            return metadata.version(package)
+        except metadata.PackageNotFoundError:
+            return None
+
+    def is_installed(self, package: str) -> bool:
+        return self.of(package) is not None
+
+    def __str__(self) -> str:
+        return self.of("apexcodexpy") or "unknown"

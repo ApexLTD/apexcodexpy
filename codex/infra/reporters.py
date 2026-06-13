@@ -8,6 +8,23 @@ from codex.infra.typer.device import TyperDevice
 
 
 @dataclass(frozen=True)
+class SimpleReporter:
+    device: _Device = field(default_factory=TyperDevice)
+
+    def success_of(self, name: str) -> None:
+        pass
+
+    def failure_of(self, name: str) -> None:
+        pass
+
+    def out(self, message: str) -> None:
+        self.device.echo(message)
+
+    def error(self, message: str) -> None:
+        self.device.echo(message)
+
+
+@dataclass(frozen=True)
 class DefaultReporter:
     device: _Device = field(default_factory=TyperDevice)
 
