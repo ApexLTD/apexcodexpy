@@ -138,3 +138,6 @@ class Version:
 
     def is_installed(self, package: str) -> bool:
         return self.of(package) is not None
+
+    def __str__(self) -> str:
+        return self.of("apexcodexpy") or "unknown"

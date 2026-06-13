@@ -36,9 +36,7 @@ class Codex:
 
     @staticmethod
     def version() -> TaskResult:
-        return ProgramResult(name="version").success(
-            message=Version.of("apexcodexpy") or "unknown"
-        )
+        return ProgramResult(name="version").success(message=str(Version()))
 
     def sync(self) -> TaskResult:
         return self.tools.sync().execute()
