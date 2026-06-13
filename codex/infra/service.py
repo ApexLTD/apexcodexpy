@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from importlib import metadata
 from pathlib import Path
 from time import time
 
 from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import ProgramResult, TaskResult
-from codex.infra.tools import Deptry, MyPy, Pip, Poetry, PoetryRun, Pytest, Ruff
+from codex.infra.tools import (
+    Deptry,
+    MyPy,
+    Pip,
+    Poetry,
+    PoetryRun,
+    Pytest,
+    Ruff,
+    Version,
+)
 from codex.infra.workflows import CheckCodeWorkflow, DependabotWorkflow
 
 
@@ -28,12 +36,9 @@ class Codex:
 
     @staticmethod
     def version() -> TaskResult:
-        try:
-            __version__ = metadata.version("apexcodexpy")
-        except metadata.PackageNotFoundError:
-            __version__ = "unknown"
-
-        return ProgramResult(name="version").success(message=__version__)
+        return ProgramResult(name="version").success(
+            message=Version.of("apexcodexpy") or "unknown"
+        )
 
     def sync(self) -> TaskResult:
         return self.tools.sync().execute()

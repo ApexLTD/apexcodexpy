@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from importlib import metadata
 from pathlib import Path
 
 from codex.infra.program import (
@@ -124,3 +125,16 @@ class Pytest:
 
     def run(self) -> Command:
         return Command("pytest").append(self.target)
+
+
+@dataclass(frozen=True)
+class Version:
+    @staticmethod
+    def of(package: str) -> str | None:
+        try:
+            return metadata.version(package)
+        except metadata.PackageNotFoundError:
+            return None
+
+    def is_installed(self, package: str) -> bool:
+        return self.of(package) is not None
