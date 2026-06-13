@@ -13,6 +13,7 @@ from yaml import MappingNode
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
+from codex.infra.tools import Version
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -122,7 +123,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             "uses": "actions/setup-python@v6",
             "with": {
                 "python-version": self.python_version,
-                "pip-install": "apexcodexpy",
+                "pip-install": f"apexcodexpy=={Version()}",
             },
         }
 
