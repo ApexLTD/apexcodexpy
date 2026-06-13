@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: 3.13
-          pip-install: apexcodexpy==0.4.3
+          pip-install: apexcodexpy==0.4.2
       - name: Lint
         run: codex lint --ci
   test-unit:
