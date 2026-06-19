@@ -68,6 +68,22 @@ class Codex:
     def build(self, tag: str) -> TaskResult:
         return self.tools.build(tag).execute()
 
+    def push(
+        self,
+        tag: str,
+        registry: str,
+        organization: str,
+        token: str,
+        actor: str,
+    ) -> TaskResult:
+        return self.tools.push(
+            tag=tag,
+            registry=registry,
+            organization=organization,
+            token=token,
+            actor=actor,
+        ).execute()
+
 
 @dataclass(frozen=True)
 class CiCodex:
@@ -253,6 +269,46 @@ class CodexTools:
                         .with_a(RELEASE=Git().revision() or str(int(time())))
                         .append(self.target)
                     ),
+                )
+            )
+        )
+
+    def push(
+        self,
+        tag: str,
+        registry: str,
+        organization: str,
+        token: str,
+        actor: str,
+    ) -> Executable:
+        local_tag = tag.lower()
+        remote_tag = f"{registry}/{organization.lower()}/{local_tag}"
+
+        return (
+            MultiProgram()
+            .attach(
+                Program(
+                    name="tag",
+                    command=Command("docker tag").append(local_tag).append(remote_tag),
+                )
+            )
+            .attach(
+                Program(
+                    name="login",
+                    command=(
+                        Command("docker login")
+                        .append(registry)
+                        .flag(username=True)
+                        .append(actor)
+                        .flag(password=True)
+                        .append(token)
+                    ),
+                )
+            )
+            .attach(
+                Program(
+                    name="push",
+                    command=Command("docker push").append(remote_tag),
                 )
             )
         )

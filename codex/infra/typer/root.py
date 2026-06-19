@@ -123,6 +123,59 @@ def _(
 
 
 @cli.command(
+    name="push",
+    help="Tag and push a Docker image to GitHub Container Registry.",
+)
+def _(
+    tag: str = typer.Option(
+        ...,
+        "--tag",
+        "-t",
+        help="Image tag, e.g. latest.",
+    ),
+    registry: str = typer.Option(
+        "ghcr.io",
+        "--registry",
+        help="Container registry host.",
+    ),
+    organization: str = typer.Option(
+        ...,
+        "--organization",
+        "-o",
+        help="GHCR organization or namespace.",
+    ),
+    token: str = typer.Option(
+        ...,
+        "--token",
+        help="GitHub token for registry login.",
+    ),
+    actor: str = typer.Option(
+        ...,
+        "--actor",
+        help="GitHub username for registry login.",
+    ),
+    path: str = typer.Option(
+        ".",
+        "--path",
+        "-p",
+        help="Target directory.",
+    ),
+) -> None:
+    (
+        Codex.target(Path(path))
+        .push(
+            tag=tag,
+            registry=registry,
+            organization=organization,
+            token=token,
+            actor=actor,
+        )
+        .report(using=DefaultReporter())
+        .exit(using=typer.Exit)
+    )
+
+
+@cli.command(
     name="lint",
     help="Run linting (Ruff) and type checking (MyPy).",
 )
