@@ -264,7 +264,7 @@ class CodexTools:
                     command=(
                         Command("docker build")
                         .flag(tag=True)
-                        .append(tag)
+                        .append(tag.lower())
                         .flag(build_arg=True)
                         .with_a(RELEASE=Git().revision() or str(int(time())))
                         .append(self.target)
