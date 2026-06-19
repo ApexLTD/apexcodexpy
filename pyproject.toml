@@ -18,12 +18,12 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
+deptry = "*"
+mypy = "*"
+ruamel-yaml = "*"
+ruff = "*"
 typer = "*"
 tomlkit = "*"
-mypy = "*"
-ruff = "*"
-pyyaml = "*"
-deptry = "*"
 
 [tool.poetry.group.dev.dependencies]
 behave = "*"
