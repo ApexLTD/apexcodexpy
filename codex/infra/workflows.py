@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping, MutableSequence
+from collections.abc import Mapping, MutableSequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -13,32 +13,6 @@ from ruamel.yaml import YAML
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
 from codex.infra.tools import Version
-
-
-@dataclass(frozen=True, kw_only=True)
-class Yamler:
-    value: Any
-
-    def __call__(self) -> Any:
-        return self.value
-
-    @classmethod
-    def parse(cls, data: Mapping[str, Any]) -> Yamler:
-        serializer = YAML()
-        serializer.indent(mapping=2, sequence=4, offset=2)
-
-        stream = io.StringIO()
-        serializer.dump(data, stream)
-
-        stream.seek(0)
-        loaded = serializer.load(stream)
-
-        return cls(value=loaded)
-
-    def anchor(self, name: str) -> Yamler:
-        self.value.yaml_set_anchor(name, always_dump=True)
-
-        return self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -77,127 +51,6 @@ class YamlWorkflow(ABC):
         return ProgramResult(name=self.name).success(
             message=f"{self.name} workflow succeeded.\n"
         )
-
-
-class CiSteps:
-    checkout_code = Yamler.parse(
-        {
-            "name": "Checkout Code",
-            "uses": "actions/checkout@v7",
-        }
-    ).anchor(name="checkout")
-
-    setup_python = Yamler.parse(
-        {
-            "name": "Setup Python",
-            "uses": "actions/setup-python@v6",
-            "with": {
-                "python-version": Version.of_python(),
-                "pip-install": f"apexcodexpy=={Version()}",
-            },
-        }
-    ).anchor(name="setup-python")
-
-    lint_code = Yamler.parse(
-        {
-            "name": "Lint Code",
-            "run": "codex lint --ci",
-        }
-    )
-
-    run_unit_tests = Yamler.parse(
-        {
-            "name": "Run unit tests",
-            "run": "codex test unit --ci",
-        }
-    )
-
-    run_integration_tests = Yamler.parse(
-        {
-            "name": "Run integration tests",
-            "run": "codex test integration --ci",
-        }
-    )
-
-    run_behaviour_tests = Yamler.parse(
-        {
-            "name": "Run behaviour tests",
-            "run": "codex test behaviour --ci",
-        }
-    )
-
-
-@dataclass(frozen=True, kw_only=True)
-class CheckCodeWorkflow(YamlWorkflow):
-    name: str = "CheckCode"
-    path: Path = Path(".github") / "workflows" / "check_code.yml"
-
-    @property
-    def standards(self) -> Mapping[str, Any]:
-        return {
-            "name": "Validate Python Code",
-            "on": {"pull_request": {"branches": ["main"]}},
-            "permissions": {"contents": "read"},
-            "jobs": {job.name: job.yamlify() for job in self._jobs() if job.is_enabled},
-        }
-
-    def _jobs(self) -> Iterable[CiJob]:
-        yield (
-            CiJob(name="lint")
-            .with_step(CiSteps.checkout_code())
-            .with_step(CiSteps.setup_python())
-            .with_step(CiSteps.lint_code())
-        )
-
-        yield (
-            CiJob(name="test-unit")
-            .with_step(CiSteps.checkout_code())
-            .with_step(CiSteps.setup_python())
-            .with_step(CiSteps.run_unit_tests())
-        )
-
-        yield (
-            CiJob(name="test-integration")
-            .enabled(when=Version().is_installed("pytest-docker"))
-            .with_step(CiSteps.checkout_code())
-            .with_step(CiSteps.setup_python())
-            .with_step(CiSteps.run_integration_tests())
-        )
-
-        yield (
-            CiJob(name="test-behaviour")
-            .enabled(when=Version().is_installed("behave"))
-            .with_step(CiSteps.checkout_code())
-            .with_step(CiSteps.setup_python())
-            .with_step(CiSteps.run_behaviour_tests())
-        )
-
-
-@dataclass(frozen=True)
-class CiJob:
-    name: str
-
-    is_enabled: bool = True
-    platform: str = "ubuntu-latest"
-    steps: MutableSequence[Any] = field(default_factory=list)
-
-    def with_step(self, step: Any) -> CiJob:
-        self.steps.append(step)
-
-        return self
-
-    def enabled(self, when: bool) -> CiJob:
-        return replace(self, is_enabled=when)
-
-    def yamlify(self) -> Any:
-        return {
-            "runs-on": self.platform,
-            "steps": self.steps,
-        }
-
-
-class CiStep:
-    pass
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -246,3 +99,160 @@ class DependabotWorkflow(YamlWorkflow):
                 }
             },
         }
+
+
+@dataclass(frozen=True, kw_only=True)
+class CheckCodeWorkflow(YamlWorkflow):
+    name: str = "CheckCode"
+    path: Path = Path(".github") / "workflows" / "check_code.yml"
+
+    @property
+    def standards(self) -> Mapping[str, Any]:
+        return (
+            CiWorkflow(name="Validate Python Code")
+            .with_job(
+                CiJob(name="lint")
+                .with_step(CiSteps.checkout_code())
+                .with_step(CiSteps.setup_python())
+                .with_step(CiSteps.lint_code())
+            )
+            .with_job(
+                CiJob(name="test-unit")
+                .with_step(CiSteps.checkout_code())
+                .with_step(CiSteps.setup_python())
+                .with_step(CiSteps.run_unit_tests())
+            )
+            .with_job(
+                CiJob(name="test-integration")
+                .enabled(when=Version().is_installed("pytest-docker"))
+                .with_step(CiSteps.checkout_code())
+                .with_step(CiSteps.setup_python())
+                .with_step(CiSteps.run_integration_tests())
+            )
+            .with_job(
+                CiJob(name="test-behaviour")
+                .enabled(when=Version().is_installed("behave"))
+                .with_step(CiSteps.checkout_code())
+                .with_step(CiSteps.setup_python())
+                .with_step(CiSteps.run_behaviour_tests())
+            )
+            .yamlify()
+        )
+
+
+@dataclass(frozen=True)
+class CiWorkflow:
+    name: str
+
+    jobs: MutableSequence[CiJob] = field(default_factory=list)
+
+    def with_job(self, value: CiJob) -> CiWorkflow:
+        if value.is_enabled:
+            self.jobs.append(value)
+
+        return self
+
+    def yamlify(self) -> Any:
+        return {
+            "name": self.name,
+            "on": {"pull_request": {"branches": ["main"]}},
+            "permissions": {"contents": "read"},
+            "jobs": {job.name: job.yamlify() for job in self.jobs},
+        }
+
+
+@dataclass(frozen=True)
+class CiJob:
+    name: str
+
+    is_enabled: bool = True
+    platform: str = "ubuntu-latest"
+    steps: MutableSequence[Any] = field(default_factory=list)
+
+    def with_step(self, step: Any) -> CiJob:
+        self.steps.append(step)
+
+        return self
+
+    def enabled(self, when: bool) -> CiJob:
+        return replace(self, is_enabled=when)
+
+    def yamlify(self) -> Any:
+        return {
+            "runs-on": self.platform,
+            "steps": self.steps,
+        }
+
+
+@dataclass(frozen=True, kw_only=True)
+class Yamler:
+    value: Any
+
+    def __call__(self) -> Any:
+        return self.value
+
+    @classmethod
+    def parse(cls, data: Mapping[str, Any]) -> Yamler:
+        serializer = YAML()
+        serializer.indent(mapping=2, sequence=4, offset=2)
+
+        stream = io.StringIO()
+        serializer.dump(data, stream)
+
+        stream.seek(0)
+        loaded = serializer.load(stream)
+
+        return cls(value=loaded)
+
+    def anchor(self, name: str) -> Yamler:
+        self.value.yaml_set_anchor(name, always_dump=True)
+
+        return self
+
+
+class CiSteps:
+    checkout_code = Yamler.parse(
+        {
+            "name": "Checkout Code",
+            "uses": "actions/checkout@v7",
+        }
+    ).anchor(name="checkout")
+
+    setup_python = Yamler.parse(
+        {
+            "name": "Setup Python",
+            "uses": "actions/setup-python@v6",
+            "with": {
+                "python-version": Version.of_python(),
+                "pip-install": f"apexcodexpy=={Version()}",
+            },
+        }
+    ).anchor(name="setup-python")
+
+    lint_code = Yamler.parse(
+        {
+            "name": "Lint Code",
+            "run": "codex lint --ci",
+        }
+    )
+
+    run_unit_tests = Yamler.parse(
+        {
+            "name": "Run unit tests",
+            "run": "codex test unit --ci",
+        }
+    )
+
+    run_integration_tests = Yamler.parse(
+        {
+            "name": "Run integration tests",
+            "run": "codex test integration --ci",
+        }
+    )
+
+    run_behaviour_tests = Yamler.parse(
+        {
+            "name": "Run behaviour tests",
+            "run": "codex test behaviour --ci",
+        }
+    )
