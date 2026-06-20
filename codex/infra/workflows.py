@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, MutableSequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
-from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -16,33 +15,30 @@ from codex.infra.result import ProgramResult
 from codex.infra.tools import Version
 
 
-def default_ruamel_yaml() -> YAML:
-    yaml = YAML()
-    yaml.indent(mapping=2, sequence=4, offset=2)
-
-    return yaml
-
-
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Yamler:
-    anchor: str = ""
-    data: Any = field(default_factory=dict)
+    value: Any
 
-    _yaml: YAML = field(init=False, default_factory=default_ruamel_yaml)
+    def __call__(self) -> Any:
+        return self.value
 
-    def with_data(self, data: Any) -> Yamler:
-        return replace(self, data=data)
+    @classmethod
+    def parse(cls, data: Mapping[str, Any]) -> Yamler:
+        serializer = YAML()
+        serializer.indent(mapping=2, sequence=4, offset=2)
 
-    def yamlify(self) -> Any:
         stream = io.StringIO()
-        self._yaml.dump(self.data, stream)
+        serializer.dump(data, stream)
+
         stream.seek(0)
-        yaml = self._yaml.load(stream)
+        loaded = serializer.load(stream)
 
-        if self.anchor:
-            yaml.yaml_set_anchor(self.anchor, always_dump=True)
+        return cls(value=loaded)
 
-        return yaml
+    def anchor(self, name: str) -> Yamler:
+        self.value.yaml_set_anchor(name, always_dump=True)
+
+        return self
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -83,46 +79,28 @@ class YamlWorkflow(ABC):
         )
 
 
-@dataclass(frozen=True)
-class PythonSetupStep:
-    version: str = "v6"
-    python: float | int = 3.13
+class CiSteps:
+    @staticmethod
+    def checkout_code() -> Any:
+        return Yamler.parse(
+            {
+                "name": "Checkout Code",
+                "uses": "actions/checkout@v7",
+            }
+        ).anchor(name="checkout")
 
-    def yamlify(self) -> Any:
-        return self._yaml
-
-    @cached_property
-    def _yaml(self) -> Any:
-        return (
-            Yamler(anchor="setup-python")
-            .with_data(
-                {
-                    "name": "Set up Python",
-                    "uses": f"actions/setup-python@{self.version}",
-                    "with": {
-                        "python-version": self.python,
-                        "pip-install": f"apexcodexpy=={Version()}",
-                    },
-                }
-            )
-            .yamlify()
-        )
-
-
-@dataclass(frozen=True)
-class CheckoutStep:
-    version: str = "v7"
-
-    def yamlify(self) -> Any:
-        return self._yaml
-
-    @cached_property
-    def _yaml(self) -> Any:
-        return (
-            Yamler(anchor="checkout")
-            .with_data({"uses": f"actions/checkout@{self.version}"})
-            .yamlify()
-        )
+    @staticmethod
+    def setup_python(version: float | int = 3.13) -> Any:
+        return Yamler.parse(
+            {
+                "name": "Setup Python",
+                "uses": "actions/setup-python@v6",
+                "with": {
+                    "python-version": version,
+                    "pip-install": f"apexcodexpy=={Version()}",
+                },
+            }
+        ).anchor(name="setup-python")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -130,8 +108,8 @@ class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
-    _setup: Any = field(init=False, default_factory=PythonSetupStep().yamlify)
-    _checkout: Any = field(init=False, default_factory=CheckoutStep().yamlify)
+    _checkout: Any = field(init=False, default_factory=CiSteps.checkout_code())
+    _setup: Any = field(init=False, default_factory=CiSteps.setup_python())
 
     @property
     def standards(self) -> Mapping[str, Any]:
