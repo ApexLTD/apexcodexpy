@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import io
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
+from collections.abc import Iterable, Mapping, MutableSequence
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from functools import cached_property
 from pathlib import Path
@@ -88,71 +88,59 @@ class CheckCodeWorkflow(YamlWorkflow):
             "name": "Validate Python Code",
             "on": {"pull_request": {"branches": ["main"]}},
             "permissions": {"contents": "read"},
-            "jobs": dict(self._jobs()),
+            "jobs": {job.name: job.yamlify() for job in self._jobs() if job.is_enabled},
         }
 
-    def _jobs(self) -> Iterable[tuple[str, Mapping[str, Any]]]:
+    def _jobs(self) -> Iterable[CiJob]:
         yield (
-            "lint",
-            {
-                "runs-on": "ubuntu-latest",
-                "steps": [
-                    self._checkout,
-                    self._setup,
-                    {
-                        "name": "Lint Code",
-                        "run": "codex lint --ci",
-                    },
-                ],
-            },
+            CiJob(name="lint")
+            .with_step(self._checkout)
+            .with_step(self._setup)
+            .with_step(
+                {
+                    "name": "Lint Code",
+                    "run": "codex lint --ci",
+                }
+            )
         )
 
         yield (
-            "test-unit",
-            {
-                "runs-on": "ubuntu-latest",
-                "steps": [
-                    self._checkout,
-                    self._setup,
-                    {
-                        "name": "Run unit tests",
-                        "run": "codex test unit --ci",
-                    },
-                ],
-            },
+            CiJob(name="test-unit")
+            .with_step(self._checkout)
+            .with_step(self._setup)
+            .with_step(
+                {
+                    "name": "Run unit tests",
+                    "run": "codex test unit --ci",
+                }
+            )
         )
 
-        if Version().is_installed("pytest-docker"):
-            yield (
-                "test-integration",
+        yield (
+            CiJob(name="test-integration")
+            .enabled(when=Version().is_installed("pytest-docker"))
+            .with_step(self._checkout)
+            .with_step(self._setup)
+            .with_step(
                 {
-                    "runs-on": "ubuntu-latest",
-                    "steps": [
-                        self._checkout,
-                        self._setup,
-                        {
-                            "name": "Run integration tests",
-                            "run": "codex test integration --ci",
-                        },
-                    ],
-                },
+                    "name": "Run integration tests",
+                    "run": "codex test integration --ci",
+                }
             )
+        )
 
-        if Version().is_installed("behave"):
-            yield (
-                "test-behaviour",
+        yield (
+            CiJob(name="test-behaviour")
+            .enabled(when=Version().is_installed("behave"))
+            .with_step(self._checkout)
+            .with_step(self._setup)
+            .with_step(
                 {
-                    "runs-on": "ubuntu-latest",
-                    "steps": [
-                        self._checkout,
-                        self._setup,
-                        {
-                            "name": "Run behaviour tests",
-                            "run": "codex test behaviour --ci",
-                        },
-                    ],
-                },
+                    "name": "Run behaviour tests",
+                    "run": "codex test behaviour --ci",
+                }
             )
+        )
 
     @cached_property
     def _checkout(self) -> Any:
@@ -174,6 +162,29 @@ class CheckCodeWorkflow(YamlWorkflow):
             },
             anchor="setup-python",
         )
+
+
+@dataclass(frozen=True)
+class CiJob:
+    name: str
+
+    is_enabled: bool = True
+    platform: str = "ubuntu-latest"
+    steps: MutableSequence[Any] = field(default_factory=list)
+
+    def with_step(self, step: Any) -> CiJob:
+        self.steps.append(step)
+
+        return self
+
+    def enabled(self, when: bool) -> CiJob:
+        return replace(self, is_enabled=when)
+
+    def yamlify(self) -> Any:
+        return {
+            "runs-on": self.platform,
+            "steps": self.steps,
+        }
 
 
 @dataclass(frozen=True, kw_only=True)
