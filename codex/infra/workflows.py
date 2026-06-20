@@ -73,14 +73,37 @@ class YamlWorkflow(ABC):
         )
 
 
+@dataclass(frozen=True)
+class PythonSetupStep:
+    version: str = "v6"
+    python: float | int = 3.13
+
+    def yamlify(self) -> Any:
+        return self._yaml
+
+    @cached_property
+    def _yaml(self) -> Any:
+        return Yamler().yamlify(
+            data={
+                "name": "Set up Python",
+                "uses": f"actions/setup-python@{self.version}",
+                "with": {
+                    "python-version": self.python,
+                    "pip-install": f"apexcodexpy=={Version()}",
+                },
+            },
+            anchor="setup-python",
+        )
+
+
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
-    python_version: float | int = 3.13
     checkout_version: str = "v6"
-    setup_python_version: str = "v6"
+
+    _setup: Any = field(init=False, default_factory=PythonSetupStep().yamlify)
 
     @property
     def standards(self) -> Mapping[str, Any]:
@@ -149,20 +172,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             anchor="checkout",
         )
 
-    @cached_property
-    def _setup(self) -> Any:
-        return Yamler().yamlify(
-            data={
-                "name": "Set up Python",
-                "uses": "actions/setup-python@v6",
-                "with": {
-                    "python-version": self.python_version,
-                    "pip-install": f"apexcodexpy=={Version()}",
-                },
-            },
-            anchor="setup-python",
-        )
-
 
 @dataclass(frozen=True)
 class CiJob:
@@ -185,6 +194,10 @@ class CiJob:
             "runs-on": self.platform,
             "steps": self.steps,
         }
+
+
+class CiStep:
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)
