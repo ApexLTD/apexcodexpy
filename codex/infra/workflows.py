@@ -90,13 +90,13 @@ class CiSteps:
         ).anchor(name="checkout")
 
     @staticmethod
-    def setup_python(version: float | int = 3.13) -> Any:
+    def setup_python() -> Any:
         return Yamler.parse(
             {
                 "name": "Setup Python",
                 "uses": "actions/setup-python@v6",
                 "with": {
-                    "python-version": version,
+                    "python-version": Version.of_python(),
                     "pip-install": f"apexcodexpy=={Version()}",
                 },
             }

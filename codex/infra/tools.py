@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from importlib import metadata
 from pathlib import Path
@@ -129,6 +130,10 @@ class Pytest:
 
 @dataclass(frozen=True)
 class Version:
+    @staticmethod
+    def of_python() -> float | int:
+        return float(f"{sys.version_info.major}.{sys.version_info.minor}")
+
     @staticmethod
     def of(package: str) -> str | None:
         try:
