@@ -80,36 +80,57 @@ class YamlWorkflow(ABC):
 
 
 class CiSteps:
-    @staticmethod
-    def checkout_code() -> Any:
-        return Yamler.parse(
-            {
-                "name": "Checkout Code",
-                "uses": "actions/checkout@v7",
-            }
-        ).anchor(name="checkout")
+    checkout_code = Yamler.parse(
+        {
+            "name": "Checkout Code",
+            "uses": "actions/checkout@v7",
+        }
+    ).anchor(name="checkout")
 
-    @staticmethod
-    def setup_python() -> Any:
-        return Yamler.parse(
-            {
-                "name": "Setup Python",
-                "uses": "actions/setup-python@v6",
-                "with": {
-                    "python-version": Version.of_python(),
-                    "pip-install": f"apexcodexpy=={Version()}",
-                },
-            }
-        ).anchor(name="setup-python")
+    setup_python = Yamler.parse(
+        {
+            "name": "Setup Python",
+            "uses": "actions/setup-python@v6",
+            "with": {
+                "python-version": Version.of_python(),
+                "pip-install": f"apexcodexpy=={Version()}",
+            },
+        }
+    ).anchor(name="setup-python")
+
+    lint_code = Yamler.parse(
+        {
+            "name": "Lint Code",
+            "run": "codex lint --ci",
+        }
+    )
+
+    run_unit_tests = Yamler.parse(
+        {
+            "name": "Run unit tests",
+            "run": "codex test unit --ci",
+        }
+    )
+
+    run_integration_tests = Yamler.parse(
+        {
+            "name": "Run integration tests",
+            "run": "codex test integration --ci",
+        }
+    )
+
+    run_behaviour_tests = Yamler.parse(
+        {
+            "name": "Run behaviour tests",
+            "run": "codex test behaviour --ci",
+        }
+    )
 
 
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
-
-    _checkout: Any = field(init=False, default_factory=CiSteps.checkout_code())
-    _setup: Any = field(init=False, default_factory=CiSteps.setup_python())
 
     @property
     def standards(self) -> Mapping[str, Any]:
@@ -123,52 +144,32 @@ class CheckCodeWorkflow(YamlWorkflow):
     def _jobs(self) -> Iterable[CiJob]:
         yield (
             CiJob(name="lint")
-            .with_step(self._checkout)
-            .with_step(self._setup)
-            .with_step(
-                {
-                    "name": "Lint Code",
-                    "run": "codex lint --ci",
-                }
-            )
+            .with_step(CiSteps.checkout_code())
+            .with_step(CiSteps.setup_python())
+            .with_step(CiSteps.lint_code())
         )
 
         yield (
             CiJob(name="test-unit")
-            .with_step(self._checkout)
-            .with_step(self._setup)
-            .with_step(
-                {
-                    "name": "Run unit tests",
-                    "run": "codex test unit --ci",
-                }
-            )
+            .with_step(CiSteps.checkout_code())
+            .with_step(CiSteps.setup_python())
+            .with_step(CiSteps.run_unit_tests())
         )
 
         yield (
             CiJob(name="test-integration")
             .enabled(when=Version().is_installed("pytest-docker"))
-            .with_step(self._checkout)
-            .with_step(self._setup)
-            .with_step(
-                {
-                    "name": "Run integration tests",
-                    "run": "codex test integration --ci",
-                }
-            )
+            .with_step(CiSteps.checkout_code())
+            .with_step(CiSteps.setup_python())
+            .with_step(CiSteps.run_integration_tests())
         )
 
         yield (
             CiJob(name="test-behaviour")
             .enabled(when=Version().is_installed("behave"))
-            .with_step(self._checkout)
-            .with_step(self._setup)
-            .with_step(
-                {
-                    "name": "Run behaviour tests",
-                    "run": "codex test behaviour --ci",
-                }
-            )
+            .with_step(CiSteps.checkout_code())
+            .with_step(CiSteps.setup_python())
+            .with_step(CiSteps.run_behaviour_tests())
         )
 
 
