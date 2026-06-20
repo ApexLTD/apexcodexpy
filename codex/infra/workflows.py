@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import cached_property
@@ -88,44 +88,71 @@ class CheckCodeWorkflow(YamlWorkflow):
             "name": "Validate Python Code",
             "on": {"pull_request": {"branches": ["main"]}},
             "permissions": {"contents": "read"},
-            "jobs": self._jobs(),
+            "jobs": dict(self._jobs()),
         }
 
-    def _jobs(self) -> dict[str, Any]:
-        jobs = {
-            "lint": self._job(
-                name="Lint Code",
-                command="codex lint --ci",
-            ),
-            "test-unit": self._job(
-                name="Run unit tests",
-                command="codex test unit --ci",
-            ),
-        }
+    def _jobs(self) -> Iterable[tuple[str, Mapping[str, Any]]]:
+        yield (
+            "lint",
+            {
+                "runs-on": "ubuntu-latest",
+                "steps": [
+                    self._checkout,
+                    self._setup,
+                    {
+                        "name": "Lint Code",
+                        "run": "codex lint --ci",
+                    },
+                ],
+            },
+        )
+
+        yield (
+            "test-unit",
+            {
+                "runs-on": "ubuntu-latest",
+                "steps": [
+                    self._checkout,
+                    self._setup,
+                    {
+                        "name": "Run unit tests",
+                        "run": "codex test unit --ci",
+                    },
+                ],
+            },
+        )
 
         if Version().is_installed("pytest-docker"):
-            jobs["test-integration"] = self._job(
-                name="Run integration tests",
-                command="codex test integration --ci",
+            yield (
+                "test-integration",
+                {
+                    "runs-on": "ubuntu-latest",
+                    "steps": [
+                        self._checkout,
+                        self._setup,
+                        {
+                            "name": "Run integration tests",
+                            "run": "codex test integration --ci",
+                        },
+                    ],
+                },
             )
 
         if Version().is_installed("behave"):
-            jobs["test-behaviour"] = self._job(
-                name="Run behaviour tests",
-                command="codex test behaviour --ci",
+            yield (
+                "test-behaviour",
+                {
+                    "runs-on": "ubuntu-latest",
+                    "steps": [
+                        self._checkout,
+                        self._setup,
+                        {
+                            "name": "Run behaviour tests",
+                            "run": "codex test behaviour --ci",
+                        },
+                    ],
+                },
             )
-
-        return jobs
-
-    def _job(self, name: str, command: str) -> Mapping[str, Any]:
-        return {
-            "runs-on": "ubuntu-latest",
-            "steps": [
-                self._checkout,
-                self._setup,
-                {"name": name, "run": command},
-            ],
-        }
 
     @cached_property
     def _checkout(self) -> Any:
