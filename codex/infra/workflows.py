@@ -96,14 +96,28 @@ class PythonSetupStep:
         )
 
 
+@dataclass(frozen=True)
+class CheckoutStep:
+    version: str = "v7"
+
+    def yamlify(self) -> Any:
+        return self._yaml
+
+    @cached_property
+    def _yaml(self) -> Any:
+        return Yamler().yamlify(
+            data={"uses": f"actions/checkout@{self.version}"},
+            anchor="checkout",
+        )
+
+
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
-    checkout_version: str = "v6"
-
     _setup: Any = field(init=False, default_factory=PythonSetupStep().yamlify)
+    _checkout: Any = field(init=False, default_factory=CheckoutStep().yamlify)
 
     @property
     def standards(self) -> Mapping[str, Any]:
@@ -163,13 +177,6 @@ class CheckCodeWorkflow(YamlWorkflow):
                     "run": "codex test behaviour --ci",
                 }
             )
-        )
-
-    @cached_property
-    def _checkout(self) -> Any:
-        return Yamler().yamlify(
-            data={"uses": f"actions/checkout@{self.checkout_version}"},
-            anchor="checkout",
         )
 
 
