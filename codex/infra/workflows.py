@@ -16,21 +16,31 @@ from codex.infra.result import ProgramResult
 from codex.infra.tools import Version
 
 
+def default_ruamel_yaml() -> YAML:
+    yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    return yaml
+
+
 @dataclass(frozen=True)
 class Yamler:
-    _yaml: YAML = field(init=False, default_factory=YAML)
+    anchor: str = ""
+    data: Any = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
-        self._yaml.indent(mapping=2, sequence=4, offset=2)
+    _yaml: YAML = field(init=False, default_factory=default_ruamel_yaml)
 
-    def yamlify(self, data: Any, anchor: str = "") -> Any:
+    def with_data(self, data: Any) -> Yamler:
+        return replace(self, data=data)
+
+    def yamlify(self) -> Any:
         stream = io.StringIO()
-        self._yaml.dump(data, stream)
+        self._yaml.dump(self.data, stream)
         stream.seek(0)
         yaml = self._yaml.load(stream)
 
-        if anchor:
-            yaml.yaml_set_anchor(anchor, always_dump=True)
+        if self.anchor:
+            yaml.yaml_set_anchor(self.anchor, always_dump=True)
 
         return yaml
 
@@ -83,16 +93,19 @@ class PythonSetupStep:
 
     @cached_property
     def _yaml(self) -> Any:
-        return Yamler().yamlify(
-            data={
-                "name": "Set up Python",
-                "uses": f"actions/setup-python@{self.version}",
-                "with": {
-                    "python-version": self.python,
-                    "pip-install": f"apexcodexpy=={Version()}",
-                },
-            },
-            anchor="setup-python",
+        return (
+            Yamler(anchor="setup-python")
+            .with_data(
+                {
+                    "name": "Set up Python",
+                    "uses": f"actions/setup-python@{self.version}",
+                    "with": {
+                        "python-version": self.python,
+                        "pip-install": f"apexcodexpy=={Version()}",
+                    },
+                }
+            )
+            .yamlify()
         )
 
 
@@ -105,9 +118,10 @@ class CheckoutStep:
 
     @cached_property
     def _yaml(self) -> Any:
-        return Yamler().yamlify(
-            data={"uses": f"actions/checkout@{self.version}"},
-            anchor="checkout",
+        return (
+            Yamler(anchor="checkout")
+            .with_data({"uses": f"actions/checkout@{self.version}"})
+            .yamlify()
         )
 
 
