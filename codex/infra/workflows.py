@@ -157,11 +157,11 @@ class CheckCodeWorkflow(YamlWorkflow):
 class CiWorkflow:
     name: str
 
-    jobs: MutableSequence[CiJob] = field(default_factory=list)
+    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
 
     def with_job(self, value: CiJob) -> CiWorkflow:
         if value.is_enabled:
-            self.jobs.append(value)
+            self.jobs[value.name] = value.yamlify()
 
         return self
 
@@ -171,7 +171,7 @@ class CiWorkflow:
                 "name": self.name,
                 "on": {"pull_request": {"branches": ["main"]}},
                 "permissions": {"contents": "read"},
-                "jobs": {job.name: job.yamlify() for job in self.jobs},
+                "jobs": {name: job.yamlify() for name, job in self.jobs.items()},
             }
         )
 
@@ -192,11 +192,13 @@ class CiJob:
     def enabled(self, when: bool) -> CiJob:
         return replace(self, is_enabled=when)
 
-    def yamlify(self) -> Any:
-        return {
-            "runs-on": self.platform,
-            "steps": [step.yamlify() for step in self.steps],
-        }
+    def yamlify(self) -> Yamler:
+        return Yamler.parse(
+            {
+                "runs-on": self.platform,
+                "steps": [step.yamlify() for step in self.steps],
+            }
+        )
 
 
 @dataclass(frozen=True)
