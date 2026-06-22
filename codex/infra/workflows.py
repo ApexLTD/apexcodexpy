@@ -5,7 +5,6 @@ from collections.abc import MutableMapping, MutableSequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
@@ -115,9 +114,7 @@ class CheckCodeWorkflow(YamlWorkflow):
         return (
             CiWorkflow(name="Validate Python Code")
             .with_job(
-                CiJob.for_code_checking()
-                .named("lint")
-                .with_step(
+                CodeCheckJob(name="lint").with_step(
                     Yamler.parse(
                         {
                             "name": "Lint Code",
@@ -127,9 +124,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                 )
             )
             .with_job(
-                CiJob.for_code_checking()
-                .named("test-unit")
-                .with_step(
+                CodeCheckJob(name="test-unit").with_step(
                     Yamler.parse(
                         {
                             "name": "Run unit tests",
@@ -139,8 +134,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                 )
             )
             .with_job(
-                CiJob.for_code_checking()
-                .named("test-integration")
+                CodeCheckJob(name="test-integration")
                 .enabled(when=Version().is_installed("pytest-docker"))
                 .with_step(
                     Yamler.parse(
@@ -152,8 +146,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                 )
             )
             .with_job(
-                CiJob.for_code_checking()
-                .named("test-behaviour")
+                CodeCheckJob(name="test-behaviour")
                 .enabled(when=Version().is_installed("behave"))
                 .with_step(
                     Yamler.parse(
@@ -191,6 +184,31 @@ class CiWorkflow:
         )
 
 
+@dataclass(frozen=True)
+class CiJob:
+    name: str
+
+    is_enabled: bool = True
+    platform: str = "ubuntu-latest"
+    steps: MutableSequence[Yamler] = field(default_factory=list)
+
+    def with_step(self, step: Yamler) -> CiJob:
+        self.steps.append(step)
+
+        return self
+
+    def enabled(self, when: bool) -> CiJob:
+        return replace(self, is_enabled=when)
+
+    def yamlify(self) -> Yamler:
+        return Yamler.parse(
+            {
+                "runs-on": self.platform,
+                "steps": [step.as_mapping() for step in self.steps],
+            }
+        )
+
+
 CHECKOUT = Yamler.parse(
     {
         "name": "Checkout Code",
@@ -211,31 +229,5 @@ SETUP = Yamler.parse(
 
 
 @dataclass(frozen=True)
-class CiJob:
-    name: str = field(default_factory=lambda: str(uuid4()))
-    is_enabled: bool = True
-    platform: str = "ubuntu-latest"
-    steps: MutableSequence[Yamler] = field(default_factory=list)
-
-    @classmethod
-    def for_code_checking(cls):
-        return cls().with_step(CHECKOUT).with_step(SETUP)
-
-    def named(self, name: str) -> CiJob:
-        return replace(self, name=name)
-
-    def with_step(self, step: Yamler) -> CiJob:
-        self.steps.append(step)
-
-        return self
-
-    def enabled(self, when: bool) -> CiJob:
-        return replace(self, is_enabled=when)
-
-    def yamlify(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "runs-on": self.platform,
-                "steps": [step.as_mapping() for step in self.steps],
-            }
-        )
+class CodeCheckJob(CiJob):
+    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
