@@ -56,6 +56,9 @@ class ProgramResult:
             exit_code=result.returncode,
         )
 
+    def no_changes(self) -> ProgramResult:
+        return self.success(message="Already up to date.\n")
+
     def success(self, *, message: str = "") -> ProgramResult:
         return ProgramResult(
             name=self.name,
