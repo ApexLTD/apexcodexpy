@@ -113,35 +113,35 @@ class CheckCodeWorkflow(YamlWorkflow):
             CiWorkflow(name="Validate Python Code")
             .with_job(
                 CodeCheckJob(name="lint")
-                .enabled(True)
                 .run(
-                    name="Lint Code",
+                    step="Lint Code",
                     command="codex lint --ci",
                 )
+                .enabled(True)
             )
             .with_job(
                 CodeCheckJob(name="test-unit")
-                .enabled(True)
                 .run(
-                    name="Run unit tests",
+                    step="Run unit tests",
                     command="codex test unit --ci",
                 )
+                .enabled(True)
             )
             .with_job(
                 CodeCheckJob(name="test-integration")
-                .enabled(when=Version().is_installed("pytest-docker"))
                 .run(
-                    name="Run integration tests",
+                    step="Run integration tests",
                     command="codex test integration --ci",
                 )
+                .enabled(when=Version().is_installed("pytest-docker"))
             )
             .with_job(
                 CodeCheckJob(name="test-behaviour")
-                .enabled(when=Version().is_installed("behave"))
                 .run(
-                    name="Run behaviour tests",
+                    step="Run behaviour tests",
                     command="codex test behaviour --ci",
                 )
+                .enabled(when=Version().is_installed("behave"))
             )
             .yamlify()
         )
@@ -218,5 +218,5 @@ SETUP = Yamler.parse(
 class CodeCheckJob(CiJob):
     steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
 
-    def run(self, name: str, command: str) -> CodeCheckJob:
-        return self.with_step(Yamler.parse({"name": name, "run": command}))
+    def run(self, step: str, command: str) -> CiJob:
+        return self.with_step(Yamler.parse({"name": step, "run": command}))
