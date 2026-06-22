@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
@@ -30,8 +31,8 @@ class YamlWorkflow(ABC):
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        old = dict(Yamler.read(path).yamlify())
-        new = dict(self.standards.yamlify())
+        old = Yamler.read(path).yamlify()
+        new = self.standards.yamlify()
 
         if old == new:
             return ProgramResult(name=self.name).success(
@@ -273,7 +274,7 @@ class CiSteps:
 
 @dataclass(frozen=True, kw_only=True)
 class Yamler:
-    value: Any
+    value: CommentedMap
 
     def yamlify(self) -> Mapping[str, Any]:
         return dict(self.value)
