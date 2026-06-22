@@ -209,7 +209,7 @@ class CiJob:
                         "name": "Checkout Code",
                         "uses": "actions/checkout@v7",
                     }
-                ),
+                ).anchor("checkout"),
                 Yamler.parse(
                     {
                         "name": "Setup Python",
@@ -219,7 +219,7 @@ class CiJob:
                             "pip-install": f"apexcodexpy=={Version()}",
                         },
                     }
-                ),
+                ).anchor("setup"),
                 *self.steps,
             ],
         )
