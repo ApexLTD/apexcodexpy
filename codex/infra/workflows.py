@@ -25,6 +25,7 @@ class YamlWorkflow(ABC):
     def sync(self, target: Path) -> Executable:
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch(exist_ok=True)
 
         if Yamler.read(path) == self.standards:
             return ProgramResult(name=self.name).success(
