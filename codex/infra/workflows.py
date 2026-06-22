@@ -114,47 +114,35 @@ class CheckCodeWorkflow(YamlWorkflow):
         return (
             CiWorkflow(name="Validate Python Code")
             .with_job(
-                CodeCheckJob(name="lint").with_step(
-                    Yamler.parse(
-                        {
-                            "name": "Lint Code",
-                            "run": "codex lint --ci",
-                        }
-                    )
+                CodeCheckJob(name="lint")
+                .enabled(True)
+                .run(
+                    name="Lint Code",
+                    command="codex lint --ci",
                 )
             )
             .with_job(
-                CodeCheckJob(name="test-unit").with_step(
-                    Yamler.parse(
-                        {
-                            "name": "Run unit tests",
-                            "run": "codex test unit --ci",
-                        }
-                    )
+                CodeCheckJob(name="test-unit")
+                .enabled(True)
+                .run(
+                    name="Run unit tests",
+                    command="codex test unit --ci",
                 )
             )
             .with_job(
                 CodeCheckJob(name="test-integration")
                 .enabled(when=Version().is_installed("pytest-docker"))
-                .with_step(
-                    Yamler.parse(
-                        {
-                            "name": "Run integration tests",
-                            "run": "codex test integration --ci",
-                        }
-                    )
+                .run(
+                    name="Run integration tests",
+                    command="codex test integration --ci",
                 )
             )
             .with_job(
                 CodeCheckJob(name="test-behaviour")
                 .enabled(when=Version().is_installed("behave"))
-                .with_step(
-                    Yamler.parse(
-                        {
-                            "name": "Run behaviour tests",
-                            "run": "codex test behaviour --ci",
-                        }
-                    )
+                .run(
+                    name="Run behaviour tests",
+                    command="codex test behaviour --ci",
                 )
             )
             .yamlify()
@@ -231,3 +219,6 @@ SETUP = Yamler.parse(
 @dataclass(frozen=True)
 class CodeCheckJob(CiJob):
     steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
+
+    def run(self, name: str, command: str) -> CodeCheckJob:
+        return self.with_step(Yamler.parse({"name": name, "run": command}))
