@@ -117,7 +117,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             CiWorkflow(name="Validate Python Code")
             .with_job(
                 CiJob(name="lint")
-                .enabled(True)
+                .for_code_checking()
                 .with_step(
                     Yamler.parse(
                         {
@@ -129,7 +129,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .with_job(
                 CiJob(name="test-unit")
-                .enabled(True)
+                .for_code_checking()
                 .with_step(
                     Yamler.parse(
                         {
@@ -142,6 +142,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-integration")
                 .enabled(when=Version().is_installed("pytest-docker"))
+                .for_code_checking()
                 .with_step(
                     Yamler.parse(
                         {
@@ -154,6 +155,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-behaviour")
                 .enabled(when=Version().is_installed("behave"))
+                .for_code_checking()
                 .with_step(
                     Yamler.parse(
                         {
@@ -190,34 +192,37 @@ class CiWorkflow:
         )
 
 
-def default_steps() -> list[Yamler]:
-    return [
-        Yamler.parse(
-            {
-                "name": "Checkout Code",
-                "uses": "actions/checkout@v7",
-            }
-        ),
-        Yamler.parse(
-            {
-                "name": "Setup Python",
-                "uses": "actions/setup-python@v6",
-                "with": {
-                    "python-version": Version.of_python(),
-                    "pip-install": f"apexcodexpy=={Version()}",
-                },
-            }
-        ),
-    ]
-
-
 @dataclass(frozen=True)
 class CiJob:
     name: str
 
     is_enabled: bool = True
     platform: str = "ubuntu-latest"
-    steps: MutableSequence[Yamler] = field(default_factory=default_steps)
+    steps: MutableSequence[Yamler] = field(default_factory=list)
+
+    def for_code_checking(self) -> CiJob:
+        return replace(
+            self,
+            steps=[
+                Yamler.parse(
+                    {
+                        "name": "Checkout Code",
+                        "uses": "actions/checkout@v7",
+                    }
+                ),
+                Yamler.parse(
+                    {
+                        "name": "Setup Python",
+                        "uses": "actions/setup-python@v6",
+                        "with": {
+                            "python-version": Version.of_python(),
+                            "pip-install": f"apexcodexpy=={Version()}",
+                        },
+                    }
+                ),
+                *self.steps,
+            ],
+        )
 
     def with_step(self, step: Yamler) -> CiJob:
         self.steps.append(step)
