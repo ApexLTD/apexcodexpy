@@ -5,6 +5,7 @@ from collections.abc import MutableMapping, MutableSequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
@@ -211,7 +212,7 @@ SETUP = Yamler.parse(
 
 @dataclass(frozen=True)
 class CiJob:
-    name: str = "unknown"
+    name: str = field(default_factory=lambda: str(uuid4()))
     is_enabled: bool = True
     platform: str = "ubuntu-latest"
     steps: MutableSequence[Yamler] = field(default_factory=list)
