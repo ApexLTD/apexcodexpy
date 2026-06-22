@@ -113,8 +113,8 @@ class CheckCodeWorkflow(YamlWorkflow):
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
     @cached_property
-    def steps(self) -> CiSteps:
-        return CiSteps()
+    def steps(self) -> SharedSteps:
+        return SharedSteps()
 
     @property
     def standards(self) -> Yamler:
@@ -227,7 +227,7 @@ class CiJob:
 
 
 @dataclass(frozen=True)
-class CiSteps:
+class SharedSteps:
     cache: MutableMapping[str, Yamler] = field(default_factory=dict)
 
     def cached(self, **values: Yamler) -> Yamler:
