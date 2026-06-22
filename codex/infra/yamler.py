@@ -13,7 +13,7 @@ from ruamel.yaml import YAML, CommentedMap
 class Yamler:
     value: CommentedMap
 
-    def yamlify(self) -> Mapping[str, Any]:
+    def as_mapping(self) -> Mapping[str, Any]:
         return dict(self.value)
 
     @classmethod

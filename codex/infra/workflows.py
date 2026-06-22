@@ -27,8 +27,8 @@ class YamlWorkflow(ABC):
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        old = Yamler.read(path).yamlify()
-        new = self.standards.yamlify()
+        old = Yamler.read(path).as_mapping()
+        new = self.standards.as_mapping()
 
         if old == new:
             return ProgramResult(name=self.name).success(
@@ -64,8 +64,8 @@ class DependabotWorkflow(YamlWorkflow):
             {
                 "version": 2,
                 "updates": [
-                    self._pip_config().yamlify(),
-                    self._gh_actions_config().yamlify(),
+                    self._pip_config().as_mapping(),
+                    self._gh_actions_config().as_mapping(),
                 ],
             }
         )
@@ -168,7 +168,7 @@ class CiWorkflow:
                 "name": self.name,
                 "on": {"pull_request": {"branches": ["main"]}},
                 "permissions": {"contents": "read"},
-                "jobs": {name: job.yamlify() for name, job in self.jobs.items()},
+                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
             }
         )
 
@@ -193,7 +193,7 @@ class CiJob:
         return Yamler.parse(
             {
                 "runs-on": self.platform,
-                "steps": [step.yamlify() for step in self.steps],
+                "steps": [step.as_mapping() for step in self.steps],
             }
         )
 
