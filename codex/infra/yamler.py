@@ -14,8 +14,8 @@ from ruamel.yaml.comments import CommentedMap
 class Yamler:
     value: CommentedMap
 
-    def as_mapping(self) -> Mapping[str, Any]:
-        return dict(self.value)
+    def as_mapping(self) -> CommentedMap:
+        return self.value
 
     @classmethod
     def read(cls, path: Path) -> Yamler:

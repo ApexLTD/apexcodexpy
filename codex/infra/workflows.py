@@ -26,8 +26,8 @@ class YamlWorkflow(ABC):
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        old = Yamler.read(path).as_mapping()
-        new = self.standards.as_mapping()
+        old = Yamler.read(path)
+        new = self.standards
 
         if old == new:
             return ProgramResult(name=self.name).success(
