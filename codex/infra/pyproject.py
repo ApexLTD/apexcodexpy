@@ -85,7 +85,7 @@ class PyProjectToml:
         modified = tomlkit.dumps(document)
 
         if original == modified:
-            return self._result.success(message="Already up to date.\n")
+            return self._result.no_changes()
 
         pyproject.write_text(modified, encoding="utf-8", newline="\n")
 

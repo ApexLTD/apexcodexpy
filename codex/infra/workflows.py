@@ -28,9 +28,7 @@ class YamlWorkflow(ABC):
         path.touch(exist_ok=True)
 
         if Yamler.read(path) == self.standards:
-            return ProgramResult(name=self.name).success(
-                message=f"Already up to date.\n"
-            )
+            return ProgramResult(name=self.name).no_changes()
 
         self.standards.comment(
             "Auto Generated",
