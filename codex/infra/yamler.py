@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,16 +22,7 @@ class Yamler:
 
     @classmethod
     def parse(cls, data: Mapping[str, Any]) -> Yamler:
-        serializer = YAML()
-        serializer.indent(mapping=2, sequence=4, offset=2)
-
-        stream = io.StringIO()
-        serializer.dump(data, stream)
-
-        stream.seek(0)
-        loaded = serializer.load(stream)
-
-        return cls(value=loaded)
+        return cls(value=CommentedMap(data))
 
     def anchor(self, name: str) -> Yamler:
         self.value.yaml_set_anchor(name, always_dump=True)
