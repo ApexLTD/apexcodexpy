@@ -29,7 +29,7 @@ class YamlWorkflow(ABC):
 
         if Yamler.read(path) == self.standards:
             return ProgramResult(name=self.name).success(
-                message=f"{self.name} workflow is up to date.\n"
+                message=f"Already up to date.\n"
             )
 
         self.standards.comment(
