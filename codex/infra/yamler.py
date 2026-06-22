@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ruamel.yaml import YAML, CommentedMap
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 
 @dataclass(frozen=True, kw_only=True)
