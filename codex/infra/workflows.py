@@ -29,6 +29,15 @@ class YamlWorkflow(ABC):
     def sync(self, target: Path) -> Executable:
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
+
+        old = dict(Yamler.read(path).yamlify())
+        new = dict(self.standards.yamlify())
+
+        if old == new:
+            return ProgramResult(name=self.name).success(
+                message=f"{self.name} workflow is up to date.\n"
+            )
+
         self.standards.comment(
             "Auto Generated",
             f"By: Apex Codex {Version()}",
@@ -266,6 +275,10 @@ class Yamler:
 
     def yamlify(self) -> Any:
         return self.value
+
+    @classmethod
+    def read(cls, path: Path) -> Yamler:
+        return cls(value=YAML().load(path))
 
     @classmethod
     def parse(cls, data: Mapping[str, Any]) -> Yamler:
