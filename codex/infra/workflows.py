@@ -175,14 +175,7 @@ class CiWorkflow:
 
     def with_job(self, value: CiJob) -> CiWorkflow:
         if value.is_enabled:
-            self.jobs[value.name] = replace(
-                value,
-                steps=[
-                    SharedSteps().checkout_code(),
-                    SharedSteps().setup_python(),
-                    *value.steps,
-                ],
-            ).yamlify()
+            self.jobs[value.name] = value.yamlify()
 
         return self
 
@@ -197,13 +190,34 @@ class CiWorkflow:
         )
 
 
+def default_steps() -> list[Yamler]:
+    return [
+        Yamler.parse(
+            {
+                "name": "Checkout Code",
+                "uses": "actions/checkout@v7",
+            }
+        ),
+        Yamler.parse(
+            {
+                "name": "Setup Python",
+                "uses": "actions/setup-python@v6",
+                "with": {
+                    "python-version": Version.of_python(),
+                    "pip-install": f"apexcodexpy=={Version()}",
+                },
+            }
+        ),
+    ]
+
+
 @dataclass(frozen=True)
 class CiJob:
     name: str
 
     is_enabled: bool = True
     platform: str = "ubuntu-latest"
-    steps: MutableSequence[Yamler] = field(default_factory=list)
+    steps: MutableSequence[Yamler] = field(default_factory=default_steps)
 
     def with_step(self, step: Yamler) -> CiJob:
         self.steps.append(step)
@@ -218,27 +232,5 @@ class CiJob:
             {
                 "runs-on": self.platform,
                 "steps": [step.as_mapping() for step in self.steps],
-            }
-        )
-
-
-class SharedSteps:
-    def checkout_code(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Checkout Code",
-                "uses": "actions/checkout@v7",
-            }
-        )
-
-    def setup_python(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Setup Python",
-                "uses": "actions/setup-python@v6",
-                "with": {
-                    "python-version": Version.of_python(),
-                    "pip-install": f"apexcodexpy=={Version()}",
-                },
             }
         )
