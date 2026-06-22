@@ -124,27 +124,55 @@ class CheckCodeWorkflow(YamlWorkflow):
                 CiJob(name="lint")
                 .with_step(self.steps.checkout_code())
                 .with_step(self.steps.setup_python())
-                .with_step(self.steps.lint_code())
+                .with_step(
+                    Yamler.parse(
+                        {
+                            "name": "Lint Code",
+                            "run": "codex lint --ci",
+                        }
+                    )
+                )
             )
             .with_job(
                 CiJob(name="test-unit")
                 .with_step(self.steps.checkout_code())
                 .with_step(self.steps.setup_python())
-                .with_step(self.steps.run_unit_tests())
+                .with_step(
+                    Yamler.parse(
+                        {
+                            "name": "Run unit tests",
+                            "run": "codex test unit --ci",
+                        }
+                    )
+                )
             )
             .with_job(
                 CiJob(name="test-integration")
                 .enabled(when=Version().is_installed("pytest-docker"))
                 .with_step(self.steps.checkout_code())
                 .with_step(self.steps.setup_python())
-                .with_step(self.steps.run_integration_tests())
+                .with_step(
+                    Yamler.parse(
+                        {
+                            "name": "Run integration tests",
+                            "run": "codex test integration --ci",
+                        }
+                    )
+                )
             )
             .with_job(
                 CiJob(name="test-behaviour")
                 .enabled(when=Version().is_installed("behave"))
                 .with_step(self.steps.checkout_code())
                 .with_step(self.steps.setup_python())
-                .with_step(self.steps.run_behaviour_tests())
+                .with_step(
+                    Yamler.parse(
+                        {
+                            "name": "Run behaviour tests",
+                            "run": "codex test behaviour --ci",
+                        }
+                    )
+                )
             )
             .yamlify()
         )
@@ -233,36 +261,4 @@ class CiSteps:
                     },
                 }
             ).anchor(name="setup-python")
-        )
-
-    def lint_code(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Lint Code",
-                "run": "codex lint --ci",
-            }
-        )
-
-    def run_unit_tests(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Run unit tests",
-                "run": "codex test unit --ci",
-            }
-        )
-
-    def run_integration_tests(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Run integration tests",
-                "run": "codex test integration --ci",
-            }
-        )
-
-    def run_behaviour_tests(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": "Run behaviour tests",
-                "run": "codex test behaviour --ci",
-            }
         )
