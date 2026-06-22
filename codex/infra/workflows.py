@@ -112,18 +112,13 @@ class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
-    @cached_property
-    def steps(self) -> SharedSteps:
-        return SharedSteps()
-
     @property
     def standards(self) -> Yamler:
         return (
             CiWorkflow(name="Validate Python Code")
             .with_job(
                 CiJob(name="lint")
-                .with_step(self.steps.checkout_code())
-                .with_step(self.steps.setup_python())
+                .enabled(True)
                 .with_step(
                     Yamler.parse(
                         {
@@ -135,8 +130,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .with_job(
                 CiJob(name="test-unit")
-                .with_step(self.steps.checkout_code())
-                .with_step(self.steps.setup_python())
+                .enabled(True)
                 .with_step(
                     Yamler.parse(
                         {
@@ -149,8 +143,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-integration")
                 .enabled(when=Version().is_installed("pytest-docker"))
-                .with_step(self.steps.checkout_code())
-                .with_step(self.steps.setup_python())
                 .with_step(
                     Yamler.parse(
                         {
@@ -163,8 +155,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-behaviour")
                 .enabled(when=Version().is_installed("behave"))
-                .with_step(self.steps.checkout_code())
-                .with_step(self.steps.setup_python())
                 .with_step(
                     Yamler.parse(
                         {
@@ -184,9 +174,20 @@ class CiWorkflow:
 
     jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
 
+    @cached_property
+    def steps(self) -> SharedSteps:
+        return SharedSteps()
+
     def with_job(self, value: CiJob) -> CiWorkflow:
         if value.is_enabled:
-            self.jobs[value.name] = value.yamlify()
+            self.jobs[value.name] = replace(
+                value,
+                steps=[
+                    self.steps.checkout_code(),
+                    self.steps.setup_python(),
+                    *value.steps,
+                ],
+            ).yamlify()
 
         return self
 
