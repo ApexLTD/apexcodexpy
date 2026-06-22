@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from collections.abc import MutableMapping, MutableSequence
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
-from functools import cached_property
 from pathlib import Path
 
 from codex.infra.program import Executable
@@ -174,17 +173,13 @@ class CiWorkflow:
 
     jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
 
-    @cached_property
-    def steps(self) -> SharedSteps:
-        return SharedSteps()
-
     def with_job(self, value: CiJob) -> CiWorkflow:
         if value.is_enabled:
             self.jobs[value.name] = replace(
                 value,
                 steps=[
-                    self.steps.checkout_code(),
-                    self.steps.setup_python(),
+                    SharedSteps().checkout_code(),
+                    SharedSteps().setup_python(),
                     *value.steps,
                 ],
             ).yamlify()
@@ -227,39 +222,23 @@ class CiJob:
         )
 
 
-@dataclass(frozen=True)
 class SharedSteps:
-    cache: MutableMapping[str, Yamler] = field(default_factory=dict)
-
-    def cached(self, **values: Yamler) -> Yamler:
-        assert len(values) == 1, "cached supports one argument at a time."
-        name, value = values.popitem()
-
-        if name not in self.cache:
-            self.cache[name] = value
-
-        return self.cache[name]
-
     def checkout_code(self) -> Yamler:
-        return self.cached(
-            checkout_code=Yamler.parse(
-                {
-                    "name": "Checkout Code",
-                    "uses": "actions/checkout@v7",
-                }
-            ).anchor(name="checkout")
+        return Yamler.parse(
+            {
+                "name": "Checkout Code",
+                "uses": "actions/checkout@v7",
+            }
         )
 
     def setup_python(self) -> Yamler:
-        return self.cached(
-            setup_python=Yamler.parse(
-                {
-                    "name": "Setup Python",
-                    "uses": "actions/setup-python@v6",
-                    "with": {
-                        "python-version": Version.of_python(),
-                        "pip-install": f"apexcodexpy=={Version()}",
-                    },
-                }
-            ).anchor(name="setup-python")
+        return Yamler.parse(
+            {
+                "name": "Setup Python",
+                "uses": "actions/setup-python@v6",
+                "with": {
+                    "python-version": Version.of_python(),
+                    "pip-install": f"apexcodexpy=={Version()}",
+                },
+            }
         )
