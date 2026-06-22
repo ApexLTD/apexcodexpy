@@ -58,43 +58,47 @@ class DependabotWorkflow(YamlWorkflow):
             {
                 "version": 2,
                 "updates": [
-                    self._pip_config(),
-                    self._gh_actions_config(),
+                    self._pip_config().yamlify(),
+                    self._gh_actions_config().yamlify(),
                 ],
             }
         )
 
     @staticmethod
-    def _pip_config() -> dict[str, Any]:
-        return {
-            "package-ecosystem": "pip",
-            "directory": "/",
-            "schedule": {
-                "interval": "weekly",
-                "day": "thursday",
-            },
-            "groups": {
-                "python": {
-                    "patterns": ["*"],
-                }
-            },
-        }
+    def _pip_config() -> Yamler:
+        return Yamler.parse(
+            {
+                "package-ecosystem": "pip",
+                "directory": "/",
+                "schedule": {
+                    "interval": "weekly",
+                    "day": "thursday",
+                },
+                "groups": {
+                    "python": {
+                        "patterns": ["*"],
+                    }
+                },
+            }
+        )
 
     @staticmethod
-    def _gh_actions_config() -> dict[str, Any]:
-        return {
-            "package-ecosystem": "github-actions",
-            "directory": "/",
-            "schedule": {
-                "interval": "weekly",
-                "day": "thursday",
-            },
-            "groups": {
-                "gh-actions": {
-                    "patterns": ["*"],
-                }
-            },
-        }
+    def _gh_actions_config() -> Yamler:
+        return Yamler.parse(
+            {
+                "package-ecosystem": "github-actions",
+                "directory": "/",
+                "schedule": {
+                    "interval": "weekly",
+                    "day": "thursday",
+                },
+                "groups": {
+                    "gh-actions": {
+                        "patterns": ["*"],
+                    }
+                },
+            }
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -169,10 +173,10 @@ class CiJob:
 
     is_enabled: bool = True
     platform: str = "ubuntu-latest"
-    steps: MutableSequence[Any] = field(default_factory=list)
+    steps: MutableSequence[Yamler] = field(default_factory=list)
 
     def with_step(self, step: Yamler) -> CiJob:
-        self.steps.append(step())
+        self.steps.append(step)
 
         return self
 
@@ -182,7 +186,7 @@ class CiJob:
     def yamlify(self) -> Any:
         return {
             "runs-on": self.platform,
-            "steps": self.steps,
+            "steps": [step.yamlify() for step in self.steps],
         }
 
 
@@ -260,7 +264,7 @@ class CiSteps:
 class Yamler:
     value: Any
 
-    def __call__(self) -> Any:
+    def yamlify(self) -> Any:
         return self.value
 
     @classmethod
