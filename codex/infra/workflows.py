@@ -26,10 +26,7 @@ class YamlWorkflow(ABC):
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        old = Yamler.read(path)
-        new = self.standards
-
-        if old == new:
+        if Yamler.read(path) == self.standards:
             return ProgramResult(name=self.name).success(
                 message=f"{self.name} workflow is up to date.\n"
             )
