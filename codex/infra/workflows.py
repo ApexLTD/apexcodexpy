@@ -273,8 +273,8 @@ class CiSteps:
 class Yamler:
     value: Any
 
-    def yamlify(self) -> Any:
-        return self.value
+    def yamlify(self) -> Mapping[str, Any]:
+        return dict(self.value)
 
     @classmethod
     def read(cls, path: Path) -> Yamler:
