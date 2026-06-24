@@ -103,6 +103,16 @@ class DependabotWorkflow(YamlWorkflow):
 
 
 @dataclass(frozen=True, kw_only=True)
+class BuildCodeWorkflow(YamlWorkflow):
+    name: str = "BuildCode"
+    path: Path = Path(".github") / "workflows" / "build_code.yml"
+
+    @property
+    def standards(self) -> Yamler:
+        return Yamler.read(self.path)
+
+
+@dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
@@ -183,6 +193,9 @@ class CiJob:
 
         return self
 
+    def run(self, step: str, command: str) -> CiJob:
+        return self.with_step(Yamler.parse({"name": step, "run": command}))
+
     def enabled(self, when: bool) -> CiJob:
         return replace(self, is_enabled=when)
 
@@ -217,6 +230,3 @@ SETUP = Yamler.parse(
 @dataclass(frozen=True)
 class CodeCheckJob(CiJob):
     steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
-
-    def run(self, step: str, command: str) -> CiJob:
-        return self.with_step(Yamler.parse({"name": step, "run": command}))

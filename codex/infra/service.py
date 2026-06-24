@@ -17,7 +17,11 @@ from codex.infra.tools import (
     Ruff,
     Version,
 )
-from codex.infra.workflows import CheckCodeWorkflow, DependabotWorkflow
+from codex.infra.workflows import (
+    BuildCodeWorkflow,
+    CheckCodeWorkflow,
+    DependabotWorkflow,
+)
 
 
 @dataclass(frozen=True)
@@ -132,6 +136,7 @@ class CodexTools:
             .attach(PyProjectToml().sync(self.target))
             .attach(DependabotWorkflow().sync(self.target))
             .attach(CheckCodeWorkflow().sync(self.target))
+            .attach(BuildCodeWorkflow().sync(self.target))
         )
 
     def lock(self) -> Executable:
