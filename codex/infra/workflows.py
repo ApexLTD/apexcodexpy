@@ -6,6 +6,8 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
+from ruamel.yaml.scalarstring import FoldedScalarString
+
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
 from codex.infra.tools import Version
@@ -22,12 +24,12 @@ class YamlWorkflow(ABC):
     def standards(self) -> Yamler:
         pass
 
-    def sync(self, target: Path) -> Executable:
+    def sync(self, target: Path, force: bool = False) -> Executable:
         path = target / self.path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch(exist_ok=True)
 
-        if Yamler.read(path) == self.standards:
+        if not force and Yamler.read(path) == self.standards:
             return ProgramResult(name=self.name).no_changes()
 
         self.standards.comment(
@@ -109,7 +111,59 @@ class BuildCodeWorkflow(YamlWorkflow):
 
     @property
     def standards(self) -> Yamler:
-        return Yamler.read(self.path)
+        workflow = Yamler.read(self.path).as_mapping()
+        workflow["jobs"]["build"] = (
+            CiJob(name="build")
+            .with_step(
+                Yamler.parse(
+                    {
+                        "name": "Checkout Code",
+                        "uses": "actions/checkout@v7",
+                    }
+                )
+            )
+            .with_step(
+                Yamler.parse(
+                    {
+                        "name": "Setup Python",
+                        "uses": "actions/setup-python@v6",
+                        "with": {
+                            "python-version": Version.of_python(),
+                            "pip-install": "apexcodexpy",
+                        },
+                    }
+                )
+            )
+            .run(
+                step="Build Docker image",
+                command=FoldedScalarString(
+                    "\n".join(
+                        [
+                            "codex build",
+                            "  --tag ${{ github.event.repository.name }}:latest",
+                        ]
+                    )
+                ),
+            )
+            .run(
+                step="Push Docker image",
+                command=FoldedScalarString(
+                    "\n".join(
+                        [
+                            "codex push",
+                            "  --tag ${{ github.event.repository.name }}:latest",
+                            "  --token ${{ secrets.GITHUB_TOKEN }}",
+                            "  --actor ${{ github.actor }}",
+                            "  --organization ${{ github.repository_owner }}",
+                        ]
+                    )
+                ),
+            )
+            .yamlify()
+            .as_mapping()
+        )
+
+        return Yamler.parse(workflow)
 
 
 @dataclass(frozen=True, kw_only=True)

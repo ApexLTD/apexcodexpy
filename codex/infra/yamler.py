@@ -18,7 +18,7 @@ class Yamler:
 
     @classmethod
     def read(cls, path: Path) -> Yamler:
-        return cls(value=YAML().load(path))
+        return cls(value=YAML(typ="safe").load(path))
 
     @classmethod
     def parse(cls, data: Mapping[str, Any]) -> Yamler:
