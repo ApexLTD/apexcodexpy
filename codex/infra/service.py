@@ -42,8 +42,8 @@ class Codex:
     def version() -> TaskResult:
         return ProgramResult(name="version").success(message=str(Version()))
 
-    def sync(self) -> TaskResult:
-        return self.tools.sync().execute()
+    def sync(self, force: bool) -> TaskResult:
+        return self.tools.sync(force).execute()
 
     def lock(self) -> TaskResult:
         return self.tools.lock().execute()
@@ -130,13 +130,13 @@ class CiCodex:
 class CodexTools:
     target: Path
 
-    def sync(self) -> Executable:
+    def sync(self, force: bool) -> Executable:
         return (
             MultiProgram()
             .attach(PyProjectToml().sync(self.target))
-            .attach(DependabotWorkflow().sync(self.target))
-            .attach(CheckCodeWorkflow().sync(self.target))
-            .attach(BuildCodeWorkflow(disclaimer=False).sync(self.target))
+            .attach(DependabotWorkflow().sync(self.target, force=force))
+            .attach(CheckCodeWorkflow().sync(self.target, force=force))
+            .attach(BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force))
         )
 
     def lock(self) -> Executable:
