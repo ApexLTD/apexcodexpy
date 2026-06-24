@@ -118,6 +118,10 @@ class BuildCodeWorkflow(YamlWorkflow):
     @property
     def standards(self) -> Yamler:
         workflow = Yamler.read(self.path).as_mapping()
+        workflow["name"] = "Build Python Application"
+        workflow["on"] = {"push": {"branches": ["main"]}}
+        workflow["permissions"] = "write-all"
+        workflow["jobs"] = workflow.get("jobs", {})
         workflow["jobs"]["build"] = (
             CiJob(name="build")
             .with_step(
