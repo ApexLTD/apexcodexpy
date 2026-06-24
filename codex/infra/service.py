@@ -136,7 +136,7 @@ class CodexTools:
             .attach(PyProjectToml().sync(self.target))
             .attach(DependabotWorkflow().sync(self.target))
             .attach(CheckCodeWorkflow().sync(self.target))
-            .attach(BuildCodeWorkflow().sync(self.target, force=True))
+            .attach(BuildCodeWorkflow(disclaimer=False).sync(self.target))
         )
 
     def lock(self) -> Executable:
