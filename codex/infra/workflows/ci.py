@@ -7,6 +7,29 @@ from codex.infra.yamler import Yamler
 
 
 @dataclass(frozen=True)
+class CiWorkflow:
+    name: str
+
+    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
+
+    def with_job(self, value: CiJob) -> CiWorkflow:
+        if value.is_enabled:
+            self.jobs[value.name] = value.yamlify()
+
+        return self
+
+    def yamlify(self) -> Yamler:
+        return Yamler.parse(
+            {
+                "name": self.name,
+                "on": {"pull_request": {"branches": ["main"]}},
+                "permissions": {"contents": "read"},
+                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
+            }
+        )
+
+
+@dataclass(frozen=True)
 class CiJob:
     name: str
 
@@ -30,28 +53,5 @@ class CiJob:
             {
                 "runs-on": self.platform,
                 "steps": [step.as_mapping() for step in self.steps],
-            }
-        )
-
-
-@dataclass(frozen=True)
-class CiWorkflow:
-    name: str
-
-    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
-
-    def with_job(self, value: CiJob) -> CiWorkflow:
-        if value.is_enabled:
-            self.jobs[value.name] = value.yamlify()
-
-        return self
-
-    def yamlify(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": self.name,
-                "on": {"pull_request": {"branches": ["main"]}},
-                "permissions": {"contents": "read"},
-                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
             }
         )
