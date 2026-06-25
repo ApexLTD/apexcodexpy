@@ -49,6 +49,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .with_job(
                 CiJob(name="test-unit")
+                .needs("lint")
                 .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
@@ -59,6 +60,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .with_job(
                 CiJob(name="test-integration")
+                .needs("lint", "test-unit")
                 .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
@@ -69,6 +71,7 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .with_job(
                 CiJob(name="test-behaviour")
+                .needs("lint", "test-unit")
                 .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(

@@ -37,6 +37,13 @@ class CiJob:
     platform: str = "ubuntu-latest"
     steps: MutableSequence[Yamler] = field(default_factory=list)
 
+    _needs: MutableSequence[str] = field(default_factory=list)
+
+    def needs(self, *names: str) -> CiJob:
+        self._needs.extend(names)
+
+        return self
+
     def with_step(self, step: Yamler) -> CiJob:
         self.steps.append(step)
 
@@ -52,6 +59,7 @@ class CiJob:
         return Yamler.parse(
             {
                 "runs-on": self.platform,
+                **({"needs": self._needs} if self._needs else {}),
                 "steps": [step.as_mapping() for step in self.steps],
             }
         )
