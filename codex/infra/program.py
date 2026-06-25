@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, Iterator, MutableSequence
+from collections.abc import Callable, Iterable, Iterator, MutableSequence
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
@@ -86,11 +86,20 @@ class Executable(Protocol):
 
 
 @dataclass(frozen=True)
+class LazyExecutable:
+    inner: Callable[[], TaskResult]
+
+    def execute(self) -> TaskResult:
+        return self.inner()
+
+
+@dataclass(frozen=True)
 class MultiProgram:
     sub_programs: MutableSequence[Executable] = field(default_factory=list)
 
-    def attach(self, program: Executable) -> MultiProgram:
-        self.sub_programs.append(program)
+    def attach(self, program: Executable, when: bool = True) -> MultiProgram:
+        if when:
+            self.sub_programs.append(program)
 
         return self
 
