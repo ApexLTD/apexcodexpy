@@ -8,8 +8,8 @@ from ruamel.yaml.scalarstring import FoldedScalarString
 from codex.infra.tools import Version
 from codex.infra.yamler import Yamler
 
+from .base import YamlWorkflow
 from .ci import CiJob
-from .workflows import YamlWorkflow
 
 
 @dataclass(frozen=True, kw_only=True)

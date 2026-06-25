@@ -5,7 +5,7 @@ from pathlib import Path
 
 from codex.infra.yamler import Yamler
 
-from .workflows import YamlWorkflow
+from .base import YamlWorkflow
 
 
 @dataclass(frozen=True, kw_only=True)
