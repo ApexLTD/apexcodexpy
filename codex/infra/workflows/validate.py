@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import MutableMapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from codex.infra.tools import Version
 from codex.infra.yamler import Yamler
 
 from .base import YamlWorkflow
-from .ci import CiJob
+from .ci import CiJob, CiWorkflow
 
 CHECKOUT = Yamler.parse(
     {
@@ -78,27 +77,4 @@ class CheckCodeWorkflow(YamlWorkflow):
                 .enabled(when=Version().is_installed("behave"))
             )
             .yamlify()
-        )
-
-
-@dataclass(frozen=True)
-class CiWorkflow:
-    name: str
-
-    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
-
-    def with_job(self, value: CiJob) -> CiWorkflow:
-        if value.is_enabled:
-            self.jobs[value.name] = value.yamlify()
-
-        return self
-
-    def yamlify(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": self.name,
-                "on": {"pull_request": {"branches": ["main"]}},
-                "permissions": {"contents": "read"},
-                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
-            }
         )
