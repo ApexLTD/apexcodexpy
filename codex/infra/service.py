@@ -136,7 +136,10 @@ class CodexTools:
             .attach(PyProjectToml().sync(self.target))
             .attach(DependabotWorkflow().sync(self.target, force=force))
             .attach(CheckCodeWorkflow().sync(self.target, force=force))
-            .attach(BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force))
+            .attach(
+                BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force),
+                when=self.target.joinpath("Dockerfile").exists(),
+            )
         )
 
     def lock(self) -> Executable:
