@@ -1,6 +1,6 @@
 [project]
 name = "apexcodexpy"
-version = "0.6.2"
+version = "0.6.3"
 description = "The Non-Destructive Configuration Steward for Python Projects."
 readme = "README.md"
 authors = [
