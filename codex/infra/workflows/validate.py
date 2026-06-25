@@ -11,6 +11,29 @@ from .base import YamlWorkflow
 from .ci import CiJob
 
 
+CHECKOUT = Yamler.parse(
+    {
+        "name": "Checkout Code",
+        "uses": "actions/checkout@v7",
+    }
+).anchor("checkout")
+SETUP = Yamler.parse(
+    {
+        "name": "Setup Python",
+        "uses": "actions/setup-python@v6",
+        "with": {
+            "python-version": Version.of_python(),
+            "pip-install": f"apexcodexpy=={Version()}",
+        },
+    }
+).anchor("setup")
+
+
+@dataclass(frozen=True)
+class CodeCheckJob(CiJob):
+    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
+
+
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
@@ -77,26 +100,3 @@ class CiWorkflow:
                 "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
             }
         )
-
-
-CHECKOUT = Yamler.parse(
-    {
-        "name": "Checkout Code",
-        "uses": "actions/checkout@v7",
-    }
-).anchor("checkout")
-SETUP = Yamler.parse(
-    {
-        "name": "Setup Python",
-        "uses": "actions/setup-python@v6",
-        "with": {
-            "python-version": Version.of_python(),
-            "pip-install": f"apexcodexpy=={Version()}",
-        },
-    }
-).anchor("setup")
-
-
-@dataclass(frozen=True)
-class CodeCheckJob(CiJob):
-    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
