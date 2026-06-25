@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import MutableMapping, MutableSequence
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -52,78 +51,3 @@ class YamlWorkflow(ABC):
         return ProgramResult(name=self.name).success(
             message=f"{self.name} workflow succeeded.\n"
         )
-
-
-@dataclass(frozen=True)
-class CiWorkflow:
-    name: str
-
-    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
-
-    def with_job(self, value: CiJob) -> CiWorkflow:
-        if value.is_enabled:
-            self.jobs[value.name] = value.yamlify()
-
-        return self
-
-    def yamlify(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "name": self.name,
-                "on": {"pull_request": {"branches": ["main"]}},
-                "permissions": {"contents": "read"},
-                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
-            }
-        )
-
-
-@dataclass(frozen=True)
-class CiJob:
-    name: str
-
-    is_enabled: bool = True
-    platform: str = "ubuntu-latest"
-    steps: MutableSequence[Yamler] = field(default_factory=list)
-
-    def with_step(self, step: Yamler) -> CiJob:
-        self.steps.append(step)
-
-        return self
-
-    def run(self, step: str, command: str) -> CiJob:
-        return self.with_step(Yamler.parse({"name": step, "run": command}))
-
-    def enabled(self, when: bool) -> CiJob:
-        return replace(self, is_enabled=when)
-
-    def yamlify(self) -> Yamler:
-        return Yamler.parse(
-            {
-                "runs-on": self.platform,
-                "steps": [step.as_mapping() for step in self.steps],
-            }
-        )
-
-
-CHECKOUT = Yamler.parse(
-    {
-        "name": "Checkout Code",
-        "uses": "actions/checkout@v7",
-    }
-).anchor("checkout")
-
-SETUP = Yamler.parse(
-    {
-        "name": "Setup Python",
-        "uses": "actions/setup-python@v6",
-        "with": {
-            "python-version": Version.of_python(),
-            "pip-install": f"apexcodexpy=={Version()}",
-        },
-    }
-).anchor("setup")
-
-
-@dataclass(frozen=True)
-class CodeCheckJob(CiJob):
-    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import MutableMapping, MutableSequence
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from codex.infra.tools import Version
 from codex.infra.yamler import Yamler
 
-from .workflows import CiWorkflow, CodeCheckJob, YamlWorkflow
+from .ci import CiJob
+from .workflows import YamlWorkflow
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -52,3 +54,49 @@ class CheckCodeWorkflow(YamlWorkflow):
             )
             .yamlify()
         )
+
+
+@dataclass(frozen=True)
+class CiWorkflow:
+    name: str
+
+    jobs: MutableMapping[str, Yamler] = field(default_factory=dict)
+
+    def with_job(self, value: CiJob) -> CiWorkflow:
+        if value.is_enabled:
+            self.jobs[value.name] = value.yamlify()
+
+        return self
+
+    def yamlify(self) -> Yamler:
+        return Yamler.parse(
+            {
+                "name": self.name,
+                "on": {"pull_request": {"branches": ["main"]}},
+                "permissions": {"contents": "read"},
+                "jobs": {name: job.as_mapping() for name, job in self.jobs.items()},
+            }
+        )
+
+
+CHECKOUT = Yamler.parse(
+    {
+        "name": "Checkout Code",
+        "uses": "actions/checkout@v7",
+    }
+).anchor("checkout")
+SETUP = Yamler.parse(
+    {
+        "name": "Setup Python",
+        "uses": "actions/setup-python@v6",
+        "with": {
+            "python-version": Version.of_python(),
+            "pip-install": f"apexcodexpy=={Version()}",
+        },
+    }
+).anchor("setup")
+
+
+@dataclass(frozen=True)
+class CodeCheckJob(CiJob):
+    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
