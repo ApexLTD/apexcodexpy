@@ -33,10 +33,10 @@ class CiWorkflow:
 class CiJob:
     name: str
 
-    is_enabled: bool = True
     platform: str = "ubuntu-latest"
-    steps: MutableSequence[Yamler] = field(default_factory=list)
+    is_enabled: bool = True
 
+    _steps: MutableSequence[Yamler] = field(default_factory=list)
     _needs: MutableSequence[str] = field(default_factory=list)
 
     def needs(self, *names: str) -> CiJob:
@@ -45,7 +45,7 @@ class CiJob:
         return self
 
     def with_step(self, step: Yamler) -> CiJob:
-        self.steps.append(step)
+        self._steps.append(step)
 
         return self
 
@@ -60,6 +60,6 @@ class CiJob:
             {
                 "runs-on": self.platform,
                 **({"needs": self._needs} if self._needs else {}),
-                "steps": [step.as_mapping() for step in self.steps],
+                "steps": [step.as_mapping() for step in self._steps],
             }
         )
