@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import MutableMapping, MutableSequence
+from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -9,7 +9,6 @@ from codex.infra.yamler import Yamler
 
 from .base import YamlWorkflow
 from .ci import CiJob
-
 
 CHECKOUT = Yamler.parse(
     {
@@ -29,11 +28,6 @@ SETUP = Yamler.parse(
 ).anchor("setup")
 
 
-@dataclass(frozen=True)
-class CodeCheckJob(CiJob):
-    steps: MutableSequence[Yamler] = field(default_factory=lambda: [CHECKOUT, SETUP])
-
-
 @dataclass(frozen=True, kw_only=True)
 class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
@@ -44,7 +38,9 @@ class CheckCodeWorkflow(YamlWorkflow):
         return (
             CiWorkflow(name="Validate Python Code")
             .with_job(
-                CodeCheckJob(name="lint")
+                CiJob(name="lint")
+                .with_step(CHECKOUT)
+                .with_step(SETUP)
                 .run(
                     step="Lint Code",
                     command="codex lint --ci",
@@ -52,7 +48,9 @@ class CheckCodeWorkflow(YamlWorkflow):
                 .enabled(True)
             )
             .with_job(
-                CodeCheckJob(name="test-unit")
+                CiJob(name="test-unit")
+                .with_step(CHECKOUT)
+                .with_step(SETUP)
                 .run(
                     step="Run unit tests",
                     command="codex test unit --ci",
@@ -60,7 +58,9 @@ class CheckCodeWorkflow(YamlWorkflow):
                 .enabled(True)
             )
             .with_job(
-                CodeCheckJob(name="test-integration")
+                CiJob(name="test-integration")
+                .with_step(CHECKOUT)
+                .with_step(SETUP)
                 .run(
                     step="Run integration tests",
                     command="codex test integration --ci",
@@ -68,7 +68,9 @@ class CheckCodeWorkflow(YamlWorkflow):
                 .enabled(when=Version().is_installed("pytest-docker"))
             )
             .with_job(
-                CodeCheckJob(name="test-behaviour")
+                CiJob(name="test-behaviour")
+                .with_step(CHECKOUT)
+                .with_step(SETUP)
                 .run(
                     step="Run behaviour tests",
                     command="codex test behaviour --ci",
