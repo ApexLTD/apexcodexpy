@@ -27,10 +27,16 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force sync.",
+    ),
 ) -> None:
     (
         Codex.target(Path(path))
-        .sync()
+        .sync(force=force)
         .report(using=DefaultReporter())
         .exit(using=typer.Exit)
     )
