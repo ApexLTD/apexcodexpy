@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable, Iterator, MutableSequence
+from collections.abc import Callable, Iterable, Iterator, MutableSequence
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
@@ -83,6 +83,14 @@ class Command:
 class Executable(Protocol):
     def execute(self) -> TaskResult:
         pass
+
+
+@dataclass(frozen=True)
+class LazyExecutable:
+    inner: Callable[[], TaskResult]
+
+    def execute(self) -> TaskResult:
+        return self.inner()
 
 
 @dataclass(frozen=True)
