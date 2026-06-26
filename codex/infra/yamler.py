@@ -28,14 +28,15 @@ class Yamler:
     @staticmethod
     def folded(*args: str, lines: Iterable[str] | None = None) -> FoldedScalarString:
         clean_lines = [line.strip() for line in [*args, *(lines or ())]]
-        scalar = FoldedScalarString(" ".join(clean_lines))
-        scalar.fold_pos = []
+        folding_positions = []
 
         accumulator = 0
         for i, line in enumerate(clean_lines[:-1]):
             accumulator += len(line)
-            scalar.fold_pos.append(accumulator + i)
+            folding_positions.append(accumulator + i)
 
+        scalar = FoldedScalarString(" ".join(clean_lines))
+        scalar.fold_pos = folding_positions  # type: ignore
         return scalar
 
     def anchor(self, name: str) -> Yamler:
