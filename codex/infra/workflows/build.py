@@ -47,21 +47,21 @@ class BuildCodeWorkflow(YamlWorkflow):
             .run(
                 step="Build Docker image",
                 command=Yamler.folded(
-                    iterable=[
+                    lines=[
                         "codex build",
-                        "--tag ${{ github.event.repository.name }}:latest",
+                        "  --tag ${{ github.event.repository.name }}:latest",
                     ]
                 ),
             )
             .run(
                 step="Push Docker image",
                 command=Yamler.folded(
-                    iterable=[
+                    lines=[
                         "codex push",
-                        "--tag ${{ github.event.repository.name }}:latest",
-                        "--token ${{ secrets.GITHUB_TOKEN }}",
-                        "--actor ${{ github.actor }}",
-                        "--organization ${{ github.repository_owner }}",
+                        "  --tag ${{ github.event.repository.name }}:latest",
+                        "  --token ${{ secrets.GITHUB_TOKEN }}",
+                        "  --actor ${{ github.actor }}",
+                        "  --organization ${{ github.repository_owner }}",
                     ],
                 ),
             )
