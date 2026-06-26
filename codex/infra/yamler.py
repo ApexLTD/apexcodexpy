@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.scalarstring import FoldedScalarString
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -24,6 +25,20 @@ class Yamler:
     def parse(cls, data: Mapping[str, Any]) -> Yamler:
         return cls(value=CommentedMap(data))
 
+    @staticmethod
+    def folded(*args: str, lines: Iterable[str] | None = None) -> FoldedScalarString:
+        clean_lines = [line.strip() for line in [*args, *(lines or ())]]
+        folding_positions = []
+
+        accumulator = 0
+        for i, line in enumerate(clean_lines[:-1]):
+            accumulator += len(line)
+            folding_positions.append(accumulator + i)
+
+        scalar = FoldedScalarString(" ".join(clean_lines))
+        scalar.fold_pos = folding_positions  # type: ignore
+        return scalar
+
     def anchor(self, name: str) -> Yamler:
         self.value.yaml_set_anchor(name, always_dump=True)
 
@@ -37,6 +52,7 @@ class Yamler:
     def dump_to(self, path: Path) -> None:
         serializer = YAML()
         serializer.indent(mapping=2, sequence=4, offset=2)
+        serializer.width = 1000
 
         with path.open("w", newline="\n") as stream:
             serializer.dump(self.value, stream)
