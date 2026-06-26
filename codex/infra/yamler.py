@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -26,8 +26,11 @@ class Yamler:
         return cls(value=CommentedMap(data))
 
     @staticmethod
-    def folded(*lines: str) -> FoldedScalarString:
-        clean_lines = [line.strip() for line in lines]
+    def folded(
+        *lines: str,
+        iterable: Iterable[str] | None = None,
+    ) -> FoldedScalarString:
+        clean_lines = [line.strip() for line in [*lines, *(iterable or ())]]
         scalar = FoldedScalarString(" ".join(clean_lines))
         scalar.fold_pos = []
 
