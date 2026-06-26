@@ -7,6 +7,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.scalarstring import FoldedScalarString
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -24,6 +25,19 @@ class Yamler:
     def parse(cls, data: Mapping[str, Any]) -> Yamler:
         return cls(value=CommentedMap(data))
 
+    @staticmethod
+    def folded(*lines: str) -> FoldedScalarString:
+        clean_lines = [line.strip() for line in lines]
+        scalar = FoldedScalarString(" ".join(clean_lines))
+        scalar.fold_pos = []
+
+        accumulator = 0
+        for i, line in enumerate(clean_lines[:-1]):
+            accumulator += len(line)
+            scalar.fold_pos.append(accumulator + i)
+
+        return scalar
+
     def anchor(self, name: str) -> Yamler:
         self.value.yaml_set_anchor(name, always_dump=True)
 
@@ -37,6 +51,7 @@ class Yamler:
     def dump_to(self, path: Path) -> None:
         serializer = YAML()
         serializer.indent(mapping=2, sequence=4, offset=2)
+        serializer.width = 1000
 
         with path.open("w", newline="\n") as stream:
             serializer.dump(self.value, stream)

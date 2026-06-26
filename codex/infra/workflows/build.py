@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from ruamel.yaml.scalarstring import FoldedScalarString
-
 from codex.infra.tools import Version
 from codex.infra.yamler import Yamler
 
@@ -48,27 +46,19 @@ class BuildCodeWorkflow(YamlWorkflow):
             )
             .run(
                 step="Build Docker image",
-                command=FoldedScalarString(
-                    "\n".join(
-                        [
-                            "codex build",
-                            "  --tag ${{ github.event.repository.name }}:latest",
-                        ]
-                    )
+                command=Yamler.folded(
+                    "codex build",
+                    "--tag ${{ github.event.repository.name }}:latest",
                 ),
             )
             .run(
                 step="Push Docker image",
-                command=FoldedScalarString(
-                    "\n".join(
-                        [
-                            "codex push",
-                            "  --tag ${{ github.event.repository.name }}:latest",
-                            "  --token ${{ secrets.GITHUB_TOKEN }}",
-                            "  --actor ${{ github.actor }}",
-                            "  --organization ${{ github.repository_owner }}",
-                        ]
-                    )
+                command=Yamler.folded(
+                    "codex push",
+                    "--tag ${{ github.event.repository.name }}:latest",
+                    "--token ${{ secrets.GITHUB_TOKEN }}",
+                    "--actor ${{ github.actor }}",
+                    "--organization ${{ github.repository_owner }}",
                 ),
             )
             .yamlify()
