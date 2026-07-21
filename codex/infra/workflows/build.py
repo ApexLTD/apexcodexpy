@@ -27,19 +27,10 @@ class BuildCodeWorkflow(YamlWorkflow):
             .with_step(
                 Yamler.parse(
                     {
-                        "name": "Checkout Code",
-                        "uses": "actions/checkout@v7",
-                    }
-                )
-            )
-            .with_step(
-                Yamler.parse(
-                    {
-                        "name": "Setup Python",
-                        "uses": "actions/setup-python@v6",
+                        "name": "Setup Environment",
+                        "uses": "ApexLTD/actions/setup@main",
                         "with": {
-                            "python-version": Version.of_python(),
-                            "pip-install": "apexcodexpy",
+                            "python": Version.of_python(),
                         },
                     }
                 )

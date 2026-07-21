@@ -15,20 +15,13 @@ class CheckCodeWorkflow(YamlWorkflow):
     name: str = "CheckCode"
     path: Path = Path(".github") / "workflows" / "check_code.yml"
 
-    CHECKOUT = Yamler.parse(
-        {
-            "name": "Checkout Code",
-            "uses": "actions/checkout@v7",
-        }
-    ).anchor("checkout")
-
     SETUP = Yamler.parse(
         {
-            "name": "Setup Python",
-            "uses": "actions/setup-python@v6",
+            "name": "Setup Environment",
+            "uses": "ApexLTD/actions/setup@main",
             "with": {
-                "python-version": Version.of_python(),
-                "pip-install": f"apexcodexpy=={Version()}",
+                "python": Version.of_python(),
+                "codex": str(Version()),
             },
         }
     ).anchor("setup")
@@ -39,7 +32,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             CiWorkflow(name="Validate Python Code")
             .with_job(
                 CiJob(name="lint")
-                .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
                     step="Lint Code",
@@ -50,7 +42,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-unit")
                 .needs("lint")
-                .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
                     step="Run unit tests",
@@ -61,7 +52,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-integration")
                 .needs("lint", "test-unit")
-                .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
                     step="Run integration tests",
@@ -72,7 +62,6 @@ class CheckCodeWorkflow(YamlWorkflow):
             .with_job(
                 CiJob(name="test-behaviour")
                 .needs("lint", "test-unit")
-                .with_step(self.CHECKOUT)
                 .with_step(self.SETUP)
                 .run(
                     step="Run behaviour tests",
