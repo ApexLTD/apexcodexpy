@@ -231,6 +231,10 @@ class CodexTools:
                     .run()
                     .flag(cov=not in_ci or None)
                     .flag(last_failed=not in_ci or None)
+                    .with_a(
+                        hypothesis_profile="ci" if in_ci else "dev",
+                        when=Version().is_installed("hypothesis"),
+                    )
                 ),
             )
         )
