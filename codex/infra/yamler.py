@@ -36,8 +36,9 @@ class Yamler:
             folding_positions.append(accumulator + i)
 
         scalar = FoldedScalarString(" ".join(clean_lines))
-        scalar.fold_pos = folding_positions  # type: ignore
-        return scalar
+        scalar.fold_pos = folding_positions
+
+        return scalar  # type: ignore
 
     def anchor(self, name: str) -> Yamler:
         self.value.yaml_set_anchor(name, always_dump=True)

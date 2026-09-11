@@ -33,15 +33,18 @@ class Command:
 
     _arguments: list[str] = field(init=False, default_factory=list)
 
-    def with_a(self, **kwargs: Any) -> Command:
-        return self.and_a(**kwargs)
+    def with_a(self, when: bool = True, **kwargs: Any) -> Command:
+        return self.and_a(**kwargs, when=when)
 
-    def and_a(self, **kwargs: Any) -> Command:
+    def and_a(self, when: bool = True, **kwargs: Any) -> Command:
+        if not when:
+            return self
+
         assert len(kwargs) == 1, "with_a/and_a supports one argument at a time."
 
         name, value = kwargs.popitem()
 
-        return self.append(f"--{name}={value}")
+        return self.append(f"--{self.dashify(name)}={value}")
 
     def flag(self, **kwargs: bool | None) -> Command:
         for name, value in kwargs.items():
