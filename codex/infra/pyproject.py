@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Mapping, MutableMapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import tomlkit
+from tomlkit import TOMLDocument
 
 from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
@@ -79,10 +82,9 @@ class PyProjectToml:
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        document = tomlkit.parse(pyproject.read_text(encoding="utf-8"))
-        original = tomlkit.dumps(document)
-        deep_merge(STANDARDS, document)
-        modified = tomlkit.dumps(document)
+        document = Tomler.read(pyproject)
+        original = document.dumps()
+        modified = document.update_with(STANDARDS).dumps()
 
         if original == modified:
             return self._result.no_changes()
@@ -94,8 +96,35 @@ class PyProjectToml:
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
 
+    @staticmethod
+    def latest() -> Tomler:
+        return Tomler.read(Path("pyproject.toml")).update_with(STANDARDS)
 
-def deep_merge(source: dict[str, Any], destination: dict[str, Any]) -> None:
+
+@dataclass(frozen=True)
+class Tomler:
+    document: TOMLDocument
+
+    @classmethod
+    def read(cls, path: Path) -> Tomler:
+        return cls(tomlkit.parse(path.read_text(encoding="utf-8")))
+
+    def dumps(self) -> str:
+        return tomlkit.dumps(self.document)
+
+    def update_with(self, source: Mapping[str, Any]) -> Self:
+        deep_merge(source, self.document)
+
+        return self
+
+    def hashed(self) -> str:
+        return hashlib.sha256(self.dumps().encode()).hexdigest()
+
+
+def deep_merge(
+    source: Mapping[str, Any],
+    destination: MutableMapping[str, Any],
+) -> None:
     """Recursively merges the source into destination with TOML formatting."""
     for key, value in source.items():
         match value:

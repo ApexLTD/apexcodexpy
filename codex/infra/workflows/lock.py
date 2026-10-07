@@ -6,6 +6,7 @@ from pathlib import Path
 
 from codex.infra.yamler import Yamler
 
+from ..pyproject import PyProjectToml
 from .base import YamlWorkflow
 
 
@@ -24,7 +25,7 @@ class CodexLockWorkflow(YamlWorkflow):
         return Yamler.parse(
             {
                 "hashes": {
-                    "pyproject": hash_of(Path("pyproject.toml")),
+                    "pyproject": PyProjectToml.latest().hashed(),
                 },
             }
         )
