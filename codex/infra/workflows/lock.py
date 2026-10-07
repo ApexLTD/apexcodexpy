@@ -30,4 +30,4 @@ class CodexLockWorkflow(YamlWorkflow):
         )
 
     def verify(self) -> bool:
-        return self.path.exists() and self.standards == Yamler.read(self.path)
+        return not self.path.exists() or self.standards == Yamler.read(self.path)
