@@ -22,6 +22,7 @@ from codex.infra.workflows import (
     CheckCodeWorkflow,
     DependabotWorkflow,
 )
+from codex.infra.workflows.lock import CodexLockWorkflow
 
 
 @dataclass(frozen=True)
@@ -140,6 +141,7 @@ class CodexTools:
                 BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force),
                 when=self.target.joinpath("Dockerfile").exists(),
             )
+            .attach(CodexLockWorkflow().sync(self.target, force=force))
         )
 
     def lock(self) -> Executable:
