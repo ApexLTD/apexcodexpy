@@ -43,6 +43,7 @@ def _ruff_config() -> dict[str, Any]:
                 "UP",
                 "RUF",
                 "FURB",
+                "PERF",
             ],
             "mccabe": {"max-complexity": 10},
         }
