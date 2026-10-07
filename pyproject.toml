@@ -54,6 +54,7 @@ select = [
     "I",
     "N",
     "UP",
+    "RUF",
 ]
 
 [tool.ruff.lint.mccabe]
