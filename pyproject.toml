@@ -54,6 +54,24 @@ select = [
     "I",
     "N",
     "UP",
+    "RUF",
+    "FURB",
+    "PERF",
+    "LOG",
+    "PIE",
+    "SLF",
+    "DTZ",
+    "PTH",
+    "TRY",
+    "PL",
+    "TCH",
+]
+
+ignore = [
+    "TRY003",
+    "PLR0913",
+    "PLR0917",
+    "PLR2004",
 ]
 
 [tool.ruff.lint.mccabe]

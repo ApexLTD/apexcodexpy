@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import MutableMapping, MutableSequence
 from dataclasses import dataclass, field, replace
+from typing import TYPE_CHECKING
 
 from codex.infra.yamler import Yamler
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping, MutableSequence
 
 
 @dataclass(frozen=True)

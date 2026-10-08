@@ -4,6 +4,7 @@ import sys
 from dataclasses import dataclass, field
 from importlib import metadata
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from codex.infra.program import (
     BoundedProgram,
@@ -11,7 +12,9 @@ from codex.infra.program import (
     MultiProgram,
     Program,
 )
-from codex.infra.result import TaskResult
+
+if TYPE_CHECKING:
+    from codex.infra.result import TaskResult
 
 
 @dataclass(frozen=True, kw_only=True)

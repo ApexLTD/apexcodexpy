@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Callable, Iterable, Iterator, MutableSequence
 from dataclasses import dataclass, field, replace
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from codex.infra.result import ComboResult, ProgramResult, TaskResult
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator, MutableSequence
 
 
 @dataclass(frozen=True)
@@ -22,6 +24,7 @@ class Program:
                     text=True,
                     encoding="utf-8",
                     capture_output=True,
+                    check=False,
                 )
             ),
         )

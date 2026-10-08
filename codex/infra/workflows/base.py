@@ -3,12 +3,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from codex.infra.program import Executable, LazyExecutable
 from codex.infra.result import ProgramResult
 from codex.infra.tools import Version
 from codex.infra.yamler import Yamler
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass(frozen=True, kw_only=True)
