@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping, MutableMapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 import tomlkit
 from tomlkit import TOMLDocument
 
-from codex.infra.program import Executable
 from codex.infra.result import ProgramResult
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, MutableMapping
+
+    from codex.infra.program import Executable
 
 
 def _mypy_config() -> dict[str, Any]:

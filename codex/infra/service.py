@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from time import time
+from typing import TYPE_CHECKING
 
 from codex.infra.program import Command, Executable, MultiProgram, Program
 from codex.infra.pyproject import PyProjectToml
@@ -23,6 +23,9 @@ from codex.infra.workflows import (
     DependabotWorkflow,
 )
 from codex.infra.workflows.lock import CodexLockWorkflow
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass(frozen=True)

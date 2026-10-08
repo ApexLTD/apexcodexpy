@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from codex.infra.result import Reporter
 from codex.infra.typer.device import TyperDevice
+
+if TYPE_CHECKING:
+    from codex.infra.result import Reporter
 
 
 @dataclass(frozen=True)
