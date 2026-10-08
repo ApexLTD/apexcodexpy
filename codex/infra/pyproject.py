@@ -56,11 +56,6 @@ def _ruff_config() -> dict[str, Any]:
                 "PL",
                 "TCH",
             ],
-            "ignore": [
-                "TRY003",
-                "PLR0913",
-                "PLR2004",
-            ],
             "mccabe": {
                 "max-complexity": 10,
             },
