@@ -207,24 +207,28 @@ class CodexTools:
 
     def fix(self, unsafe: bool = False) -> Executable:
         return (
-            PoetryRun()
+            MultiProgram()
             .attach(
-                Program(
-                    name="black",
-                    command=Ruff(on=self.target).format(),
+                PoetryRun()
+                .attach(
+                    Program(
+                        name="black",
+                        command=Ruff(on=self.target).format(),
+                    )
+                )
+                .attach(
+                    Program(
+                        name="ruff",
+                        command=(
+                            Ruff(on=self.target)
+                            .lint()
+                            .flag(fix=True)
+                            .flag(unsafe_fixes=unsafe)
+                        ),
+                    ),
                 )
             )
-            .attach(
-                Program(
-                    name="ruff",
-                    command=(
-                        Ruff(on=self.target)
-                        .lint()
-                        .flag(fix=True)
-                        .flag(unsafe_fixes=unsafe)
-                    ),
-                ),
-            )
+            .attach(CodexLockWorkflow().verify(self.target))
         )
 
     def unit(self, in_ci: bool = False) -> Executable:
