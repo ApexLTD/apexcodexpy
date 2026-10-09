@@ -4,10 +4,9 @@ import copy
 import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 import tomlkit
-from tomlkit import TOMLDocument
 
 from codex.infra.result import ProgramResult
 
@@ -119,7 +118,7 @@ class PyProjectToml:
 
 @dataclass(frozen=True)
 class Tomler:
-    document: TOMLDocument
+    document: Mapping[str, Any]
 
     @classmethod
     def read(cls, path: Path) -> Tomler:
@@ -128,10 +127,8 @@ class Tomler:
     def dumps(self) -> str:
         return tomlkit.dumps(self.document)
 
-    def update_with(self, source: Mapping[str, Any]) -> Self:
-        deep_merge(source, self.document)
-
-        return self
+    def update_with(self, source: Mapping[str, Any]) -> Tomler:
+        return Tomler(deep_merge(source, self.document))
 
     def hashed(self) -> str:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
