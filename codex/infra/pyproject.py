@@ -98,9 +98,8 @@ class PyProjectToml:
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        document = Tomler.read(pyproject)
-        original = document.dumps()
-        modified = document.update_with(STANDARDS).dumps()
+        original = Tomler.read(pyproject).dumps()
+        modified = Tomler.read(pyproject).update_with(STANDARDS).dumps()
 
         if original == modified:
             return self._result.no_changes()
