@@ -11,7 +11,7 @@ cli = typer.Typer(no_args_is_help=True)
 
 @cli.callback()
 def verify_codex_lock(ctx: typer.Context) -> None:
-    if ctx.invoked_subcommand == "sync":
+    if ctx.invoked_subcommand != "fix":
         return
 
     if CodexLockWorkflow().verify():
