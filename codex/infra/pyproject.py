@@ -98,13 +98,13 @@ class PyProjectToml:
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        original = Tomler.read(pyproject).dumps()
-        modified = Tomler.read(pyproject).update_with(STANDARDS).dumps()
+        current = Tomler.read(pyproject).dumps()
+        latest = Tomler.read(pyproject).update_with(STANDARDS).dumps()
 
-        if original == modified:
+        if current == latest:
             return self._result.no_changes()
 
-        pyproject.write_text(modified, encoding="utf-8", newline="\n")
+        pyproject.write_text(latest, encoding="utf-8", newline="\n")
 
         return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
 
