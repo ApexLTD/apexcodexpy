@@ -38,9 +38,9 @@ class _Message:
 
     @staticmethod
     def parse(raw: str) -> _Message | _NoMessage:
-        message = dedent(raw).strip()
+        message = dedent(raw)
 
-        return _Message(message + "\n") if message else _NoMessage()
+        return _Message(message) if message.strip() else _NoMessage()
 
     def display(self, using: Callable[[str], None]) -> None:
         using(self.raw)
