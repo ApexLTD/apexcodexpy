@@ -4,23 +4,8 @@ import typer
 
 from codex.infra.reporters import DefaultReporter, SimpleReporter
 from codex.infra.service import Codex, Git
-from codex.infra.workflows.lock import CodexLockWorkflow
 
 cli = typer.Typer(no_args_is_help=True)
-
-
-@cli.callback()
-def verify_codex_lock(ctx: typer.Context) -> None:
-    if ctx.invoked_subcommand != "fix":
-        return
-
-    if CodexLockWorkflow().verify():
-        return
-
-    typer.echo("Codex is out of sync!")
-    typer.echo("Run `codex sync` to bring configuration up to date")
-
-    raise typer.Exit(1)
 
 
 @cli.command(
