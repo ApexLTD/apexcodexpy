@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -11,7 +12,7 @@ from tomlkit import TOMLDocument
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Mapping
 
     from codex.infra.program import Executable
 
@@ -138,19 +139,41 @@ class Tomler:
 
 def deep_merge(
     source: Mapping[str, Any],
-    destination: MutableMapping[str, Any],
-) -> None:
-    """Recursively merges the source into destination with TOML formatting."""
+    destination: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """
+    Recursively merges two TOML documents or mappings,
+    updating the values of the destination with those from the source.
+    The merge is performed deeply to handle nested mappings, ensuring that
+    both simple and complex TOML structures are merged effectively.
+
+    This function ensures that TOML-compliant data structures are preserved during the
+    merge process, including the creation of properly formatted TOML arrays and tables.
+
+    :param source: The source mapping to be merged into the destination.
+    :type source: Mapping[str, Any]
+    :param destination: The destination mapping.
+    :type destination: Mapping[str, Any]
+    :return: A TOMLDocument representing the merged result.
+    :rtype: Mapping[str, Any]
+    """
+    result = {**destination}
+
     for key, value in source.items():
-        match value:
-            case dict():
-                if key not in destination:
-                    destination[key] = tomlkit.table()
-                deep_merge(value, destination[key])
-            case list():
+        match (result.get(key), value):
+            case (dict(destination_value), dict(source_value)):
+                # Both exist and are dicts -> recursively merge
+                result[key] = deep_merge(source_value, destination_value)
+            case (_, dict(source_value)):
+                # Only source is a dict -> convert to TOML table
+                result[key] = deep_merge(source_value, {})
+            case (_, list(src_list)):
+                # Formatted TOML array
                 new_array = tomlkit.array()
-                new_array.extend(value)
+                new_array.extend(copy.deepcopy(src_list))
                 new_array.multiline(True)
-                destination[key] = new_array
+                result[key] = new_array
             case _:
-                destination[key] = value
+                result[key] = copy.deepcopy(value)
+
+    return result
