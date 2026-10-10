@@ -117,21 +117,19 @@ class PyProjectToml:
     def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
-    def _sync(self, pyproject: Path) -> Executable:
-        a = PyProjectFile(pyproject)
-
-        if not a.exists():
+    def _sync(self, pyproject: PyProjectFile) -> Executable:
+        if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        if not a.is_outdated():
+        if not pyproject.is_outdated():
             return self._result.no_changes()
 
-        a.sync()
+        pyproject.sync()
 
         return self._result.workflow_success()
 
-    def toml_on(self, path: Path) -> Path:
-        return path / self.NAME
+    def toml_on(self, path: Path) -> PyProjectFile:
+        return PyProjectFile(path / self.NAME)
 
 
 @dataclass(frozen=True)
