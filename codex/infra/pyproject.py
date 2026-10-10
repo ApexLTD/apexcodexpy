@@ -1,125 +1,138 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 from dataclasses import dataclass, field
+from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 import tomlkit
-from tomlkit import TOMLDocument
 
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Mapping
 
     from codex.infra.program import Executable
 
 
-def _mypy_config() -> dict[str, Any]:
-    return {
-        "strict": True,
-        "ignore_missing_imports": True,
-        "show_error_codes": True,
-        "pretty": True,
-    }
+@dataclass(frozen=True)
+class PyProjectToml:
+    name: str = "PyProject"
+    path: Path = Path("pyproject.toml")
 
+    def sync(self, target: Path) -> Executable:
+        pyproject = PyProjectFile(target / self.path, standards=self.standards)
 
-def _ruff_config() -> dict[str, Any]:
-    return {
-        "lint": {
-            "select": [
-                "A",
-                "ARG",
-                "B",
-                "C4",
-                "PT",
-                "RSE",
-                "RET",
-                "SIM",
-                "T20",
-                "E",
-                "W",
-                "F",
-                "I",
-                "N",
-                "UP",
-                "RUF",
-                "FURB",
-                "PERF",
-                "LOG",
-                "PIE",
-                "SLF",
-                "DTZ",
-                "PTH",
-                "TRY",
-                "PL",
-                "TCH",
-            ],
-            "mccabe": {
-                "max-complexity": 10,
+        if not pyproject.exists():
+            return ProgramResult(name=self.name).fail(message=f"{self.name} not found.")
+
+        if not pyproject.is_outdated():
+            return ProgramResult(name=self.name).no_changes()
+
+        pyproject.sync()
+
+        return ProgramResult(name=self.name).workflow_success()
+
+    @property
+    def standards(self) -> Mapping[str, Any]:
+        return {
+            "tool": {
+                "mypy": self._mypy,
+                "ruff": self._ruff,
+                "coverage": self._coveragepy,
+            }
+        }
+
+    @property
+    def _mypy(self) -> dict[str, Any]:
+        return {
+            "strict": True,
+            "ignore_missing_imports": True,
+            "show_error_codes": True,
+            "pretty": True,
+        }
+
+    @property
+    def _ruff(self) -> dict[str, Any]:
+        return {
+            "lint": {
+                "select": [
+                    "A",
+                    "ARG",
+                    "B",
+                    "C4",
+                    "PT",
+                    "RSE",
+                    "RET",
+                    "SIM",
+                    "T20",
+                    "E",
+                    "W",
+                    "F",
+                    "I",
+                    "N",
+                    "UP",
+                    "RUF",
+                    "FURB",
+                    "PERF",
+                    "LOG",
+                    "PIE",
+                    "SLF",
+                    "DTZ",
+                    "PTH",
+                    "TRY",
+                    "PL",
+                    "TCH",
+                ],
+                "mccabe": {
+                    "max-complexity": 10,
+                },
+            }
+        }
+
+    @property
+    def _coveragepy(self) -> dict[str, Any]:
+        return {
+            "run": {
+                "branch": True,
+            },
+            "report": {
+                "skip_empty": True,
+                "skip_covered": True,
+                "show_missing": True,
             },
         }
-    }
-
-
-def _coverage_config() -> dict[str, Any]:
-    return {
-        "run": {
-            "branch": True,
-        },
-        "report": {
-            "skip_empty": True,
-            "skip_covered": True,
-            "show_missing": True,
-        },
-    }
-
-
-STANDARDS = {
-    "tool": {
-        "mypy": _mypy_config(),
-        "ruff": _ruff_config(),
-        "coverage": _coverage_config(),
-    }
-}
 
 
 @dataclass(frozen=True)
-class PyProjectToml:
-    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
+class PyProjectFile:
+    path: Path
 
-    NAME = "pyproject.toml"
+    standards: Mapping[str, Any] = field(default_factory=dict)
 
-    def sync(self, target: Path) -> Executable:
-        return self._sync(self.toml_on(target))
+    @cached_property
+    def current(self) -> Tomler:
+        return Tomler.read(self.path)
 
-    def _sync(self, pyproject: Path) -> Executable:
-        if not pyproject.exists():
-            return self._result.fail(message=f"{self.NAME} not found.")
+    @cached_property
+    def latest(self) -> Tomler:
+        return self.current.update_with(self.standards)
 
-        document = Tomler.read(pyproject)
-        original = document.dumps()
-        modified = document.update_with(STANDARDS).dumps()
+    def exists(self) -> bool:
+        return self.path.exists()
 
-        if original == modified:
-            return self._result.no_changes()
+    def is_outdated(self) -> bool:
+        return self.current != self.latest
 
-        pyproject.write_text(modified, encoding="utf-8", newline="\n")
-
-        return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
-
-    def toml_on(self, path: Path) -> Path:
-        return path / self.NAME
-
-    @staticmethod
-    def latest() -> Tomler:
-        return Tomler.read(Path("pyproject.toml")).update_with(STANDARDS)
+    def sync(self) -> None:
+        self.path.write_text(self.latest.dumps(), encoding="utf-8", newline="\n")
 
 
 @dataclass(frozen=True)
 class Tomler:
-    document: TOMLDocument
+    document: Mapping[str, Any]
 
     @classmethod
     def read(cls, path: Path) -> Tomler:
@@ -128,10 +141,8 @@ class Tomler:
     def dumps(self) -> str:
         return tomlkit.dumps(self.document)
 
-    def update_with(self, source: Mapping[str, Any]) -> Self:
-        deep_merge(source, self.document)
-
-        return self
+    def update_with(self, source: Mapping[str, Any]) -> Tomler:
+        return Tomler(deep_merge(source, self.document))
 
     def hashed(self) -> str:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
@@ -139,19 +150,41 @@ class Tomler:
 
 def deep_merge(
     source: Mapping[str, Any],
-    destination: MutableMapping[str, Any],
-) -> None:
-    """Recursively merges the source into destination with TOML formatting."""
+    destination: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """
+    Recursively merges two mappings, taking the source and merging it into
+    the destination. Performs a deep merge such that nested dictionaries or
+    arrays are combined intelligently.
+
+    The function identifies the type of each key-value pair in the `source`
+    and `destination` mappings and determines how to merge them based on
+    their data types, supporting nested dictionaries and TOML data
+    structures.
+
+    :param source: The source mapping to merge into the destination.
+    :param destination: The destination mapping that will be updated with the
+        data from `source`.
+    :return: A new mapping that represents the merged result of `source`
+        and `destination`.
+    """
+    result = {**destination}
+
     for key, value in source.items():
-        match value:
-            case dict():
-                if key not in destination:
-                    destination[key] = tomlkit.table()
-                deep_merge(value, destination[key])
-            case list():
+        match (result.get(key), value):
+            case (dict(destination_value), dict(source_value)):
+                # Both exist and are dicts -> recursively merge
+                result[key] = deep_merge(source_value, destination_value)
+            case (_, dict(source_value)):
+                # Only source is a dict -> convert to TOML table
+                result[key] = deep_merge(source_value, {})
+            case (_, list(src_list)):
+                # Formatted TOML array
                 new_array = tomlkit.array()
-                new_array.extend(value)
+                new_array.extend(copy.deepcopy(src_list))
                 new_array.multiline(True)
-                destination[key] = new_array
+                result[key] = new_array
             case _:
-                destination[key] = value
+                result[key] = copy.deepcopy(value)
+
+    return result

@@ -22,7 +22,6 @@ from codex.infra.workflows import (
     CheckCodeWorkflow,
     DependabotWorkflow,
 )
-from codex.infra.workflows.lock import CodexLockWorkflow
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -137,14 +136,12 @@ class CodexTools:
     def sync(self, force: bool) -> Executable:
         return (
             MultiProgram()
-            .attach(PyProjectToml().sync(self.target))
             .attach(DependabotWorkflow().sync(self.target, force=force))
             .attach(CheckCodeWorkflow().sync(self.target, force=force))
             .attach(
                 BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force),
                 when=self.target.joinpath("Dockerfile").exists(),
             )
-            .attach(CodexLockWorkflow().sync(self.target, force=force))
         )
 
     def lock(self) -> Executable:
@@ -207,23 +204,27 @@ class CodexTools:
 
     def fix(self, unsafe: bool = False) -> Executable:
         return (
-            PoetryRun()
+            MultiProgram()
+            .attach(PyProjectToml().sync(self.target))
             .attach(
-                Program(
-                    name="black",
-                    command=Ruff(on=self.target).format(),
+                PoetryRun()
+                .attach(
+                    Program(
+                        name="black",
+                        command=Ruff(on=self.target).format(),
+                    )
                 )
-            )
-            .attach(
-                Program(
-                    name="ruff",
-                    command=(
-                        Ruff(on=self.target)
-                        .lint()
-                        .flag(fix=True)
-                        .flag(unsafe_fixes=unsafe)
+                .attach(
+                    Program(
+                        name="ruff",
+                        command=(
+                            Ruff(on=self.target)
+                            .lint()
+                            .flag(fix=True)
+                            .flag(unsafe_fixes=unsafe)
+                        ),
                     ),
-                ),
+                )
             )
         )
 

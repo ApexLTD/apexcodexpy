@@ -46,14 +46,9 @@ class YamlWorkflow(ABC):
 
             standards.dump_to(path)
 
-            return self.success()
+            return ProgramResult(name=self.name).workflow_success()
 
         return LazyExecutable(_)
 
     def _utcnow(self) -> str:
         return datetime.now(tz=UTC).replace(microsecond=0).isoformat(sep=" ")
-
-    def success(self) -> ProgramResult:
-        return ProgramResult(name=self.name).success(
-            message=f"{self.name} workflow succeeded.\n"
-        )

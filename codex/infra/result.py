@@ -61,6 +61,9 @@ class ProgramResult:
     def no_changes(self) -> ProgramResult:
         return self.success(message="Already up to date.\n")
 
+    def workflow_success(self) -> ProgramResult:
+        return self.success(message="Workflow succeeded!\n")
+
     def success(self, *, message: str = "") -> ProgramResult:
         return ProgramResult(
             name=self.name,
