@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 import tomlkit
@@ -86,6 +87,28 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
+class Abracadabra:
+    pyproject: Path
+
+    @cached_property
+    def current(self) -> Tomler:
+        return Tomler.read(self.pyproject)
+
+    @cached_property
+    def latest(self) -> Tomler:
+        return self.current.update_with(STANDARDS)
+
+    def exists(self) -> bool:
+        return self.pyproject.exists()
+
+    def is_outdated(self) -> bool:
+        return self.current != self.latest
+
+    def sync(self) -> None:
+        self.pyproject.write_text(self.latest.dumps(), encoding="utf-8", newline="\n")
+
+
+@dataclass(frozen=True)
 class PyProjectToml:
     _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
 
@@ -95,16 +118,15 @@ class PyProjectToml:
         return self._sync(self.toml_on(target))
 
     def _sync(self, pyproject: Path) -> Executable:
-        if not pyproject.exists():
+        a = Abracadabra(pyproject)
+
+        if not a.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        current = Tomler.read(pyproject)
-        latest = current.update_with(STANDARDS)
-
-        if current == latest:
+        if not a.is_outdated():
             return self._result.no_changes()
 
-        pyproject.write_text(latest.dumps(), encoding="utf-8", newline="\n")
+        a.sync()
 
         return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
 
@@ -115,13 +137,12 @@ class PyProjectToml:
         return self._verify(self.toml_on(target))
 
     def _verify(self, pyproject: Path) -> ProgramResult:
-        if not pyproject.exists():
+        a = Abracadabra(pyproject)
+
+        if not a.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        current = Tomler.read(pyproject)
-        latest = current.update_with(STANDARDS)
-
-        if current == latest:
+        if not a.is_outdated():
             return self._result.no_changes()
 
         return self._result.fail(
