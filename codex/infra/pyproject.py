@@ -90,13 +90,15 @@ STANDARDS = {
 class PyProjectFile:
     path: Path
 
+    standards: dict[str, Any] = field(default_factory=dict)
+
     @cached_property
     def current(self) -> Tomler:
         return Tomler.read(self.path)
 
     @cached_property
     def latest(self) -> Tomler:
-        return self.current.update_with(STANDARDS)
+        return self.current.update_with(self.standards)
 
     def exists(self) -> bool:
         return self.path.exists()
@@ -115,7 +117,7 @@ class PyProjectToml:
     NAME = "pyproject.toml"
 
     def sync(self, target: Path) -> Executable:
-        pyproject = PyProjectFile(target / self.NAME)
+        pyproject = PyProjectFile(target / self.NAME, standards=STANDARDS)
 
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
