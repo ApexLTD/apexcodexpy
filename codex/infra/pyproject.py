@@ -17,75 +17,6 @@ if TYPE_CHECKING:
     from codex.infra.program import Executable
 
 
-def _mypy_config() -> dict[str, Any]:
-    return {
-        "strict": True,
-        "ignore_missing_imports": True,
-        "show_error_codes": True,
-        "pretty": True,
-    }
-
-
-def _ruff_config() -> dict[str, Any]:
-    return {
-        "lint": {
-            "select": [
-                "A",
-                "ARG",
-                "B",
-                "C4",
-                "PT",
-                "RSE",
-                "RET",
-                "SIM",
-                "T20",
-                "E",
-                "W",
-                "F",
-                "I",
-                "N",
-                "UP",
-                "RUF",
-                "FURB",
-                "PERF",
-                "LOG",
-                "PIE",
-                "SLF",
-                "DTZ",
-                "PTH",
-                "TRY",
-                "PL",
-                "TCH",
-            ],
-            "mccabe": {
-                "max-complexity": 10,
-            },
-        }
-    }
-
-
-def _coverage_config() -> dict[str, Any]:
-    return {
-        "run": {
-            "branch": True,
-        },
-        "report": {
-            "skip_empty": True,
-            "skip_covered": True,
-            "show_missing": True,
-        },
-    }
-
-
-STANDARDS = {
-    "tool": {
-        "mypy": _mypy_config(),
-        "ruff": _ruff_config(),
-        "coverage": _coverage_config(),
-    }
-}
-
-
 @dataclass(frozen=True)
 class PyProjectToml:
     _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
@@ -107,7 +38,73 @@ class PyProjectToml:
 
     @property
     def standards(self) -> Mapping[str, Any]:
-        return STANDARDS
+        return {
+            "tool": {
+                "mypy": self._mypy,
+                "ruff": self._ruff,
+                "coverage": self._coveragepy,
+            }
+        }
+
+    @property
+    def _mypy(self) -> dict[str, Any]:
+        return {
+            "strict": True,
+            "ignore_missing_imports": True,
+            "show_error_codes": True,
+            "pretty": True,
+        }
+
+    @property
+    def _ruff(self) -> dict[str, Any]:
+        return {
+            "lint": {
+                "select": [
+                    "A",
+                    "ARG",
+                    "B",
+                    "C4",
+                    "PT",
+                    "RSE",
+                    "RET",
+                    "SIM",
+                    "T20",
+                    "E",
+                    "W",
+                    "F",
+                    "I",
+                    "N",
+                    "UP",
+                    "RUF",
+                    "FURB",
+                    "PERF",
+                    "LOG",
+                    "PIE",
+                    "SLF",
+                    "DTZ",
+                    "PTH",
+                    "TRY",
+                    "PL",
+                    "TCH",
+                ],
+                "mccabe": {
+                    "max-complexity": 10,
+                },
+            }
+        }
+
+    @property
+    def _coveragepy(self) -> dict[str, Any]:
+        return {
+            "run": {
+                "branch": True,
+            },
+            "report": {
+                "skip_empty": True,
+                "skip_covered": True,
+                "show_missing": True,
+            },
+        }
 
 
 @dataclass(frozen=True)
