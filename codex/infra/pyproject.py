@@ -114,9 +114,6 @@ class PyProjectToml:
 
     NAME = "pyproject.toml"
 
-    def verify(self, target: Path) -> Executable:
-        return self.sync(target)
-
     def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
