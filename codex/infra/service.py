@@ -206,6 +206,7 @@ class CodexTools:
     def fix(self, unsafe: bool = False) -> Executable:
         return (
             MultiProgram()
+            .attach(PyProjectToml().verify(self.target))
             .attach(
                 PoetryRun()
                 .attach(
@@ -226,7 +227,6 @@ class CodexTools:
                     ),
                 )
             )
-            .attach(PyProjectToml().verify(self.target))
         )
 
     def unit(self, in_ci: bool = False) -> Executable:
