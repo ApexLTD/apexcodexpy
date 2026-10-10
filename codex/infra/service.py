@@ -35,7 +35,7 @@ class Codex:
     def target(cls, target: Path) -> Codex:
         return cls(CodexTools(target))
 
-    def ci(self, on: bool) -> Codex | CiCodex:
+    def ci(self, *, on: bool) -> Codex | CiCodex:
         if on:
             return CiCodex(tools=self.tools)
 
@@ -45,8 +45,8 @@ class Codex:
     def version() -> TaskResult:
         return ProgramResult(name="version").success(message=str(Version()))
 
-    def sync(self, force: bool) -> TaskResult:
-        return self.tools.sync(force).execute()
+    def sync(self, *, force: bool) -> TaskResult:
+        return self.tools.sync(force=force).execute()
 
     def lock(self) -> TaskResult:
         return self.tools.lock().execute()
@@ -60,7 +60,7 @@ class Codex:
     def lint(self) -> TaskResult:
         return self.tools.lint().execute()
 
-    def fix(self, unsafe: bool = False) -> TaskResult:
+    def fix(self, *, unsafe: bool = False) -> TaskResult:
         return self.tools.fix(unsafe=unsafe).execute()
 
     def unit(self) -> TaskResult:
@@ -133,7 +133,7 @@ class CiCodex:
 class CodexTools:
     target: Path
 
-    def sync(self, force: bool) -> Executable:
+    def sync(self, *, force: bool) -> Executable:
         return (
             MultiProgram()
             .attach(DependabotWorkflow().sync(self.target, force=force))
@@ -202,7 +202,7 @@ class CodexTools:
             )
         )
 
-    def fix(self, unsafe: bool = False) -> Executable:
+    def fix(self, *, unsafe: bool = False) -> Executable:
         return (
             MultiProgram()
             .attach(PyProjectToml().sync(self.target))
@@ -228,7 +228,7 @@ class CodexTools:
             )
         )
 
-    def unit(self, in_ci: bool = False) -> Executable:
+    def unit(self, *, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
             Program(
                 name="test",
@@ -245,7 +245,7 @@ class CodexTools:
             )
         )
 
-    def behaviour(self, in_ci: bool = False) -> Executable:
+    def behaviour(self, *, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
             Program(
                 name="behave",
@@ -334,7 +334,7 @@ class CodexTools:
 
 @dataclass(frozen=True)
 class Git:
-    def revision(self, of: str = "HEAD", short: bool = True) -> str:
+    def revision(self, of: str = "HEAD", *, short: bool = True) -> str:
         return (
             Program(Command("git rev-parse").flag(short=short).append(of))
             .execute()

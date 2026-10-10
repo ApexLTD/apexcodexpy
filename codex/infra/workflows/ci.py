@@ -55,7 +55,7 @@ class CiJob:
     def run(self, step: str, command: str) -> CiJob:
         return self.with_step(Yamler.parse({"name": step, "run": command}))
 
-    def enabled(self, when: bool) -> CiJob:
+    def enabled(self, *, when: bool) -> CiJob:
         return replace(self, is_enabled=when)
 
     def yamlify(self) -> Yamler:

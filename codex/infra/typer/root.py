@@ -27,8 +27,9 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    *,
     force: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--force",
         "-f",
         help="Force sync.",
@@ -192,13 +193,14 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    *,
     ci: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--ci",
         help="Run in CI mode.",
     ),
     silent: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--silent",
         "-s",
         help="Suppress output.",
@@ -224,14 +226,15 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    *,
     silent: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--silent",
         "-s",
         help="Suppress output.",
     ),
     unsafe: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--unsafe",
         help="Run unsafe Ruff fixes.",
     ),

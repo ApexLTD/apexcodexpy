@@ -36,10 +36,10 @@ class Command:
 
     _arguments: list[str] = field(init=False, default_factory=list)
 
-    def with_a(self, when: bool = True, **kwargs: Any) -> Command:
+    def with_a(self, *, when: bool = True, **kwargs: Any) -> Command:
         return self.and_a(**kwargs, when=when)
 
-    def and_a(self, when: bool = True, **kwargs: Any) -> Command:
+    def and_a(self, *, when: bool = True, **kwargs: Any) -> Command:
         if not when:
             return self
 
@@ -103,7 +103,7 @@ class LazyExecutable:
 class MultiProgram:
     sub_programs: MutableSequence[Executable] = field(default_factory=list)
 
-    def attach(self, program: Executable, when: bool = True) -> MultiProgram:
+    def attach(self, program: Executable, *, when: bool = True) -> MultiProgram:
         if when:
             self.sub_programs.append(program)
 

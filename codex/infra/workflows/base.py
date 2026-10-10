@@ -26,7 +26,7 @@ class YamlWorkflow(ABC):
     def standards(self) -> Yamler:
         pass
 
-    def sync(self, target: Path, force: bool = False) -> Executable:
+    def sync(self, target: Path, *, force: bool = False) -> Executable:
         def _() -> ProgramResult:
             path = target / self.path
             path.parent.mkdir(parents=True, exist_ok=True)

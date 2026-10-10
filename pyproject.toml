@@ -68,6 +68,7 @@ select = [
     "FLY",
     "PYI",
     "PGH",
+    "FBT",
 ]
 ignore = [
     "TRY003",

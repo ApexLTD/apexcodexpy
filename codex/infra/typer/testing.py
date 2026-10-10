@@ -19,8 +19,9 @@ def run_unit_tests(
         "-p",
         help="Target directory.",
     ),
+    *,
     ci: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--ci",
         help="Run in CI mode.",
     ),
@@ -45,8 +46,9 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    *,
     ci: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--ci",
         help="Run in CI mode.",
     ),
@@ -71,8 +73,9 @@ def _(
         "-p",
         help="Target directory.",
     ),
+    *,
     ci: bool = typer.Option(
-        False,
+        False,  # noqa: FBT003
         "--ci",
         help="Run in CI mode.",
     ),
