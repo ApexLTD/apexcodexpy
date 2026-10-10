@@ -4,6 +4,7 @@ import copy
 import hashlib
 from dataclasses import dataclass, field
 from functools import cached_property
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import tomlkit
@@ -12,7 +13,6 @@ from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from pathlib import Path
 
     from codex.infra.program import Executable
 
@@ -20,14 +20,13 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class PyProjectToml:
     name: str = "PyProject"
-
-    NAME = "pyproject.toml"
+    path: Path = Path("pyproject.toml")
 
     def sync(self, target: Path) -> Executable:
-        pyproject = PyProjectFile(target / self.NAME, standards=self.standards)
+        pyproject = PyProjectFile(target / self.path, standards=self.standards)
 
         if not pyproject.exists():
-            return ProgramResult(name=self.name).fail(message=f"{self.NAME} not found.")
+            return ProgramResult(name=self.name).fail(message=f"{self.name} not found.")
 
         if not pyproject.is_outdated():
             return ProgramResult(name=self.name).no_changes()
