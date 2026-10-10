@@ -114,6 +114,9 @@ class PyProjectToml:
 
     NAME = "pyproject.toml"
 
+    def verify(self, target: Path) -> Executable:
+        return self.sync(target)
+
     def sync(self, target: Path) -> Executable:
         return self._sync(self.toml_on(target))
 
@@ -132,25 +135,6 @@ class PyProjectToml:
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
-
-    def verify(self, target: Path) -> Executable:
-        return self._verify(self.toml_on(target))
-
-    def _verify(self, pyproject: Path) -> ProgramResult:
-        a = Abracadabra(pyproject)
-
-        if not a.exists():
-            return self._result.fail(message=f"{self.NAME} not found.")
-
-        if not a.is_outdated():
-            return self._result.no_changes()
-
-        return self._result.fail(
-            message=f"""
-                {self.NAME} is outdated!
-                Run `codex sync` to bring configuration up to date.
-            """
-        )
 
 
 @dataclass(frozen=True)
