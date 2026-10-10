@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import hashlib
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import tomlkit
@@ -12,6 +11,7 @@ from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
 
     from codex.infra.program import Executable
 
@@ -111,9 +111,25 @@ class PyProjectToml:
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
 
-    @staticmethod
-    def latest() -> Tomler:
-        return Tomler.read(Path("pyproject.toml")).update_with(STANDARDS)
+    def verify(self, target: Path) -> Executable:
+        return self._verify(self.toml_on(target))
+
+    def _verify(self, pyproject: Path) -> ProgramResult:
+        if not pyproject.exists():
+            return self._result.fail(message=f"{self.NAME} not found.")
+
+        current = Tomler.read(pyproject).dumps()
+        latest = Tomler.read(pyproject).update_with(STANDARDS).dumps()
+
+        if current == latest:
+            return self._result.no_changes()
+
+        return self._result.fail(
+            message=f"""
+                {self.NAME} is outdated!
+                Run `codex sync` to bring configuration up to date.
+            """
+        )
 
 
 @dataclass(frozen=True)

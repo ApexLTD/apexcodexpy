@@ -22,7 +22,6 @@ from codex.infra.workflows import (
     CheckCodeWorkflow,
     DependabotWorkflow,
 )
-from codex.infra.workflows.lock import CodexLockWorkflow
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -144,7 +143,6 @@ class CodexTools:
                 BuildCodeWorkflow(disclaimer=False).sync(self.target, force=force),
                 when=self.target.joinpath("Dockerfile").exists(),
             )
-            .attach(CodexLockWorkflow().sync(self.target, force=force))
         )
 
     def lock(self) -> Executable:
@@ -228,7 +226,7 @@ class CodexTools:
                     ),
                 )
             )
-            .attach(CodexLockWorkflow().verify(self.target))
+            .attach(PyProjectToml().verify(self.target))
         )
 
     def unit(self, in_ci: bool = False) -> Executable:
