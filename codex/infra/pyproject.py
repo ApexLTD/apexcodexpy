@@ -87,6 +87,26 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
+class PyProjectToml:
+    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
+
+    NAME = "pyproject.toml"
+
+    def sync(self, target: Path) -> Executable:
+        pyproject = PyProjectFile(target / self.NAME, standards=STANDARDS)
+
+        if not pyproject.exists():
+            return self._result.fail(message=f"{self.NAME} not found.")
+
+        if not pyproject.is_outdated():
+            return self._result.no_changes()
+
+        pyproject.sync()
+
+        return self._result.workflow_success()
+
+
+@dataclass(frozen=True)
 class PyProjectFile:
     path: Path
 
@@ -108,26 +128,6 @@ class PyProjectFile:
 
     def sync(self) -> None:
         self.path.write_text(self.latest.dumps(), encoding="utf-8", newline="\n")
-
-
-@dataclass(frozen=True)
-class PyProjectToml:
-    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
-
-    NAME = "pyproject.toml"
-
-    def sync(self, target: Path) -> Executable:
-        pyproject = PyProjectFile(target / self.NAME, standards=STANDARDS)
-
-        if not pyproject.exists():
-            return self._result.fail(message=f"{self.NAME} not found.")
-
-        if not pyproject.is_outdated():
-            return self._result.no_changes()
-
-        pyproject.sync()
-
-        return self._result.workflow_success()
 
 
 @dataclass(frozen=True)
