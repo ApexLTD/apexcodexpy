@@ -93,7 +93,7 @@ class PyProjectToml:
     NAME = "pyproject.toml"
 
     def sync(self, target: Path) -> Executable:
-        pyproject = PyProjectFile(target / self.NAME, standards=STANDARDS)
+        pyproject = PyProjectFile(target / self.NAME, standards=self.standards)
 
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
@@ -104,6 +104,10 @@ class PyProjectToml:
         pyproject.sync()
 
         return self._result.workflow_success()
+
+    @property
+    def standards(self) -> Mapping[str, Any]:
+        return STANDARDS
 
 
 @dataclass(frozen=True)
