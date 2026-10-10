@@ -37,7 +37,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                     step="Lint Code",
                     command="codex lint --ci",
                 )
-                .enabled(True)
+                .enabled(when=True)
             )
             .with_job(
                 CiJob(name="test-unit")
@@ -47,7 +47,7 @@ class CheckCodeWorkflow(YamlWorkflow):
                     step="Run unit tests",
                     command="codex test unit --ci",
                 )
-                .enabled(True)
+                .enabled(when=True)
             )
             .with_job(
                 CiJob(name="test-integration")

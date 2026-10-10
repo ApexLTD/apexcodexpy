@@ -85,6 +85,10 @@ class PyProjectToml:
                     "TRY",
                     "PL",
                     "TCH",
+                    "FLY",
+                    "PYI",
+                    "PGH",
+                    "FBT",
                 ],
                 "mccabe": {
                     "max-complexity": 10,
@@ -182,7 +186,7 @@ def deep_merge(
                 # Formatted TOML array
                 new_array = tomlkit.array()
                 new_array.extend(copy.deepcopy(src_list))
-                new_array.multiline(True)
+                new_array.multiline(multiline=True)
                 result[key] = new_array
             case _:
                 result[key] = copy.deepcopy(value)
