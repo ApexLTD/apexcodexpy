@@ -118,8 +118,8 @@ class PyProjectToml:
         if not pyproject.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
 
-        current = Tomler.read(pyproject).dumps()
-        latest = Tomler.read(pyproject).update_with(STANDARDS).dumps()
+        current = Tomler.read(pyproject)
+        latest = current.update_with(STANDARDS)
 
         if current == latest:
             return self._result.no_changes()
