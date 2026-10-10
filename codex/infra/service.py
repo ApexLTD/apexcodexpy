@@ -136,7 +136,6 @@ class CodexTools:
     def sync(self, force: bool) -> Executable:
         return (
             MultiProgram()
-            .attach(PyProjectToml().sync(self.target))
             .attach(DependabotWorkflow().sync(self.target, force=force))
             .attach(CheckCodeWorkflow().sync(self.target, force=force))
             .attach(
