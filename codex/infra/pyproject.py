@@ -110,7 +110,7 @@ class PyProjectToml:
 class PyProjectFile:
     path: Path
 
-    standards: dict[str, Any] = field(default_factory=dict)
+    standards: Mapping[str, Any] = field(default_factory=dict)
 
     @cached_property
     def current(self) -> Tomler:
