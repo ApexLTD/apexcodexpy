@@ -87,25 +87,25 @@ STANDARDS = {
 
 
 @dataclass(frozen=True)
-class Abracadabra:
-    pyproject: Path
+class PyProjectFile:
+    path: Path
 
     @cached_property
     def current(self) -> Tomler:
-        return Tomler.read(self.pyproject)
+        return Tomler.read(self.path)
 
     @cached_property
     def latest(self) -> Tomler:
         return self.current.update_with(STANDARDS)
 
     def exists(self) -> bool:
-        return self.pyproject.exists()
+        return self.path.exists()
 
     def is_outdated(self) -> bool:
         return self.current != self.latest
 
     def sync(self) -> None:
-        self.pyproject.write_text(self.latest.dumps(), encoding="utf-8", newline="\n")
+        self.path.write_text(self.latest.dumps(), encoding="utf-8", newline="\n")
 
 
 @dataclass(frozen=True)
@@ -118,7 +118,7 @@ class PyProjectToml:
         return self._sync(self.toml_on(target))
 
     def _sync(self, pyproject: Path) -> Executable:
-        a = Abracadabra(pyproject)
+        a = PyProjectFile(pyproject)
 
         if not a.exists():
             return self._result.fail(message=f"{self.NAME} not found.")
