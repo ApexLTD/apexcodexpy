@@ -139,20 +139,20 @@ def deep_merge(
     destination: Mapping[str, Any],
 ) -> Mapping[str, Any]:
     """
-    Recursively merges two TOML documents or mappings,
-    updating the values of the destination with those from the source.
-    The merge is performed deeply to handle nested mappings, ensuring that
-    both simple and complex TOML structures are merged effectively.
+    Recursively merges two mappings, taking the source and merging it into
+    the destination. Performs a deep merge such that nested dictionaries or
+    arrays are combined intelligently.
 
-    This function ensures that TOML-compliant data structures are preserved during the
-    merge process, including the creation of properly formatted TOML arrays and tables.
+    The function identifies the type of each key-value pair in the `source`
+    and `destination` mappings and determines how to merge them based on
+    their data types, supporting nested dictionaries and TOML data
+    structures.
 
-    :param source: The source mapping to be merged into the destination.
-    :type source: Mapping[str, Any]
-    :param destination: The destination mapping.
-    :type destination: Mapping[str, Any]
-    :return: A TOMLDocument representing the merged result.
-    :rtype: Mapping[str, Any]
+    :param source: The source mapping to merge into the destination.
+    :param destination: The destination mapping that will be updated with the
+        data from `source`.
+    :return: A new mapping that represents the merged result of `source`
+        and `destination`.
     """
     result = {**destination}
 
