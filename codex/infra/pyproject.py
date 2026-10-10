@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class PyProjectToml:
-    _result: ProgramResult = field(init=False, default=ProgramResult(name="PyProject"))
+    name: str = "PyProject"
 
     NAME = "pyproject.toml"
 
@@ -27,14 +27,14 @@ class PyProjectToml:
         pyproject = PyProjectFile(target / self.NAME, standards=self.standards)
 
         if not pyproject.exists():
-            return self._result.fail(message=f"{self.NAME} not found.")
+            return ProgramResult(name=self.name).fail(message=f"{self.NAME} not found.")
 
         if not pyproject.is_outdated():
-            return self._result.no_changes()
+            return ProgramResult(name=self.name).no_changes()
 
         pyproject.sync()
 
-        return self._result.workflow_success()
+        return ProgramResult(name=self.name).workflow_success()
 
     @property
     def standards(self) -> Mapping[str, Any]:
