@@ -85,6 +85,9 @@ class PyProjectToml:
                     "TRY",
                     "PL",
                     "TCH",
+                    "FLY",
+                    "PYI",
+                    "PGH",
                 ],
                 "mccabe": {
                     "max-complexity": 10,
