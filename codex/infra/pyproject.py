@@ -128,7 +128,7 @@ class PyProjectToml:
 
         a.sync()
 
-        return self._result.success(message=f"{self.NAME} synchronized successfully.\n")
+        return self._result.workflow_success()
 
     def toml_on(self, path: Path) -> Path:
         return path / self.NAME
