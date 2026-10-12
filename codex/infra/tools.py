@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING
 from codex.infra.program import (
     BoundedProgram,
     Command,
+    ExternalProgram,
     MultiProgram,
-    Program,
 )
 
 if TYPE_CHECKING:
@@ -49,13 +49,13 @@ class Poetry:
         return (
             BoundedProgram()
             .setup(
-                Program(
+                ExternalProgram(
                     name="install",
                     command=Pip().install("poetry", "poetry-plugin-export"),
                 )
             )
             .setup(
-                Program(
+                ExternalProgram(
                     name="export",
                     command=(
                         Command("poetry export")
@@ -66,7 +66,7 @@ class Poetry:
                 )
             )
             .teardown(
-                Program(
+                ExternalProgram(
                     name="teardown",
                     command=Command("rm").append(target / "requirements.txt"),
                 )
@@ -78,9 +78,9 @@ class Poetry:
 class PoetryRun:
     program: MultiProgram = field(init=False, default_factory=MultiProgram)
 
-    def attach(self, program: Program) -> PoetryRun:
+    def attach(self, program: ExternalProgram) -> PoetryRun:
         self.program.attach(
-            Program(
+            ExternalProgram(
                 name=program.name,
                 command=Poetry().run(program.command),
             )

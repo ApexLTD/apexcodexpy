@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class Program:
+class ExternalProgram:
     command: Command
 
     name: str = "unknown"

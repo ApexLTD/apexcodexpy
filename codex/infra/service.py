@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from time import time
 from typing import TYPE_CHECKING
 
-from codex.infra.program import Command, Executable, MultiProgram, Program
+from codex.infra.program import Command, Executable, ExternalProgram, MultiProgram
 from codex.infra.pyproject import PyProjectToml
 from codex.infra.result import ProgramResult, TaskResult
 from codex.infra.tools import (
@@ -146,22 +146,22 @@ class CodexTools:
         )
 
     def lock(self) -> Executable:
-        return Program(name="lock", command=Poetry().lock())
+        return ExternalProgram(name="lock", command=Poetry().lock())
 
     def update(self) -> Executable:
-        return Program(name="update", command=Poetry().update())
+        return ExternalProgram(name="update", command=Poetry().update())
 
     def install(self) -> Executable:
         return (
             MultiProgram()
             .attach(
-                Program(
+                ExternalProgram(
                     name="tools",
                     command=Pip().install("pip", "poetry"),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="dependencies",
                     command=Poetry().install(),
                 )
@@ -172,31 +172,31 @@ class CodexTools:
         return (
             PoetryRun()
             .attach(
-                Program(
+                ExternalProgram(
                     name="poetry",
                     command=Poetry().lint(self.target),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="black",
                     command=Ruff(on=self.target).format().flag(check=True),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="dependencies",
                     command=Deptry(on=self.target).lint(),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="ruff",
                     command=Ruff(on=self.target).lint(),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="mypy",
                     command=MyPy(on=self.target).check(),
                 )
@@ -210,19 +210,19 @@ class CodexTools:
             .attach(
                 PoetryRun()
                 .attach(
-                    Program(
-                        name="PyProject Format",
+                    ExternalProgram(
+                        name="pyproject-fmt",
                         command=PyprojectFmt(on=self.target).format(),
                     )
                 )
                 .attach(
-                    Program(
+                    ExternalProgram(
                         name="black",
                         command=Ruff(on=self.target).format(),
                     )
                 )
                 .attach(
-                    Program(
+                    ExternalProgram(
                         name="ruff",
                         command=(
                             Ruff(on=self.target)
@@ -237,7 +237,7 @@ class CodexTools:
 
     def unit(self, *, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
-            Program(
+            ExternalProgram(
                 name="test",
                 command=(
                     Pytest.on(self.target)
@@ -254,7 +254,7 @@ class CodexTools:
 
     def behaviour(self, *, in_ci: bool = False) -> Executable:
         return PoetryRun().attach(
-            Program(
+            ExternalProgram(
                 name="behave",
                 command=(
                     Command("behave")
@@ -271,7 +271,7 @@ class CodexTools:
             .export(self.target)
             .attach(
                 PoetryRun().attach(
-                    Program(
+                    ExternalProgram(
                         name="test",
                         command=Pytest.on(self.target / "tests" / "integration").run(),
                     )
@@ -284,7 +284,7 @@ class CodexTools:
             Poetry()
             .export(self.target)
             .attach(
-                Program(
+                ExternalProgram(
                     name="build",
                     command=(
                         Command("docker build")
@@ -312,13 +312,13 @@ class CodexTools:
         return (
             MultiProgram()
             .attach(
-                Program(
+                ExternalProgram(
                     name="tag",
                     command=Command("docker tag").append(local_tag).append(remote_tag),
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="login",
                     command=(
                         Command("docker login")
@@ -331,7 +331,7 @@ class CodexTools:
                 )
             )
             .attach(
-                Program(
+                ExternalProgram(
                     name="push",
                     command=Command("docker push").append(remote_tag),
                 )
@@ -343,13 +343,13 @@ class CodexTools:
 class Git:
     def revision(self, of: str = "HEAD", *, short: bool = True) -> str:
         return (
-            Program(Command("git rev-parse").flag(short=short).append(of))
+            ExternalProgram(Command("git rev-parse").flag(short=short).append(of))
             .execute()
             .stdout
         )
 
     def amend(self) -> TaskResult:
-        return Program(
+        return ExternalProgram(
             name="amend",
             command=Command("git commit")
             .flag(all=True)
