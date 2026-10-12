@@ -24,6 +24,7 @@ ruamel-yaml = "*"
 ruff = "*"
 typer = "*"
 tomlkit = "*"
+pyproject-fmt = "*"
 
 [tool.poetry.group.dev.dependencies]
 behave = "*"
