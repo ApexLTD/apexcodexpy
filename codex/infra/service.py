@@ -13,6 +13,7 @@ from codex.infra.tools import (
     Pip,
     Poetry,
     PoetryRun,
+    PyprojectFmt,
     Pytest,
     Ruff,
     Version,
@@ -208,6 +209,12 @@ class CodexTools:
             .attach(PyProjectToml().sync(self.target))
             .attach(
                 PoetryRun()
+                .attach(
+                    Program(
+                        name="PyProject Format",
+                        command=PyprojectFmt(on=self.target).format(),
+                    )
+                )
                 .attach(
                     Program(
                         name="black",
