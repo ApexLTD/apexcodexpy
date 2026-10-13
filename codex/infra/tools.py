@@ -115,7 +115,6 @@ class PyprojectFmt:
             .with_a(indent=4)
             .with_a(table_format="long")
             .with_a(sub_table_spacing=r'"\n"')
-            .with_a(expand_tables="[project.authors]")
             .flag(generate_python_version_classifiers=False)
             .append(self.on / "pyproject.toml")
         )
