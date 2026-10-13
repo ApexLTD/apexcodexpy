@@ -81,6 +81,7 @@ DEP002 = [
     "mypy",
     "ruff",
     "deptry",
+    "pyproject-fmt",
 ]
 
 [tool.mypy]
