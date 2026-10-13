@@ -4,26 +4,28 @@ version = "0.8.1"
 description = "The Non-Destructive Configuration Steward for Python Projects."
 readme = "README.md"
 authors = [
-    { name = "Apex Dev", email = "dev@apex.ge" }
+    { name = "Apex Dev", email = "dev@apex.ge" },
 ]
-dynamic = ["dependencies"]
 requires-python = ">=3.11,<4"
+dynamic = [ "dependencies" ]
+
 
 [project.scripts]
 codex = "codex.runner:cli"
 
 [tool.poetry]
 packages = [
-    { include = "codex" }
+    { include = "codex" },
 ]
 
 [tool.poetry.dependencies]
 deptry = "*"
 mypy = "*"
+pyproject-fmt = "*"
 ruamel-yaml = "*"
 ruff = "*"
-typer = "*"
 tomlkit = "*"
+typer = "*"
 
 [tool.poetry.group.dev.dependencies]
 behave = "*"
@@ -31,11 +33,8 @@ coverage = "*"
 pytest = "*"
 pytest-cov = "*"
 
-[tool.mypy]
-ignore_missing_imports = true
-strict = true
-show_error_codes = true
-pretty = true
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.ruff.lint]
 select = [
@@ -43,63 +42,67 @@ select = [
     "ARG",
     "B",
     "C4",
-    "PT",
-    "RSE",
-    "RET",
-    "SIM",
-    "T20",
-    "E",
-    "W",
-    "F",
-    "I",
-    "N",
-    "UP",
-    "RUF",
-    "FURB",
-    "PERF",
-    "LOG",
-    "PIE",
-    "SLF",
     "DTZ",
-    "PTH",
-    "TRY",
-    "PL",
-    "TCH",
-    "FLY",
-    "PYI",
-    "PGH",
+    "E",
+    "F",
     "FBT",
+    "FLY",
+    "FURB",
+    "I",
+    "LOG",
+    "N",
+    "PERF",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RET",
+    "RSE",
+    "RUF",
+    "SIM",
+    "SLF",
+    "T20",
+    "TCH",
+    "TRY",
+    "UP",
+    "W",
 ]
 ignore = [
-    "TRY003",
     "PLR0913",
     "PLR0917",
     "PLR2004",
+    "TRY003",
 ]
-
-[tool.ruff.lint.mccabe]
-max-complexity = 10
 
 [tool.deptry.per_rule_ignores]
 DEP002 = [
     "mypy",
     "ruff",
     "deptry",
+    "pyproject-fmt",
 ]
 
-[tool.coverage.run]
-branch = true
-source = [
-    "codex",
-    "tests",
-]
-
-[tool.coverage.report]
-skip_empty = true
-skip_covered = true
-show_missing = true
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+pretty = true
+show_error_codes = true
 
 [tool.pytest]
 testpaths = [
     "tests/unit",
 ]
+
+[tool.coverage.run]
+source = [
+    "codex",
+    "tests",
+]
+branch = true
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing = true
