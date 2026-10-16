@@ -110,13 +110,12 @@ class PyprojectFmt:
     def format(self) -> Command:
         return (
             Command("pyproject-fmt")
-            .flag(version=True)
-            .flag(print_diff=False)
-            .with_a(indent=4)
-            .with_a(table_format="long")
-            .with_a(sub_table_spacing=r'"\n"')
-            .flag(generate_python_version_classifiers=False)
             .append(self.on / "pyproject.toml")
+            .with_a(indent=4)
+            .and_a(table_format="long")
+            .and_a(collapse_tables="project.authors")
+            .and_a(sub_table_spacing=r'"\n"')
+            .flag(generate_python_version_classifiers=False)
         )
 
 
