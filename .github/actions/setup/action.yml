@@ -1,0 +1,28 @@
+name: Setup Environment
+description: Setups python and codex
+
+inputs:
+  python:
+    description: Python version
+    required: false
+    default: "3.13"
+  codex:
+    description: Codex version
+    required: false
+    default: ""
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ inputs.python }}
+
+    - name: Install Codex
+      shell: bash
+      run: pip install "apexcodexpy${{ inputs.codex && format('=={0}', inputs.codex) || '' }}"

@@ -28,7 +28,7 @@ class BuildCodeWorkflow(YamlWorkflow):
                 Yamler.parse(
                     {
                         "name": "Setup Environment",
-                        "uses": "ApexLTD/actions/setup@main",
+                        "uses": "ApexLTD/apexcodexpy/setup@main",
                         "with": {
                             "python": Version.of_python(),
                         },
