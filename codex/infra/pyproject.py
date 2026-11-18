@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import copy
 import hashlib
 from dataclasses import dataclass, field
@@ -58,9 +59,7 @@ class PyProjectToml:
     def _ruff(self) -> dict[str, Any]:
         return {
             "lint": {
-                "mccabe": {
-                    "max-complexity": 10,
-                },
+                "mccabe": None,
                 "select": [
                     "A",
                     "ARG",
@@ -176,6 +175,9 @@ def deep_merge(
 
     for key, value in source.items():
         match (result.get(key), value):
+            case (_, None):
+                with contextlib.suppress(KeyError):
+                    del result[key]
             case (dict(destination_value), dict(source_value)):
                 # Both exist and are dicts -> recursively merge
                 result[key] = deep_merge(source_value, destination_value)

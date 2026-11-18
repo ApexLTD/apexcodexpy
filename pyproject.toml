@@ -7,7 +7,9 @@ authors = [
     { name = "Apex Dev", email = "dev@apex.ge" },
 ]
 requires-python = ">=3.11,<4"
-dynamic = [ "dependencies" ]
+dynamic = [
+    "dependencies",
+]
 
 [project.scripts]
 codex = "codex.runner:cli"
@@ -31,9 +33,6 @@ behave = "*"
 coverage = "*"
 pytest = "*"
 pytest-cov = "*"
-
-[tool.ruff.lint.mccabe]
-max-complexity = 10
 
 [tool.ruff.lint]
 select = [
