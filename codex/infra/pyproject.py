@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import copy
 import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
@@ -13,8 +14,6 @@ import tomlkit
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from codex.infra.program import Executable
 
 
@@ -167,10 +166,10 @@ class Tomler:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
 
 
-def deep_merge(
-    source: Mapping[str, Any],
-    destination: Mapping[str, Any],
-) -> Mapping[str, Any]:
+_TomlMapping = Mapping[str, list[Any] | dict[str, Any] | None]
+
+
+def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> Mapping[str, Any]:
     """
     Recursively merges two mappings, taking the source and merging it into
     the destination. Performs a deep merge such that nested dictionaries or
@@ -190,24 +189,16 @@ def deep_merge(
     result = {**destination}
 
     for key, updates in source.items():
-        as_is = result.get(key)
-
         match updates:
-            case None:
-                # Source is None -> Erase destination key completely
+            case dict():  # Merge recursively
+                result[key] = deep_merge(updates, result.get(key, {}))
+            case list():  # Combine as TOML array
+                combo = tomlkit.array()
+                combo.extend(copy.deepcopy(sorted(set(updates + result.get(key, [])))))
+                combo.multiline(multiline=True)
+                result[key] = combo
+            case _:  # Erase key
                 with contextlib.suppress(KeyError):
                     del result[key]
-            case dict():
-                # Source is a dict -> merge recursively
-                result[key] = deep_merge(updates, as_is or {})
-            case list():
-                # Source is a list -> Combine as TOML array
-                new_array = tomlkit.array()
-                new_array.extend(copy.deepcopy(sorted(set(updates + as_is))))
-                new_array.multiline(multiline=True)
-                result[key] = new_array
-            case _:
-                # Overwrite with source value
-                result[key] = copy.deepcopy(updates)
 
     return result
