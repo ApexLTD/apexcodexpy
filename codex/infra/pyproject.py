@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import contextlib
 import copy
 import hashlib
 from collections.abc import Mapping
+from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
@@ -198,7 +198,7 @@ def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> Mapping[str, 
                 combo.multiline(multiline=True)
                 result[key] = combo
             case _:  # Erase key
-                with contextlib.suppress(KeyError):
+                with suppress(KeyError):
                     del result[key]
 
     return result
