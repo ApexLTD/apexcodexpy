@@ -15,8 +15,8 @@ from codex.infra.result import ProgramResult
 if TYPE_CHECKING:
     from codex.infra.program import Executable
 
-
-_TomlMapping = dict[str, list[Any] | dict[str, Any] | bool | None]
+_TomlLeaf = str | bool | None
+_TomlMapping = dict[str, dict[str, Any] | list[_TomlLeaf] | _TomlLeaf]
 
 
 @dataclass(frozen=True)
