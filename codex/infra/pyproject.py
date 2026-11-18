@@ -13,9 +13,10 @@ import tomlkit
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from codex.infra.program import Executable
+
+
+_TomlMapping = dict[str, list[Any] | dict[str, Any] | bool | None]
 
 
 @dataclass(frozen=True)
@@ -37,7 +38,7 @@ class PyProjectToml:
         return ProgramResult(name=self.name).workflow_success()
 
     @property
-    def standards(self) -> Mapping[str, Any]:
+    def standards(self) -> _TomlMapping:
         return {
             "tool": {
                 "mypy": self._mypy,
@@ -48,7 +49,7 @@ class PyProjectToml:
         }
 
     @property
-    def _mypy(self) -> dict[str, Any]:
+    def _mypy(self) -> _TomlMapping:
         return {
             "strict": True,
             "ignore_missing_imports": True,
@@ -57,7 +58,7 @@ class PyProjectToml:
         }
 
     @property
-    def _ruff(self) -> dict[str, Any]:
+    def _ruff(self) -> _TomlMapping:
         return {
             "extend-exclude": ["migrations"],
             "lint": {
@@ -102,7 +103,7 @@ class PyProjectToml:
         }
 
     @property
-    def _coveragepy(self) -> dict[str, Any]:
+    def _coveragepy(self) -> _TomlMapping:
         return {
             "run": {
                 "branch": True,
@@ -121,7 +122,7 @@ class PyProjectToml:
         }
 
     @property
-    def _deptry(self) -> dict[str, Any]:
+    def _deptry(self) -> _TomlMapping:
         return {"extend_exclude": ["migrations"]}
 
 
@@ -129,7 +130,7 @@ class PyProjectToml:
 class PyProjectFile:
     path: Path
 
-    standards: Mapping[str, Any] = field(default_factory=dict)
+    standards: _TomlMapping = field(default_factory=dict)
 
     @cached_property
     def current(self) -> Tomler:
@@ -151,7 +152,7 @@ class PyProjectFile:
 
 @dataclass(frozen=True)
 class Tomler:
-    document: Mapping[str, Any]
+    document: _TomlMapping
 
     @classmethod
     def read(cls, path: Path) -> Tomler:
@@ -160,14 +161,11 @@ class Tomler:
     def dumps(self) -> str:
         return tomlkit.dumps(self.document)
 
-    def update_with(self, source: Mapping[str, Any]) -> Tomler:
+    def update_with(self, source: _TomlMapping) -> Tomler:
         return Tomler(deep_merge(source, self.document))
 
     def hashed(self) -> str:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
-
-
-_TomlMapping = dict[str, list[Any] | dict[str, Any] | bool | None]
 
 
 def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> _TomlMapping:
