@@ -167,7 +167,7 @@ class Tomler:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
 
 
-_TomlMapping = dict[str, list[Any] | dict[str, Any] | None]
+_TomlMapping = dict[str, list[Any] | dict[str, Any] | bool | None]
 
 
 def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> _TomlMapping:
@@ -205,8 +205,10 @@ def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> _TomlMapping:
                 combo.multiline(multiline=True)
 
                 result[key] = combo
-            case _:  # Erase key
+            case None:  # Erase key
                 with suppress(KeyError):
                     del result[key]
+            case _:
+                result[key] = updates
 
     return result

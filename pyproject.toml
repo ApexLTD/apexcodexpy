@@ -93,6 +93,10 @@ DEP002 = [
 ]
 
 [tool.mypy]
+ignore_missing_imports = true
+strict = true
+pretty = true
+show_error_codes = true
 
 [tool.pytest]
 testpaths = [
@@ -104,6 +108,7 @@ source = [
     "codex",
     "tests",
 ]
+branch = true
 
 [tool.coverage.report]
 exclude_also = [
@@ -111,3 +116,7 @@ exclude_also = [
     "class .*\\bProtocol\\)",
     "if TYPE_CHECKING:",
 ]
+skip_covered = true
+skip_empty = true
+show_missing = true
+sort = "Cover"
