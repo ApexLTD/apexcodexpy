@@ -101,6 +101,12 @@ source = [
 branch = true
 
 [tool.coverage.report]
+exclude_also = [
+    "@(abc\\.)?abstractmethod",
+    "class .*\\bProtocol\\)",
+    "if TYPE_CHECKING:",
+]
 skip_covered = true
 skip_empty = true
 show_missing = true
+sort = "Cover"

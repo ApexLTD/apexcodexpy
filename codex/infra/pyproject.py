@@ -102,9 +102,15 @@ class PyProjectToml:
                 "branch": True,
             },
             "report": {
+                "exclude_also": [
+                    r"@(abc\.)?abstractmethod",
+                    r"class .*\bProtocol\)",
+                    r"if TYPE_CHECKING:",
+                ],
                 "skip_empty": True,
                 "skip_covered": True,
                 "show_missing": True,
+                "sort": "Cover",
             },
         }
 
