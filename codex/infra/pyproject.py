@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
@@ -12,9 +13,10 @@ import tomlkit
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from codex.infra.program import Executable
+
+_TomlLeaf = str | bool | None
+_TomlMapping = dict[str, dict[str, Any] | list[_TomlLeaf] | _TomlLeaf]
 
 
 @dataclass(frozen=True)
@@ -36,17 +38,18 @@ class PyProjectToml:
         return ProgramResult(name=self.name).workflow_success()
 
     @property
-    def standards(self) -> Mapping[str, Any]:
+    def standards(self) -> _TomlMapping:
         return {
             "tool": {
                 "mypy": self._mypy,
                 "ruff": self._ruff,
                 "coverage": self._coveragepy,
+                "deptry": self._deptry,
             }
         }
 
     @property
-    def _mypy(self) -> dict[str, Any]:
+    def _mypy(self) -> _TomlMapping:
         return {
             "strict": True,
             "ignore_missing_imports": True,
@@ -55,12 +58,11 @@ class PyProjectToml:
         }
 
     @property
-    def _ruff(self) -> dict[str, Any]:
+    def _ruff(self) -> _TomlMapping:
         return {
+            "extend-exclude": ["migrations"],
             "lint": {
-                "mccabe": {
-                    "max-complexity": 10,
-                },
+                "mccabe": None,
                 "select": [
                     "A",
                     "ARG",
@@ -93,28 +95,42 @@ class PyProjectToml:
                     "UP",
                     "W",
                 ],
-            }
+                "ignore": [
+                    "PLR2004",
+                    "TRY003",
+                ],
+            },
         }
 
     @property
-    def _coveragepy(self) -> dict[str, Any]:
+    def _coveragepy(self) -> _TomlMapping:
         return {
             "run": {
                 "branch": True,
             },
             "report": {
+                "exclude_also": [
+                    r"@(abc\.)?abstractmethod",
+                    r"class .*\bProtocol\)",
+                    r"if TYPE_CHECKING:",
+                ],
                 "skip_empty": True,
                 "skip_covered": True,
                 "show_missing": True,
+                "sort": "Cover",
             },
         }
+
+    @property
+    def _deptry(self) -> _TomlMapping:
+        return {"extend_exclude": ["migrations"]}
 
 
 @dataclass(frozen=True)
 class PyProjectFile:
     path: Path
 
-    standards: Mapping[str, Any] = field(default_factory=dict)
+    standards: _TomlMapping = field(default_factory=dict)
 
     @cached_property
     def current(self) -> Tomler:
@@ -136,7 +152,7 @@ class PyProjectFile:
 
 @dataclass(frozen=True)
 class Tomler:
-    document: Mapping[str, Any]
+    document: _TomlMapping
 
     @classmethod
     def read(cls, path: Path) -> Tomler:
@@ -145,17 +161,14 @@ class Tomler:
     def dumps(self) -> str:
         return tomlkit.dumps(self.document)
 
-    def update_with(self, source: Mapping[str, Any]) -> Tomler:
+    def update_with(self, source: _TomlMapping) -> Tomler:
         return Tomler(deep_merge(source, self.document))
 
     def hashed(self) -> str:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
 
 
-def deep_merge(
-    source: Mapping[str, Any],
-    destination: Mapping[str, Any],
-) -> Mapping[str, Any]:
+def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> _TomlMapping:
     """
     Recursively merges two mappings, taking the source and merging it into
     the destination. Performs a deep merge such that nested dictionaries or
@@ -174,21 +187,26 @@ def deep_merge(
     """
     result = {**destination}
 
-    for key, value in source.items():
-        match (result.get(key), value):
-            case (dict(destination_value), dict(source_value)):
-                # Both exist and are dicts -> recursively merge
-                result[key] = deep_merge(source_value, destination_value)
-            case (_, dict(source_value)):
-                # Only source is a dict -> convert to TOML table
-                result[key] = deep_merge(source_value, {})
-            case (_, list(src_list)):
-                # Formatted TOML array
-                new_array = tomlkit.array()
-                new_array.extend(copy.deepcopy(src_list))
-                new_array.multiline(multiline=True)
-                result[key] = new_array
+    for key, updates in source.items():
+        match updates:
+            case dict():  # Merge recursively
+                as_id = result.get(key, {})
+                assert isinstance(as_id, dict), f"Expected dict, got {as_id}"
+
+                result[key] = deep_merge(updates, as_id)
+            case list():  # Combine as TOML array
+                as_is = result.get(key, [])
+                assert isinstance(as_is, list), f"Expected list, got {as_is}"
+
+                combo = tomlkit.array()
+                combo.extend(copy.deepcopy(sorted(set(updates + as_is))))
+                combo.multiline(multiline=True)
+
+                result[key] = combo
+            case None:  # Erase key
+                with suppress(KeyError):
+                    del result[key]
             case _:
-                result[key] = copy.deepcopy(value)
+                result[key] = updates
 
     return result
