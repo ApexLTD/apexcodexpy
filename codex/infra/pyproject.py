@@ -189,25 +189,24 @@ def deep_merge(
     """
     result = {**destination}
 
-    for key, value in source.items():
-        match (result.get(key), value):
-            case (_, None):
+    for key, updates in source.items():
+        as_is = result.get(key)
+
+        match updates:
+            case None:
                 # Destination is None -> Drop the source
                 with contextlib.suppress(KeyError):
                     del result[key]
-            case (dict(destination_value), dict(source_value)):
+            case dict():
                 # Both exist and are dicts -> recursively merge
-                result[key] = deep_merge(source_value, destination_value)
-            case (_, dict(source_value)):
-                # Only source is a dict -> convert to TOML table
-                result[key] = deep_merge(source_value, {})
-            case (list(dst_list), list(src_list)):
+                result[key] = deep_merge(updates, as_is or {})
+            case list():
                 # Formatted TOML array
                 new_array = tomlkit.array()
-                new_array.extend(copy.deepcopy(sorted(set(src_list + dst_list))))
+                new_array.extend(copy.deepcopy(sorted(set(updates + as_is))))
                 new_array.multiline(multiline=True)
                 result[key] = new_array
             case _:
-                result[key] = copy.deepcopy(value)
+                result[key] = copy.deepcopy(updates)
 
     return result
