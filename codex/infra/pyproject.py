@@ -194,19 +194,20 @@ def deep_merge(
 
         match updates:
             case None:
-                # Destination is None -> Drop the source
+                # Source is None -> Erase destination key completely
                 with contextlib.suppress(KeyError):
                     del result[key]
             case dict():
-                # Both exist and are dicts -> recursively merge
+                # Source is a dict -> merge recursively
                 result[key] = deep_merge(updates, as_is or {})
             case list():
-                # Formatted TOML array
+                # Source is a list -> Combine as TOML array
                 new_array = tomlkit.array()
                 new_array.extend(copy.deepcopy(sorted(set(updates + as_is))))
                 new_array.multiline(multiline=True)
                 result[key] = new_array
             case _:
+                # Overwrite with source value
                 result[key] = copy.deepcopy(updates)
 
     return result
