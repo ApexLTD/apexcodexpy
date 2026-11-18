@@ -43,6 +43,7 @@ class PyProjectToml:
                 "mypy": self._mypy,
                 "ruff": self._ruff,
                 "coverage": self._coveragepy,
+                "deptry": self._deptry,
             }
         }
 
@@ -58,6 +59,7 @@ class PyProjectToml:
     @property
     def _ruff(self) -> dict[str, Any]:
         return {
+            "extend-exclude": ["migrations"],
             "lint": {
                 "mccabe": None,
                 "select": [
@@ -92,7 +94,7 @@ class PyProjectToml:
                     "UP",
                     "W",
                 ],
-            }
+            },
         }
 
     @property
@@ -113,6 +115,10 @@ class PyProjectToml:
                 "sort": "Cover",
             },
         }
+
+    @property
+    def _deptry(self) -> dict[str, Any]:
+        return {"extend_exclude": ["migrations"]}
 
 
 @dataclass(frozen=True)

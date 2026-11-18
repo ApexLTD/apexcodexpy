@@ -34,6 +34,11 @@ coverage = "*"
 pytest = "*"
 pytest-cov = "*"
 
+[tool.ruff]
+extend-exclude = [
+    "migrations",
+]
+
 [tool.ruff.lint]
 select = [
     "A",
@@ -72,6 +77,11 @@ ignore = [
     "PLR0917",
     "PLR2004",
     "TRY003",
+]
+
+[tool.deptry]
+extend_exclude = [
+    "migrations",
 ]
 
 [tool.deptry.per_rule_ignores]
