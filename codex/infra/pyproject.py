@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import hashlib
-from collections.abc import Mapping
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -14,6 +13,8 @@ import tomlkit
 from codex.infra.result import ProgramResult
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from codex.infra.program import Executable
 
 
@@ -166,10 +167,10 @@ class Tomler:
         return hashlib.sha256(self.dumps().encode()).hexdigest()
 
 
-_TomlMapping = Mapping[str, list[Any] | dict[str, Any] | None]
+_TomlMapping = dict[str, list[Any] | dict[str, Any] | None]
 
 
-def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> Mapping[str, Any]:
+def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> _TomlMapping:
     """
     Recursively merges two mappings, taking the source and merging it into
     the destination. Performs a deep merge such that nested dictionaries or
@@ -191,11 +192,18 @@ def deep_merge(source: _TomlMapping, destination: _TomlMapping) -> Mapping[str, 
     for key, updates in source.items():
         match updates:
             case dict():  # Merge recursively
-                result[key] = deep_merge(updates, result.get(key, {}))
+                as_id = result.get(key, {})
+                assert isinstance(as_id, dict), f"Expected dict, got {as_id}"
+
+                result[key] = deep_merge(updates, as_id)
             case list():  # Combine as TOML array
+                as_is = result.get(key, [])
+                assert isinstance(as_is, list), f"Expected list, got {as_is}"
+
                 combo = tomlkit.array()
-                combo.extend(copy.deepcopy(sorted(set(updates + result.get(key, [])))))
+                combo.extend(copy.deepcopy(sorted(set(updates + as_is))))
                 combo.multiline(multiline=True)
+
                 result[key] = combo
             case _:  # Erase key
                 with suppress(KeyError):
