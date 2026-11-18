@@ -94,6 +94,10 @@ class PyProjectToml:
                     "UP",
                     "W",
                 ],
+                "ignore": [
+                    "PLR2004",
+                    "TRY003",
+                ],
             },
         }
 
@@ -188,6 +192,7 @@ def deep_merge(
     for key, value in source.items():
         match (result.get(key), value):
             case (_, None):
+                # Destination is None -> Drop the source
                 with contextlib.suppress(KeyError):
                     del result[key]
             case (dict(destination_value), dict(source_value)):
@@ -196,10 +201,10 @@ def deep_merge(
             case (_, dict(source_value)):
                 # Only source is a dict -> convert to TOML table
                 result[key] = deep_merge(source_value, {})
-            case (_, list(src_list)):
+            case (list(dst_list), list(src_list)):
                 # Formatted TOML array
                 new_array = tomlkit.array()
-                new_array.extend(copy.deepcopy(src_list))
+                new_array.extend(copy.deepcopy(sorted(set(src_list + dst_list))))
                 new_array.multiline(multiline=True)
                 result[key] = new_array
             case _:
